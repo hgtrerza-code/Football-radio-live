@@ -5,22 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#070b16">
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" href="icon-192.png">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="Scores de football en direct, classements, actualités et radios sport du monde entier.">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="FootLive Pro | Scores de football en direct">
-    <meta property="og:description" content="Scores en direct, classements, actualités, vidéos et radios sport du monde entier.">
-    <meta name="twitter:card" content="summary">
+    <meta name="description" content="Suivez les scores de foot en direct, résultats, classements et actus de la Ligue 1, Premier League, LaLiga et plus. Radios sport en direct, gratuit.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://www.footlivepro.com/">
-    <meta property="og:url" content="https://www.footlivepro.com/">
-    <meta property="og:image" content="https://www.footlivepro.com/icon-512.png">
+    <link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/">
+    <link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <meta property="og:type" content="website">
     <meta property="og:site_name" content="FootLive Pro">
     <meta property="og:locale" content="fr_FR">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-    <title>Footlive Pro | Scores en direct & Radio sport</title>
+    <meta property="og:url" content="https://www.footlivepro.com/">
+    <meta property="og:title" content="FootLive Pro | Scores foot en direct, classements et radios">
+    <meta property="og:description" content="Scores de foot en direct, résultats, classements, actualités et radios sport du monde entier.">
+    <meta property="og:image" content="https://www.footlivepro.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="FootLive Pro, scores de football en direct">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FootLive Pro | Scores foot en direct, classements et radios">
+    <meta name="twitter:description" content="Scores de foot en direct, résultats, classements, actualités et radios sport.">
+    <meta name="twitter:image" content="https://www.footlivepro.com/og-image.png">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://www.footlivepro.com/#site","name":"FootLive Pro","alternateName":"Footlive Pro","url":"https://www.footlivepro.com/","inLanguage":"fr"},{"@type":"WebApplication","name":"FootLive Pro","url":"https://www.footlivepro.com/","applicationCategory":"SportsApplication","operatingSystem":"Any","inLanguage":"fr","description":"Scores de football en direct, résultats, classements, actualités et radios sport du monde entier.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"isPartOf":{"@id":"https://www.footlivepro.com/#site"}}]}</script>
+    <title>FootLive Pro | Scores foot en direct, classements et radios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -332,6 +343,8 @@
         #radio-mini small { display: block; color: var(--text-muted); font-size: .7rem; }
         @media (prefers-reduced-motion: reduce) { .rB .eq i { animation: none; } }
         @media (prefers-reduced-motion: reduce) { .pitch-ball { transition: none; } .pitch-ring, .pitch-goal-txt { animation: none; } }
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+        .faq h3{font-size:.9rem;font-weight:600;color:var(--text-main);margin:.9rem 0 .2rem}
     </style>
 
 <style id="pro-theme">
@@ -531,7 +544,7 @@ h1 .brand-mark{width:44px;height:44px}
 
     <header>
         <div class="container header-content">
-            <h1><span class="brand-mark"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12h"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12h)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></span><b>Footlive <span>Pro</span></b></h1>
+            <h1><span class="brand-mark"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12h"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12h)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></span><b>Footlive <span>Pro</span></b><span class="sr-only"> : scores de football en direct</span></h1>
         </div>
         <div class="container">
             <div class="ticker" id="ticker" aria-label="Actualités du football mondial">
@@ -541,6 +554,7 @@ h1 .brand-mark{width:44px;height:44px}
     </header>
 
     <main class="container">
+    <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
     <div id="scores-view">
         <div class="sec-title">📅 Calendrier & résultats <small>touchez un match pour voir les statistiques détaillées</small></div>
         <div class="control-group">
@@ -571,6 +585,17 @@ h1 .brand-mark{width:44px;height:44px}
         <h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">FootLive Pro : scores de football en direct, classements, actualités et radios sport</h2>
         <p>FootLive Pro est un site gratuit pour suivre le football du monde entier en temps réel. Retrouvez les scores en direct, les résultats et le programme des matchs de la Ligue 1, de la Premier League, de LaLiga, de la Serie A, de la Bundesliga, de la Ligue des champions, de la Ligue Europa et de nombreux autres championnats.</p>
         <p>Consultez les classements de chaque compétition, lisez les dernières actualités foot issues de sources reconnues (ESPN, BBC Sport, The Guardian, Sky Sports, L’Équipe) et écoutez des radios sport du monde entier en direct, directement depuis votre téléphone ou votre ordinateur. Les données se mettent à jour automatiquement.</p>
+        <div class="faq">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Questions fréquentes</h2>
+        <h3>Comment suivre un match de foot en direct ?</h3>
+        <p>Ouvrez l’onglet « En direct » : les matchs en cours s’affichent avec un score actualisé automatiquement. Touchez un match pour voir ses statistiques détaillées.</p>
+        <h3>FootLive Pro est-il gratuit ?</h3>
+        <p>Oui, FootLive Pro est gratuit : scores, résultats, classements, actualités et radios sport.</p>
+        <h3>Peut-on écouter des radios sport en direct ?</h3>
+        <p>Oui, l’onglet Radio propose des radios foot du monde entier, classées par type de compétition. L’écoute continue même si vous revenez à la page des scores.</p>
+        <h3>Peut-on installer FootLive Pro sur son téléphone ?</h3>
+        <p>Oui, vous pouvez l’ajouter à l’écran d’accueil de votre téléphone pour l’ouvrir comme une application.</p>
+        </div>
     </section>
 
     <footer><div class="container"><p>FootLive Pro © 2026 — <span id="updated"></span></p></div></footer>
@@ -1503,7 +1528,7 @@ h1 .brand-mark{width:44px;height:44px}
                 const ev = gy.closest(".d-ev"), nx = ev.nextElementSibling;
                 if (nx && nx.classList.contains("d-vid")) { nx.remove(); return; }
                 const box = document.createElement("div"); box.className = "d-vid yt-box"; box.dataset.playing = "1"; box.innerHTML = '<div class="note">Recherche de la vidéo…</div>'; ev.after(box);
-                ytSearch(gy.dataset.yq, { kind: "goal", home: gy.dataset.h, away: gy.dataset.a, start: gy.dataset.s, who: gy.dataset.who }).then(r => { if (!box.isConnected) return; if (r.length) ytPlay(box, r[0]); else { delete box.dataset.playing; box.innerHTML = '<div class="note">Pas de vidéo fiable de ce but pour le moment (elle peut apparaître plus tard).</div>' + ytExt(gy.dataset.yq) + '<button class="yt-close">✕ Fermer</button>'; } })
+                ytSearch(gy.dataset.yq, { kind: "goal", home: gy.dataset.h, away: gy.dataset.a, start: gy.dataset.s, who: gy.dataset.who }).then(r => { if (!box.isConnected) return; const g = r.find(v => v.rel); if (g) ytPlay(box, g); else if (r.length) { delete box.dataset.playing; box.innerHTML = ytWarn + ytCards(r.slice(0, 3)) + ytExt(gy.dataset.yq) + '<button class="yt-close">✕ Fermer</button>'; } else { delete box.dataset.playing; box.innerHTML = '<div class="note">Pas de vidéo fiable de ce but pour le moment (elle peut apparaître plus tard).</div>' + ytExt(gy.dataset.yq) + '<button class="yt-close">✕ Fermer</button>'; } })
                     .catch(() => { if (box.isConnected) { delete box.dataset.playing; box.innerHTML = '<div class="note">Recherche vidéo indisponible, réessaie dans un instant.</div>'; } });
                 return;
             }
@@ -1719,20 +1744,24 @@ h1 .brand-mark{width:44px;height:44px}
             const last = ctx.who ? (vnorm(ctx.who).trim().split(" ").filter(w => w.length >= 3).pop() || "") : "";
             const out = [];
             list.forEach(v => {
-                const t = vnorm(v.title); let bad = 0;
+                const t = vnorm(v.title); let bad = 0; const pb = v.pub > 0 ? (v.pub < 1e11 ? v.pub * 1000 : v.pub) : 0;
+                if (pb && st && pb < st - 3600e3) return;   // publiée avant le match : forcément une ancienne vidéo
                 if (vidHas(t, VID_BAD) || VID_GAME.test(t)) bad += 2;
                 if (!vidHas(t, VID_GOOD)) bad += 1;
                 if (typeof v.dur === "number" && !isNaN(v.dur)) { if (v.dur <= 0 || v.dur < (goal ? 3 : 60) || v.dur > (goal ? 300 : 1800)) bad += 1; }
-                if (v.pub > 0 && st && v.pub < st - 12 * 3600e3) bad += 2;
+                if (pb && st && pb < st - 12 * 3600e3) bad += 2;
                 const yrs = (t.match(/\b20\d{2}\b/g) || []).map(Number); if (yrs.length && !yrs.some(y => y === my || y === my - 1)) bad += 2;
                 const h = teamHit(t, ctx.home), a = teamHit(t, ctx.away), sc = !!last && t.includes(" " + last + " ");
-                if (goal ? !((h && a) || (sc && (h || a))) : !(h && a)) bad += 2;
+                const rel = goal ? ((h && a) || (sc && (h || a))) : (h && a);
+                if (!rel) bad += 2;
                 if (YT_FILTER && bad) return;
                 let score = (h ? 2 : 0) + (a ? 2 : 0) + (sc ? 4 : 0) + (VID_CHAN.some(c => vnorm(v.by).includes(" " + c + " ")) ? 3 : 0) - bad * 2;
                 if (!goal && vidHas(t, VID_HL)) score += 2;
-                out.push(Object.assign({ score }, v));
+                out.push(Object.assign({ score, rel: !!rel }, v));
             });
-            return out.sort((x, z) => z.score - x.score).slice(0, YT_FILTER ? 5 : 8);
+            out.sort((x, z) => z.score - x.score);
+            const good = out.filter(x => x.rel);
+            return (good.length ? good : out).slice(0, YT_FILTER ? 5 : 8);
         }
         function ytOne(a, q, ctx) {
             const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 7000);
@@ -1795,13 +1824,15 @@ h1 .brand-mark{width:44px;height:44px}
             box.dataset.playing = "1";
             box.innerHTML = `<div class="yt-frame"><iframe src="https://www.youtube-nocookie.com/embed/${esc(v.id)}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><button class="yt-close">✕ Fermer</button>`;
         }
+        const ytCards = r => r.map(v => `<div class="yt-card" data-id="${esc(v.id)}"><img src="https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg" alt="" loading="lazy"><div><b>▶ ${esc(v.title)}</b><small>${esc(v.by || "")}</small></div></div>`).join("");
+        const ytWarn = '<div class="note">⚠ Vidéos non vérifiées : vérifie qu\'il s\'agit du bon match.</div>';
         function ytRender(box) {
             const q = box.dataset.q; if (!q) return;
             const ctx = ytCtx(box), k = q + "|" + ctx.kind + (ctx.who || "");
             const draw = r => {
                 if (!box.isConnected || box.dataset.playing) return;
                 if (!r.length) { box.innerHTML = '<div class="note">Pas encore de vraie vidéo de buts / résumé fiable pour ce match (les résumés sortent en général dans l\'heure qui suit le coup de sifflet final).</div>' + ytExt(q) + '<button class="yt-retry">↻ Réessayer</button>'; return; }
-                box.innerHTML = r.map(v => `<div class="yt-card" data-id="${esc(v.id)}"><img src="https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg" alt="" loading="lazy"><div><b>▶ ${esc(v.title)}</b><small>${esc(v.by || "")}</small></div></div>`).join("");
+                box.innerHTML = (r.some(v => v.rel) ? "" : ytWarn) + ytCards(r);
             };
             const c = ytCached(k); if (c) return draw(c);
             box.innerHTML = '<div class="note">Recherche des vidéos…</div>';
