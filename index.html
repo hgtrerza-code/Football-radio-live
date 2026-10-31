@@ -1000,7 +1000,20 @@ header{background:rgba(7,11,22,.97)!important}
             renderAll();
             ex.then(() => { detectGoals(); renderAll(); });
         }
-        const all = () => Object.values(byDay).flat();
+        const all = () => {
+            const rk = m => m.gh ? 3 : !m.tsdb ? 0 : /^n/.test(String(m.id)) ? 1 : 2;   // priorité : ESPN > 365Scores > TheSportsDB > GitHub
+            const s = Object.values(byDay).flat().map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((a, b) => a[1] - b[1]);
+            const keep = [];
+            for (const [m, t] of s) {
+                let dup = -1;
+                for (let k = keep.length - 1; k >= 0 && t - keep[k][1] < 6 * 3600e3; k--) {
+                    const o = keep[k][0];
+                    if (sameTeam(o.home, m.home) && sameTeam(o.away, m.away)) { dup = k; break; }
+                }
+                if (dup < 0) keep.push([m, t]); else if (rk(m) < rk(keep[dup][0])) keep[dup] = [m, t];
+            }
+            return keep.map(x => x[0]);
+        };
 
         // ===== Affichage =====
         const FLAG = "⚽";

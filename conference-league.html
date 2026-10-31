@@ -1000,7 +1000,20 @@ header{background:rgba(7,11,22,.97)!important}
             renderAll();
             ex.then(() => { detectGoals(); renderAll(); });
         }
-        const all = () => Object.values(byDay).flat();
+        const all = () => {
+            const rk = m => m.gh ? 3 : !m.tsdb ? 0 : /^n/.test(String(m.id)) ? 1 : 2;   // priorité : ESPN > 365Scores > TheSportsDB > GitHub
+            const s = Object.values(byDay).flat().map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((a, b) => a[1] - b[1]);
+            const keep = [];
+            for (const [m, t] of s) {
+                let dup = -1;
+                for (let k = keep.length - 1; k >= 0 && t - keep[k][1] < 6 * 3600e3; k--) {
+                    const o = keep[k][0];
+                    if (sameTeam(o.home, m.home) && sameTeam(o.away, m.away)) { dup = k; break; }
+                }
+                if (dup < 0) keep.push([m, t]); else if (rk(m) < rk(keep[dup][0])) keep[dup] = [m, t];
+            }
+            return keep.map(x => x[0]);
+        };
 
         // ===== Affichage =====
         const FLAG = "⚽";
@@ -1664,7 +1677,7 @@ header{background:rgba(7,11,22,.97)!important}
             n = String(n || "");
             if (/women|feminin|féminin|\bu-?\d{2}\b|youth|reserve|\bb team\b/i.test(n)) return 500;
             const i = LG_RANK.findIndex(r => r.test(n));
-            if (i >= 0) return i;
+            if (i >= 0) return (/botola|moroccan|morocc/i.test(n) && /(\b2\b|\bii\b|\bd2\b|deuxi|second|division 2)/i.test(n)) ? i + 0.5 : i;
             if (/\b(2|ii|second|championship|segunda|serie b|ligue 2|division 2|league one|league two)\b/i.test(n)) return 200;
             return 100;
         }
