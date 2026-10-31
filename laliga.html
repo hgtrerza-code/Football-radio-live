@@ -939,7 +939,7 @@ header{background:rgba(7,11,22,.97)!important}
         const GH_LEAGUES = [
             ["en.1", "Premier League", "gb-eng", "Europe/London", "Angleterre"], ["en.2", "Championship", "gb-eng", "Europe/London", "Angleterre"],
             ["en.3", "League One", "gb-eng", "Europe/London", "Angleterre"], ["en.4", "League Two", "gb-eng", "Europe/London", "Angleterre"],
-            ["de.1", "Bundesliga", "de", "Europe/Berlin", "Allemagne"], ["es.1", "La Liga", "es", "Europe/Madrid", "Espagne"], ["es.2", "Segunda División", "es", "Europe/Madrid", "Espagne"],
+            ["de.1", "Bundesliga", "de", "Europe/Berlin", "Allemagne"], ["es.2", "Segunda División", "es", "Europe/Madrid", "Espagne"],
             ["it.1", "Serie A", "it", "Europe/Rome", "Italie"], ["it.2", "Serie B", "it", "Europe/Rome", "Italie"],
             ["fr.1", "Ligue 1", "fr", "Europe/Paris", "France"], ["fr.2", "Ligue 2", "fr", "Europe/Paris", "France"],
             ["nl.1", "Eredivisie", "nl", "Europe/Amsterdam", "Pays-Bas"], ["pt.1", "Primeira Liga", "pt", "Europe/Lisbon", "Portugal"]
@@ -1023,9 +1023,9 @@ header{background:rgba(7,11,22,.97)!important}
                     const cands = new Set();
                     km.th.concat(km.ta, [km.h, km.a]).forEach(w => { const l = idx.get(w); if (l) l.forEach(i => cands.add(i)); });
                     for (const i of cands) {
-                        const o = keep[i][0]; if (Math.abs(t - keep[i][1]) >= 12 * 3600e3) continue;
+                        const o = keep[i][0], gh = !!(o.gh || m.gh); if (Math.abs(t - keep[i][1]) >= (gh ? 10 * 86400e3 : 12 * 3600e3)) continue;   // GitHub : dates parfois périmées (match reporté) -> fenêtre plus large
                         const ko = kk(o);
-                        if ((sameT(ko.h, ko.th, km.h, km.th) && sameT(ko.a, ko.ta, km.a, km.ta)) || (sameT(ko.h, ko.th, km.a, km.ta) && sameT(ko.a, ko.ta, km.h, km.th))) { dup = i; break; }
+                        if ((sameT(ko.h, ko.th, km.h, km.th) && sameT(ko.a, ko.ta, km.a, km.ta)) || (!gh && sameT(ko.h, ko.th, km.a, km.ta) && sameT(ko.a, ko.ta, km.h, km.th))) { dup = i; break; }
                     }
                 }
                 if (dup < 0) { keep.push([m, t]); ids.set(sid, keep.length - 1); addIdx(km, keep.length - 1); }
