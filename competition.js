@@ -17,11 +17,12 @@
     try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
     finally { clearTimeout(t); }
   }
+  let netErr = "", diag = "";
   // Worker 1, puis Worker 2, puis ESPN directement. ok(j) décide si la réponse est exploitable.
   async function espn(sl, what, qs, ok) {
     const direct = (what === "standings" ? "https://site.api.espn.com/apis/v2/sports/soccer/" : "https://site.api.espn.com/apis/site/v2/sports/soccer/") + sl + "/" + what + (qs || "");
     const tries = [PROXY + "soccer/" + sl + "/" + what + (qs || ""), PROXY2 + "soccer/" + sl + "/" + what + (qs || ""), direct];
-    for (const u of tries) { try { const j = await fetchJSON(u); if (!ok || ok(j)) return j; } catch (e) { } }
+    for (const u of tries) { try { const j = await fetchJSON(u); if (!ok || ok(j)) return j; } catch (e) { netErr = e.message; } }
     return null;
   }
 
@@ -42,12 +43,33 @@
     };
   }
   async function loadEspn() {
+    diag = "";
     const t = new Date(), a = new Date(t), b = new Date(t); a.setDate(t.getDate() - 14); b.setDate(t.getDate() + 21);
     const qs = "?dates=" + ymd(a) + "-" + ymd(b) + "&limit=1000";
     for (const sl of SLUGS) {
       const j = await espn(sl, "scoreboard", qs, x => (x.events || []).length);
       if (j) return j.events.map(normalize).filter(Boolean);
     }
+    diag = "plage de dates vide";
+    // Plan B : jour par jour (même méthode que la page d'accueil)
+    const days = []; for (let i = -6; i <= 8; i++) { const d = new Date(); d.setDate(d.getDate() + i); days.push(ymd(d)); }
+    const byId = new Map(); let okn = 0, tot = 0;
+    for (const sl of SLUGS) {
+      await Promise.all(days.map(async d => {
+        tot++;
+        const j = await espn(sl, "scoreboard", "?dates=" + d + "&limit=1000", x => Array.isArray(x.events));
+        if (j) { okn++; j.events.map(normalize).filter(Boolean).forEach(m => byId.set(m.id, m)); }
+      }));
+      if (byId.size) break;
+    }
+    if (byId.size) return [...byId.values()];
+    diag += " · jour par jour : " + okn + "/" + tot + " réponses" + (netErr ? " (dernière erreur : " + netErr + ")" : "");
+    // Plan C : données déjà chargées par la page d'accueil
+    try {
+      const c = JSON.parse(localStorage.getItem("fl_cache") || "null"), L = [];
+      if (c && c.d) Object.keys(c.d).forEach(k => (c.d[k] || []).forEach(m => { if (SLUGS.indexOf(String(m.slug || "").toLowerCase()) >= 0 || SLUGS.indexOf(String(m.fslug || "").toLowerCase()) >= 0) L.push(m); }));
+      if (L.length) { diag += " · données de la page d’accueil utilisées"; return L; }
+    } catch (e) { }
     return [];
   }
   const TS = "https://www.thesportsdb.com/api/v1/json/3/";
@@ -98,7 +120,7 @@
     const last = matches.filter(m => m.state === "post").sort(desc).slice(0, 15);
     const sec = (title, list, dot) => list.length ? '<div class="cp-sub">' + (dot ? '<span class="live-dot"></span>' : "") + title + '<span class="count">' + list.length + '</span></div>' + list.map(row).join("") : "";
     const h = sec("En direct", live, true) + sec("Prochains matchs", next) + sec("Derniers résultats", last);
-    box.innerHTML = h || (!loaded ? skel(4) : '<div class="empty">' + (lastErr ? "⚠️ " + esc(lastErr) : "Aucun match trouvé pour cette compétition pour le moment.") + '</div>');
+    box.innerHTML = h || (!loaded ? skel(4) : '<div class="empty">' + (lastErr ? "⚠️ " + esc(lastErr) : "Aucun match trouvé pour cette compétition pour le moment.") + (diag ? '<p class="note">Détail : ' + esc(diag) + '</p>' : "") + '<p><button class="btn-action" id="cp-retry" style="margin:.6rem auto 0">↻ Réessayer</button></p></div>');
     const n = $("#cp-note");
     if (n) n.textContent = "Horaires affichés dans votre fuseau horaire." + (lastOk ? " Dernière mise à jour : " + new Date(lastOk).toLocaleTimeString("fr-FR") + "." : "");
     const u = $("#updated"); if (u && lastOk) u.textContent = "Dernière mise à jour : " + new Date(lastOk).toLocaleTimeString("fr-FR");
@@ -199,6 +221,7 @@
     if (t === "m") renderMatches(); else if (t === "s" && !stdDone) loadStd(); else if (t === "n" && !newsDone) loadNews();
     try { history.replaceState(null, "", t === "m" ? location.pathname + location.search : "#" + (t === "s" ? "classement" : "actus")); } catch (e) { }
   }
+  $("#cp-m").addEventListener("click", e => { if (e.target.closest("#cp-retry")) { loaded = false; renderMatches(); refresh(); } });
   $(".cp-tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) show(b.dataset.t); });
   const fab = $("#fab-top");
   if (fab) { window.addEventListener("scroll", () => fab.classList.toggle("show", window.scrollY > 600), { passive: true }); fab.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" }); }
