@@ -939,7 +939,7 @@ header{background:rgba(7,11,22,.97)!important}
         const GH_LEAGUES = [
             ["en.1", "Premier League", "gb-eng", "Europe/London", "Angleterre"], ["en.2", "Championship", "gb-eng", "Europe/London", "Angleterre"],
             ["en.3", "League One", "gb-eng", "Europe/London", "Angleterre"], ["en.4", "League Two", "gb-eng", "Europe/London", "Angleterre"],
-            ["de.1", "Bundesliga", "de", "Europe/Berlin", "Allemagne"], ["es.1", "La Liga", "es", "Europe/Madrid", "Espagne"], ["es.2", "Segunda División", "es", "Europe/Madrid", "Espagne"],
+            ["de.1", "Bundesliga", "de", "Europe/Berlin", "Allemagne"], ["es.2", "Segunda División", "es", "Europe/Madrid", "Espagne"],
             ["it.1", "Serie A", "it", "Europe/Rome", "Italie"], ["it.2", "Serie B", "it", "Europe/Rome", "Italie"],
             ["fr.1", "Ligue 1", "fr", "Europe/Paris", "France"], ["fr.2", "Ligue 2", "fr", "Europe/Paris", "France"],
             ["nl.1", "Eredivisie", "nl", "Europe/Amsterdam", "Pays-Bas"], ["pt.1", "Primeira Liga", "pt", "Europe/Lisbon", "Portugal"]
@@ -1001,24 +1001,35 @@ header{background:rgba(7,11,22,.97)!important}
             ex.then(() => { detectGoals(); renderAll(); });
         }
         let _allMemo = null, _allSig = "", _arrId = new WeakMap(), _arrN = 0, _keyMemo = new WeakMap();
+        const _STOP = new Set(["real", "united", "city", "town", "sporting", "club", "atletico", "athletic", "deportivo", "inter", "borussia", "olympique", "racing", "sport", "futbol", "football", "calcio", "team"]);
+        const _tok = s => String(s || "").toLowerCase().normalize("NFD").split("").filter(c => { const k = c.charCodeAt(0); return k < 768 || k > 879; }).join("").replace(/[^a-z0-9]+/g, " ").split(" ").filter(w => w.length >= 4 && !_STOP.has(w));
         const all = () => {
-            // résultat mis en cache : recalculé seulement quand les données ont réellement changé (sinon le site ralentit)
+            // résultat mis en cache : recalculé seulement quand les données ont changé (sinon le site ralentit)
             const ents = Object.entries(byDay);
             const sig = ents.map(([k, a]) => { let id = _arrId.get(a); if (!id) { id = ++_arrN; _arrId.set(a, id); } return k + ":" + id + ":" + a.length; }).join("|");
             if (_allMemo && sig === _allSig) return _allMemo.slice();
             const rk = m => m.gh ? 3 : !m.tsdb ? 0 : /^n/.test(String(m.id)) ? 1 : 2;   // priorité : ESPN > 365Scores > TheSportsDB > GitHub
-            const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away) }; _keyMemo.set(m, v); } return v; };
+            const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away), th: _tok(m.home), ta: _tok(m.away) }; _keyMemo.set(m, v); } return v; };
             const same = (x, y) => !!x && !!y && (x === y || x.includes(y) || y.includes(x));
+            const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.includes(w));
             const s = ents.flatMap(e => e[1]).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
-            const keep = [];
+            const keep = [], idx = new Map(), ids = new Map();
+            const addIdx = (km, i) => { km.th.concat(km.ta, [km.h, km.a]).forEach(w => { if (!w) return; let l = idx.get(w); if (!l) { l = []; idx.set(w, l); } l.push(i); }); };
             for (const [m, t] of s) {
                 const km = kk(m); let dup = -1;
-                for (let k = keep.length - 1; k >= 0 && t - keep[k][1] < 6 * 3600e3; k--) {
-                    const o = keep[k][0]; if (rk(o) === rk(m) && o.id !== m.id && rk(m) !== 2 && rk(m) !== 1) continue;
-                    const ko = kk(o);
-                    if (same(ko.h, km.h) && same(ko.a, km.a)) { dup = k; break; }
+                const sid = String(m.id);
+                if (ids.has(sid)) dup = ids.get(sid);
+                else {
+                    const cands = new Set();
+                    km.th.concat(km.ta, [km.h, km.a]).forEach(w => { const l = idx.get(w); if (l) l.forEach(i => cands.add(i)); });
+                    for (const i of cands) {
+                        const o = keep[i][0], gh = !!(o.gh || m.gh); if (Math.abs(t - keep[i][1]) >= (gh ? 10 * 86400e3 : 12 * 3600e3)) continue;   // GitHub : dates parfois périmées (match reporté) -> fenêtre plus large
+                        const ko = kk(o);
+                        if ((sameT(ko.h, ko.th, km.h, km.th) && sameT(ko.a, ko.ta, km.a, km.ta)) || (!gh && sameT(ko.h, ko.th, km.a, km.ta) && sameT(ko.a, ko.ta, km.h, km.th))) { dup = i; break; }
+                    }
                 }
-                if (dup < 0) keep.push([m, t]); else if (rk(m) < rk(keep[dup][0])) keep[dup] = [m, t];
+                if (dup < 0) { keep.push([m, t]); ids.set(sid, keep.length - 1); addIdx(km, keep.length - 1); }
+                else if (rk(m) < rk(keep[dup][0])) { keep[dup] = [m, t]; ids.set(sid, dup); addIdx(km, dup); }
             }
             _allMemo = keep.map(x => x[0]); _allSig = sig;
             return _allMemo.slice();
@@ -1683,14 +1694,14 @@ header{background:rgba(7,11,22,.97)!important}
             /qualif/i, /friendl|international/i
         ];
         function lgRank(n) {
-            n = String(n || "");
+            n = String(n || "").split(String.fromCharCode(8203))[0];   // retire le suffixe interne « id » des noms 365Scores
             if (/women|feminin|féminin|\bu-?\d{2}\b|youth|reserve|\bb team\b/i.test(n)) return 500;
             const i = LG_RANK.findIndex(r => r.test(n));
             if (i >= 0) return (/botola|moroccan|morocc/i.test(n) && /(\b2\b|\bii\b|\bd2\b|deuxi|second|division 2)/i.test(n)) ? i + 0.5 : i;
             if (/\b(2|ii|second|championship|segunda|serie b|ligue 2|division 2|league one|league two)\b/i.test(n)) return 200;
             return 100;
         }
-        const lgCmp = (a, b) => lgRank(a) - lgRank(b) || a.localeCompare(b, "fr");
+        const lgCmp = (a, b) => ((window.compFilter && window.compFilter.main && window.compFilter.main(a)) ? 0 : 1) - ((window.compFilter && window.compFilter.main && window.compFilter.main(b)) ? 0 : 1) || lgRank(a) - lgRank(b) || a.localeCompare(b, "fr");
         const BOTOLA_BTN = '';
         function grouped(list, rowFn, withBtn) {
             const g = {};
@@ -2411,6 +2422,18 @@ header{background:rgba(7,11,22,.97)!important}
   // Changer de page arrêterait le lecteur. Quand une radio joue, on affiche donc la compétition ici même (même page, même lecteur).
   const COMP_CTRY = { "ligue-des-champions": "Europe", "europa-league": "Europe", "conference-league": "Europe", "premier-league": "Angleterre", "laliga": "Espagne", "serie-a": "Italie", "bundesliga": "Allemagne", "ligue-1": "France", "liga-portugal": "Portugal", "botola-pro": "Maroc" };
   const COMP_EXCL = /women|feminin|féminin|qualif|\bu-?\d{2}\b|youth|reserve/i;
+  const COMP_MAIN = {
+    "premier-league": /^(english )?premier league$/i,
+    "laliga": /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i,
+    "serie-a": /^(italian )?serie a( (?!2$|ii$|women).*)?$/i,
+    "bundesliga": /^(german )?bundesliga$/i,
+    "ligue-1": /^(french )?ligue 1( (?!2$|ii$|women).*)?$/i,
+    "liga-portugal": /^(portuguese )?(liga portugal|primeira liga)( .*)?$/i,
+    "botola-pro": /^(moroccan )?botola pro( inwi)?$/i,
+    "ligue-des-champions": /^(uefa )?champions league$/i,
+    "europa-league": /^(uefa )?europa league$/i,
+    "conference-league": /^(uefa )?(europa )?conference league$/i
+  };
   function compChip() {
     let el = $("#comp-chip");
     if (!window.compFilter) { if (el) el.remove(); $$("#compbar a.on").forEach(a => a.classList.remove("on")); return; }
@@ -2421,7 +2444,7 @@ header{background:rgba(7,11,22,.97)!important}
     const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");
     if (!img || !img.dataset.lgre || !COMP_CTRY[slug]) return false;   // inconnu : navigation normale
     const re = new RegExp(img.dataset.lgre, "i"), ctry = COMP_CTRY[slug] + " · ";
-    window.compFilter = { name: a.textContent.trim(), test: m => { const raw = String(m.lg).replace(/​.*$/, ""); return re.test(raw) && !COMP_EXCL.test(raw) && lgDisp(m.lg, [m]).indexOf(ctry) === 0; } };
+    window.compFilter = { name: a.textContent.trim(), main: raw => !!COMP_MAIN[slug] && COMP_MAIN[slug].test(String(raw || "").split(String.fromCharCode(8203))[0]), test: m => { const raw = String(m.lg).replace(/​.*$/, ""); return re.test(raw) && !COMP_EXCL.test(raw) && lgDisp(m.lg, [m]).indexOf(ctry) === 0; } };
     $$("#compbar a").forEach(x => x.classList.toggle("on", x === a));
     showPage("scores");
     tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
