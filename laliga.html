@@ -1001,24 +1001,35 @@ header{background:rgba(7,11,22,.97)!important}
             ex.then(() => { detectGoals(); renderAll(); });
         }
         let _allMemo = null, _allSig = "", _arrId = new WeakMap(), _arrN = 0, _keyMemo = new WeakMap();
+        const _STOP = new Set(["real", "united", "city", "town", "sporting", "club", "atletico", "athletic", "deportivo", "inter", "borussia", "olympique", "racing", "sport", "futbol", "football", "calcio", "team"]);
+        const _tok = s => String(s || "").toLowerCase().normalize("NFD").split("").filter(c => { const k = c.charCodeAt(0); return k < 768 || k > 879; }).join("").replace(/[^a-z0-9]+/g, " ").split(" ").filter(w => w.length >= 4 && !_STOP.has(w));
         const all = () => {
-            // résultat mis en cache : recalculé seulement quand les données ont réellement changé (sinon le site ralentit)
+            // résultat mis en cache : recalculé seulement quand les données ont changé (sinon le site ralentit)
             const ents = Object.entries(byDay);
             const sig = ents.map(([k, a]) => { let id = _arrId.get(a); if (!id) { id = ++_arrN; _arrId.set(a, id); } return k + ":" + id + ":" + a.length; }).join("|");
             if (_allMemo && sig === _allSig) return _allMemo.slice();
             const rk = m => m.gh ? 3 : !m.tsdb ? 0 : /^n/.test(String(m.id)) ? 1 : 2;   // priorité : ESPN > 365Scores > TheSportsDB > GitHub
-            const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away) }; _keyMemo.set(m, v); } return v; };
+            const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away), th: _tok(m.home), ta: _tok(m.away) }; _keyMemo.set(m, v); } return v; };
             const same = (x, y) => !!x && !!y && (x === y || x.includes(y) || y.includes(x));
+            const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.includes(w));
             const s = ents.flatMap(e => e[1]).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
-            const keep = [];
+            const keep = [], idx = new Map(), ids = new Map();
+            const addIdx = (km, i) => { km.th.concat(km.ta, [km.h, km.a]).forEach(w => { if (!w) return; let l = idx.get(w); if (!l) { l = []; idx.set(w, l); } l.push(i); }); };
             for (const [m, t] of s) {
                 const km = kk(m); let dup = -1;
-                for (let k = keep.length - 1; k >= 0 && t - keep[k][1] < 6 * 3600e3; k--) {
-                    const o = keep[k][0]; if (rk(o) === rk(m) && o.id !== m.id && rk(m) !== 2 && rk(m) !== 1) continue;
-                    const ko = kk(o);
-                    if (same(ko.h, km.h) && same(ko.a, km.a)) { dup = k; break; }
+                const sid = String(m.id);
+                if (ids.has(sid)) dup = ids.get(sid);
+                else {
+                    const cands = new Set();
+                    km.th.concat(km.ta, [km.h, km.a]).forEach(w => { const l = idx.get(w); if (l) l.forEach(i => cands.add(i)); });
+                    for (const i of cands) {
+                        const o = keep[i][0]; if (Math.abs(t - keep[i][1]) >= 12 * 3600e3) continue;
+                        const ko = kk(o);
+                        if ((sameT(ko.h, ko.th, km.h, km.th) && sameT(ko.a, ko.ta, km.a, km.ta)) || (sameT(ko.h, ko.th, km.a, km.ta) && sameT(ko.a, ko.ta, km.h, km.th))) { dup = i; break; }
+                    }
                 }
-                if (dup < 0) keep.push([m, t]); else if (rk(m) < rk(keep[dup][0])) keep[dup] = [m, t];
+                if (dup < 0) { keep.push([m, t]); ids.set(sid, keep.length - 1); addIdx(km, keep.length - 1); }
+                else if (rk(m) < rk(keep[dup][0])) { keep[dup] = [m, t]; ids.set(sid, dup); addIdx(km, dup); }
             }
             _allMemo = keep.map(x => x[0]); _allSig = sig;
             return _allMemo.slice();
