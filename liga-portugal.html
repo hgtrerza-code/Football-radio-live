@@ -716,7 +716,7 @@ header{background:rgba(7,11,22,.97)!important}
             const c = (ev.competitions && ev.competitions[0]) || {};
             const lid = ((ev.uid || "").match(/l:(\d+)/) || [])[1];
             const fromTop = (top.leagues || []).find(l => String(l.id) === lid);
-            return (ev.league && ev.league.name) || (c.league && c.league.name) || (fromTop && fromTop.name) || (ev.season && ev.season.slug && ev.season.slug.replace(/-/g, " ")) || "Football — autres compétitions";
+            return (ev.league && ev.league.name) || (c.league && c.league.name) || (fromTop && fromTop.name) || (ev.season && ev.season.slug && ev.season.slug.replace(/^[0-9]{4}-[0-9]{2,4}-/, "").replace(/-/g, " ").replace(/(^| )[a-z]/g, c => c.toUpperCase())) || "Football — autres compétitions";
         }
         function slugOf(ev, top) {
             const lid = ((ev.uid || "").match(/l:(\d+)/) || [])[1];
@@ -917,7 +917,7 @@ header{background:rgba(7,11,22,.97)!important}
                 const lgl = "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2/v5/Competitions/light/" + g.competitionId;
                 const t0 = new Date(g.startTime).getTime();
                 const e = base.find(x => !x.tsdb && Math.abs(new Date(x.start).getTime() - t0) < 4 * 3600e3 && sameTeam(x.home, hc.name) && sameTeam(x.away, ac.name));
-                if (e) { e.start = g.startTime; e.lg = key; e.lgl = lgl; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
+                if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
                 const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon/i.test(st);
                 const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
                 let state = "pre";
@@ -1000,6 +1000,7 @@ header{background:rgba(7,11,22,.97)!important}
             renderAll();
             ex.then(() => { detectGoals(); renderAll(); });
         }
+        const LG_ALIAS = Object.create(null);   // nom ESPN de la compétition -> nom 365Scores (même compétition = même catégorie)
         let _allMemo = null, _allSig = "", _arrId = new WeakMap(), _arrN = 0, _keyMemo = new WeakMap();
         const _STOP = new Set(["real", "united", "city", "town", "sporting", "club", "atletico", "athletic", "deportivo", "inter", "borussia", "olympique", "racing", "sport", "futbol", "football", "calcio", "team"]);
         const _tok = s => String(s || "").toLowerCase().normalize("NFD").split("").filter(c => { const k = c.charCodeAt(0); return k < 768 || k > 879; }).join("").replace(/[^a-z0-9]+/g, " ").split(" ").filter(w => w.length >= 4 && !_STOP.has(w));
@@ -1031,6 +1032,7 @@ header{background:rgba(7,11,22,.97)!important}
                 if (dup < 0) { keep.push([m, t]); ids.set(sid, keep.length - 1); addIdx(km, keep.length - 1); }
                 else if (rk(m) < rk(keep[dup][0])) { keep[dup] = [m, t]; ids.set(sid, dup); addIdx(km, dup); }
             }
+            keep.forEach(x => { const al = LG_ALIAS[x[0].lg]; if (al && al.size === 1) { const k = al.values().next().value; if (k && k !== x[0].lg) x[0].lg = k; } });
             _allMemo = keep.map(x => x[0]); _allSig = sig;
             return _allMemo.slice();
         };
@@ -1133,7 +1135,7 @@ header{background:rgba(7,11,22,.97)!important}
         function cleanLg(name) {
             let n = String(name || ""), prev;
             do { prev = n; n = n.replace(PH_SEP, "").replace(PH_END, ""); } while (n !== prev);
-            return n.trim() || String(name || "");
+            n = n.replace(/^[0-9]{4}[ /-][0-9]{2,4} +/, "").trim(); return n || String(name || "");
         }
         const isGenericLg = n => GENERIC_LG.test(n) || /^league (?:stage|phase)\b/i.test(n);
         // Pays obligatoire au début du nom (ou continent / « Monde » pour les compétitions internationales)
