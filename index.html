@@ -1664,7 +1664,7 @@ header{background:rgba(7,11,22,.97)!important}
             n = String(n || "");
             if (/women|feminin|féminin|\bu-?\d{2}\b|youth|reserve|\bb team\b/i.test(n)) return 500;
             const i = LG_RANK.findIndex(r => r.test(n));
-            if (i >= 0) return i;
+            if (i >= 0) return (/botola|moroccan|morocc/i.test(n) && /(\b2\b|\bii\b|\bd2\b|deuxi|second|division 2)/i.test(n)) ? i + 0.5 : i;
             if (/\b(2|ii|second|championship|segunda|serie b|ligue 2|division 2|league one|league two)\b/i.test(n)) return 200;
             return 100;
         }
