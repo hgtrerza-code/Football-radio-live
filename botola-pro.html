@@ -28,6 +28,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="competition.css">
+<style>
+#compbar a .cl{width:20px;height:20px;object-fit:contain;background:#fff;border-radius:50%;padding:2px;flex-shrink:0}
+#compbar a .cl:not([src]){display:none}
+</style>
 </head>
 <body data-slug="mar.1,mor.1" data-name="Botola Pro" data-tsdb="Morocco">
     <header>
@@ -37,7 +41,7 @@
         </div>
         <nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="index.html"><span>⚽</span>Scores</a><a href="index.html#radio"><span>📻</span>Radio</a><a href="index.html#table"><span>🏆</span>Classements</a><a href="index.html#news"><span>📰</span>Actus</a></div></nav>
     </header>
-    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span>Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>Premier League</a><a href="laliga.html"><span>🇪🇸</span>LaLiga</a><a href="serie-a.html"><span>🇮🇹</span>Serie A</a><a href="bundesliga.html"><span>🇩🇪</span>Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span>Ligue 1</a><a href="europa-league.html"><span>🟠</span>Europa League</a><a href="conference-league.html"><span>🟢</span>Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span>Liga Portugal</a><a href="botola-pro.html" class="on" aria-current="page"><span>🇲🇦</span>Botola Pro</a></div></nav>
+    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/2.png">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/15.png">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/12.png">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/10.png">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/9.png">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/20296.png">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" src="https://a.espncdn.com/i/leaguelogos/soccer/500/14.png">Liga Portugal</a><a href="botola-pro.html" class="on" aria-current="page"><span>🇲🇦</span><img class="cl" alt="">Botola Pro</a></div></nav>
     <main class="container">
         <noscript><p class="note">Activez JavaScript pour afficher les scores de Botola Pro en direct.</p></noscript>
         <h1 class="sec-title cp-title"><img class="lg-flag" src="https://flagcdn.com/w40/ma.png" alt="" onerror="this.remove()">Botola Pro <small>Maroc · scores, résultats, classement et actus</small></h1>
@@ -58,5 +62,16 @@
     <footer><div class="container"><nav class="legal-links" aria-label="Informations légales"><a href="mentions-legales.html">Mentions légales</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></nav><p>FootLive Pro © 2026 — <span id="updated"></span></p></div></footer>
     <button id="fab-top" aria-label="Remonter">↑</button>
     <script src="competition.js" defer></script>
+<script>
+(function(){
+  var st={};try{st=JSON.parse(localStorage.getItem("fl_cl")||"{}")}catch(e){}
+  document.querySelectorAll("#compbar a").forEach(function(a){
+    var img=a.querySelector(".cl"); if(!img) return;
+    var k=(a.getAttribute("href")||"").replace(".html","");
+    img.addEventListener("error",function(){ if(st[k]&&img.src!==st[k]){img.src=st[k];}else{img.removeAttribute("src");} });
+    if(!img.getAttribute("src")&&st[k]) img.src=st[k];
+  });
+})();
+</script>
 </body>
 </html>

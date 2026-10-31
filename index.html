@@ -553,6 +553,44 @@ h1 .brand-mark{width:44px;height:44px}
 .legal-links a{color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.8rem}
 .legal-links a:hover{color:var(--accent)}
 </style>
+<style>
+/* --- À la une : carrousel, grands logos, icônes SVG --- */
+.svgi{width:1.2em;height:1.2em;display:inline-block;vertical-align:-.22em}
+#tabbar a span .svgi{width:1.3em;height:1.3em}
+.hero-wrap{position:relative}
+.hero-card{display:none;margin-bottom:0}
+.hero-card.on{display:block}
+.hl-top{font-size:.75rem}
+.hl-lg{background:rgba(255,255,255,.08);padding:4px 10px;border-radius:999px;color:var(--text-main)}
+.hl-live{background:rgba(239,68,68,.14);padding:4px 10px;border-radius:999px}
+.hl-ph{background:#1e293b;color:#fff;font-weight:800;font-size:1.1rem;letter-spacing:1px}
+.hl-dots{display:flex;justify-content:center;gap:8px;margin-top:10px}
+.hl-dot{width:9px;height:9px;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.25);cursor:pointer;transition:all .25s}
+.hl-dot.on{width:24px;border-radius:6px;background:var(--accent)}
+@media(min-width:700px){
+ .hero-card{padding:22px 32px 28px}
+ .hl-main{gap:24px;margin-top:18px}
+ .hl-team{gap:12px}
+ .hl-team img,.hl-ph{width:96px;height:96px;padding:8px}
+ .hl-team b{font-size:1.2rem}
+ .hl-score{font-size:4rem;letter-spacing:4px}
+ .hl-min{font-size:1rem;margin-top:10px}
+ .hl-mid{min-width:180px}
+ .hl-cd{font-size:1.5rem}
+ .hl-top{font-size:.82rem}
+}
+@media(min-width:1100px){
+ .hero-card{padding:28px 48px 34px}
+ .hl-team img,.hl-ph{width:120px;height:120px}
+ .hl-score{font-size:5rem}
+ .hl-team b{font-size:1.4rem}
+ .hl-mid{min-width:240px}
+}
+</style>
+<style>
+#compbar a .cl{width:20px;height:20px;object-fit:contain;background:#fff;border-radius:50%;padding:2px;flex-shrink:0}
+#compbar a .cl:not([src]){display:none}
+</style>
 </head>
 <body>
 <div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
@@ -568,7 +606,7 @@ h1 .brand-mark{width:44px;height:44px}
             </div>
         </div>
     </header>
-    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span>Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>Premier League</a><a href="laliga.html"><span>🇪🇸</span>LaLiga</a><a href="serie-a.html"><span>🇮🇹</span>Serie A</a><a href="bundesliga.html"><span>🇩🇪</span>Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span>Ligue 1</a><a href="europa-league.html"><span>🟠</span>Europa League</a><a href="conference-league.html"><span>🟢</span>Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span>Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span>Botola Pro</a></div></nav>
+    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/i/leaguelogos/soccer/500/2.png" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/i/leaguelogos/soccer/500/15.png" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/i/leaguelogos/soccer/500/12.png" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/i/leaguelogos/soccer/500/10.png" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/i/leaguelogos/soccer/500/9.png" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/i/leaguelogos/soccer/500/20296.png" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/i/leaguelogos/soccer/500/14.png" data-id="14">Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
     <main class="container">
     <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
@@ -578,9 +616,9 @@ h1 .brand-mark{width:44px;height:44px}
             <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
                 <div class="filters" id="filters">
                     <button class="btn-live" data-tab="live"><span class="ic ic-live"></span> En direct <span class="live-count" id="live-count">0</span></button>
-                    <button class="active" data-tab="today"><span class="ic ic-today">⚡</span> Aujourd'hui</button>
-                    <button data-tab="results"><span class="ic ic-goal">🥅</span> Résultats</button>
-                    <button data-tab="next"><span class="ic ic-ball">⚽</span> À venir</button>
+                    <button class="active" data-tab="today"><span class="ic ic-today"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span> Aujourd'hui</button>
+                    <button data-tab="results"><span class="ic ic-goal"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7M8 15l1.5 1.5L12 14M14 9h3M14 16h3"/></svg></span> Résultats</button>
+                    <button data-tab="next"><span class="ic ic-ball"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span> À venir</button>
                 </div>
                 <select class="region-select" id="league-filter"><option value="all">🌍 Toutes les ligues</option></select>
             </div>
@@ -1966,7 +2004,7 @@ h1 .brand-mark{width:44px;height:44px}
     e.stopPropagation(); e.preventDefault(); toggleFav(s.dataset.team);
   }, true);
   new MutationObserver(() => decorate()).observe($("#matches"), { childList: true });
-  $("#filters").insertAdjacentHTML("beforeend", '<button data-tab="fav"><span class="ic ic-today">⭐</span> Favoris</button>');
+  $("#filters").insertAdjacentHTML("beforeend", '<button data-tab="fav"><span class="ic ic-today"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span> Favoris</button>');
 
   // ---------- Sélecteur de jour ----------
   window.dayPick = "";
@@ -1989,36 +2027,80 @@ h1 .brand-mark{width:44px;height:44px}
   // ---------- Carte « À la une » ----------
   $("#scores-view").insertAdjacentHTML("afterbegin", '<div id="hero"></div>');
   const heroPref = (a, b) => (window.isFavMatch(b) - window.isFavMatch(a)) || lgRank(a.lg) - lgRank(b.lg);
-  function pickHero() {
-    const A = all().filter(m => !m.off), now = Date.now(), T = m => new Date(m.start).getTime();
-    const live = A.filter(m => m.state === "in").sort(heroPref);
-    if (live.length) return { m: live[0], kind: "live", n: live.length };
-    const nx = A.filter(m => m.state === "pre" && T(m) > now - 600000 && T(m) < now + 36 * 3600e3).sort((a, b) => heroPref(a, b) || a.start.localeCompare(b.start));
-    if (nx.length) return { m: nx[0], kind: "next" };
-    const fin = A.filter(m => m.state === "post" && now - T(m) < 24 * 3600e3).sort(heroPref);
-    return fin.length ? { m: fin[0], kind: "post" } : null;
+  function minOf(m) { const x = String(m.label || "").match(/(\d+)/); return x ? +x[1] : 0; }
+  function heroScore(m) {
+    const g = (m.h || 0) + (m.a || 0), d = Math.abs((m.h || 0) - (m.a || 0)), mn = minOf(m);
+    let sc = -Math.min(lgRank(m.lg), 300) * 4 + Math.min(g, 6) * 6 + Math.min(mn, 90) / 3;
+    if (d <= 1) sc += 25;
+    if (g === 0 && mn < 20) sc -= 60;
+    if (window.isFavMatch(m)) sc += 1000;
+    return sc;
   }
-  let heroSig = "";
+  function pickHeroes() {
+    const A = all().filter(m => !m.off), now = Date.now(), T = m => new Date(m.start).getTime(), MAX = 5;
+    const live = A.filter(m => m.state === "in").sort((x, y) => heroScore(y) - heroScore(x));
+    const out = live.slice(0, MAX).map(m => ({ m, kind: "live", n: live.length }));
+    if (out.length < 3) {
+      const nx = A.filter(m => m.state === "pre" && T(m) > now - 600000 && T(m) < now + 36 * 3600e3).sort((x, y) => heroPref(x, y) || x.start.localeCompare(y.start));
+      nx.slice(0, 3 - out.length).forEach(m => out.push({ m, kind: "next" }));
+    }
+    if (!out.length) {
+      const fin = A.filter(m => m.state === "post" && now - T(m) < 24 * 3600e3).sort(heroPref);
+      fin.slice(0, 3).forEach(m => out.push({ m, kind: "post" }));
+    }
+    return out;
+  }
+  const initials = n => String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  let heroSig = "", heroIdx = 0, heroTimer = null, heroPause = false;
+  function showSlide(i) {
+    const sl = $$("#hero .hero-card"); if (!sl.length) return;
+    heroIdx = (i + sl.length) % sl.length;
+    sl.forEach((c, k) => c.classList.toggle("on", k === heroIdx));
+    $$("#hero .hl-dot").forEach((d, k) => { d.classList.toggle("on", k === heroIdx); d.setAttribute("aria-current", k === heroIdx ? "true" : "false"); });
+  }
   function renderHero() {
     const box = $("#hero"); if (!box) return;
-    const p = pickHero();
-    if (!p) { if (heroSig) { box.innerHTML = ""; heroSig = ""; } return; }
-    const m = p.m, sig = [p.kind, p.n, m.id, m.h, m.a, m.label].join("|");
+    const list = pickHeroes();
+    if (!list.length) { if (heroSig) { box.innerHTML = ""; heroSig = ""; } return; }
+    const sig = list.map(p => [p.kind, p.n, p.m.id, p.m.h, p.m.a, p.m.label].join("|")).join("~");
     if (sig === heroSig) return; heroSig = sig;
-    const lab = p.kind === "live" ? '<span class="hl-live"><i></i>EN DIRECT' + (p.n > 1 ? " · " + p.n + " matchs" : "") + '</span>' : p.kind === "next" ? '<span class="hl-next">⏱ PROCHAIN MATCH</span>' : '<span class="hl-end">TERMINÉ</span>';
-    const mid = p.kind === "next" ? '<div class="hl-vs">VS</div><div class="hl-cd" id="hl-cd" data-t="' + esc(m.start) + '"></div>' : '<div class="hl-score">' + (m.h ?? 0) + ' <i>-</i> ' + (m.a ?? 0) + '</div><div class="hl-min">' + esc(m.label || "") + '</div>';
-    const tm = (n, l) => '<div class="hl-team">' + (l ? '<img src="' + esc(l) + '" alt="" onerror="this.style.visibility=\'hidden\'">' : '<span class="hl-ph">⚽</span>') + '<b>' + esc(n) + '</b></div>';
-    box.innerHTML = '<div class="hero-card" data-id="' + esc(m.id) + '" data-k="' + p.kind + '"><div class="hl-top">' + lab + '<span class="hl-lg">' + esc(lgDisp(m.lg, [m])) + '</span></div><div class="hl-main">' + tm(m.home, m.hl) + '<div class="hl-mid">' + mid + '</div>' + tm(m.away, m.al) + '</div></div>';
+    const keepId = ($("#hero .hero-card.on") || {}).dataset ? $("#hero .hero-card.on").dataset.id : null;
+    const tm = (n, l) => '<div class="hl-team">' + (l ? '<img src="' + esc(l) + '" alt="" loading="lazy">' : '<span class="hl-ph">' + esc(initials(n)) + '</span>') + '<b>' + esc(n) + '</b></div>';
+    const slide = p => {
+      const m = p.m;
+      const lab = p.kind === "live" ? '<span class="hl-live"><i></i>EN DIRECT' + (p.n > 1 ? " · " + p.n + " matchs" : "") + '</span>' : p.kind === "next" ? '<span class="hl-next">PROCHAIN MATCH</span>' : '<span class="hl-end">TERMINÉ</span>';
+      const mid = p.kind === "next" ? '<div class="hl-vs">VS</div><div class="hl-cd" data-t="' + esc(m.start) + '"></div>' : '<div class="hl-score">' + (m.h ?? 0) + ' <i>-</i> ' + (m.a ?? 0) + '</div><div class="hl-min">' + esc(m.label || "") + '</div>';
+      return '<div class="hero-card" data-id="' + esc(m.id) + '" data-k="' + p.kind + '"><div class="hl-top">' + lab + '<span class="hl-lg">' + esc(lgDisp(m.lg, [m])) + '</span></div><div class="hl-main">' + tm(m.home, m.hl) + '<div class="hl-mid">' + mid + '</div>' + tm(m.away, m.al) + '</div></div>';
+    };
+    const dots = list.length > 1 ? '<div class="hl-dots">' + list.map((_, k) => '<button type="button" class="hl-dot" data-i="' + k + '" aria-label="Match ' + (k + 1) + '"></button>').join("") + '</div>' : "";
+    box.innerHTML = '<div class="hero-wrap">' + list.map(slide).join("") + dots + '</div>';
+    box.querySelectorAll(".hl-team img").forEach(img => {
+      const fb = () => { const n = img.nextElementSibling ? img.nextElementSibling.textContent : ""; const sp = document.createElement("span"); sp.className = "hl-ph"; sp.textContent = initials(n); img.replaceWith(sp); };
+      img.addEventListener("error", fb);
+      if (img.complete && img.naturalWidth === 0) fb();
+    });
+    const at = keepId ? list.findIndex(p => p.m.id === keepId) : -1;
+    showSlide(at >= 0 ? at : 0);
     tickCd();
   }
   function tickCd() {
-    const e = $("#hl-cd"); if (!e) return;
-    const s = Math.floor((new Date(e.dataset.t) - Date.now()) / 1000);
-    if (s <= 0) { e.textContent = "Coup d’envoi !"; return; }
-    const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), mi = Math.floor(s % 3600 / 60), se = s % 60;
-    e.textContent = (d ? d + "j " : "") + [h, mi, se].map(v => String(v).padStart(2, "0")).join(":");
+    $$("#hero .hl-cd").forEach(e => {
+      const s = Math.floor((new Date(e.dataset.t) - Date.now()) / 1000);
+      if (s <= 0) { e.textContent = "Coup d’envoi !"; return; }
+      const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), mi = Math.floor(s % 3600 / 60), se = s % 60;
+      e.textContent = (d ? d + "j " : "") + [h, mi, se].map(v => String(v).padStart(2, "0")).join(":");
+    });
   }
   setInterval(tickCd, 1000);
+  // défilement automatique (pause au survol / au toucher / onglet masqué)
+  $("#hero").addEventListener("mouseenter", () => heroPause = true);
+  $("#hero").addEventListener("mouseleave", () => heroPause = false);
+  $("#hero").addEventListener("touchstart", () => { heroPause = true; clearTimeout(heroTimer); heroTimer = setTimeout(() => heroPause = false, 12000); }, { passive: true });
+  $("#hero").addEventListener("click", e => {
+    const d = e.target.closest(".hl-dot"); if (!d) return;
+    showSlide(+d.dataset.i); heroPause = true; clearTimeout(heroTimer); heroTimer = setTimeout(() => heroPause = false, 12000);
+  });
+  setInterval(() => { if (!heroPause && !document.hidden && $$("#hero .hero-card").length > 1) showSlide(heroIdx + 1); }, 6500);
   $("#hero").addEventListener("click", e => {
     const c = e.target.closest(".hero-card"); if (!c) return;
     const id = c.dataset.id, k = c.dataset.k, m = all().find(x => x.id === id);
@@ -2208,7 +2290,7 @@ h1 .brand-mark{width:44px;height:44px}
   };
   const oldBar = $("#tabbar"); if (oldBar) oldBar.remove();
   $("header").querySelector(".header-content").insertAdjacentHTML("afterend",
-    '<nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="#scores" data-go="scores" class="on"><span>⚽</span>Scores</a><a href="#radio" data-go="radio"><span>📻</span>Radio</a><a href="#table" data-go="table"><span>🏆</span>Classements</a><a href="#news" data-go="news"><span>📰</span>Actus</a></div></nav>');
+    '<nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="#scores" data-go="scores" class="on"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span>Scores</a><a href="#radio" data-go="radio"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="15" cy="14" r="3"/><path d="M6 12h3M6 15h3"/></svg></span>Radio</a><a href="#table" data-go="table"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span>Classements</a><a href="#news" data-go="news"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Actus</a></div></nav>');
   $("#tabbar").addEventListener("click", e => { const a = e.target.closest("a[data-go]"); if (!a) return; e.preventDefault(); showPage(a.dataset.go); });
   window.addEventListener("popstate", () => showPage(location.hash.slice(1) || "scores", true));
   $$(".header-actions [data-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
@@ -2252,6 +2334,36 @@ h1 .brand-mark{width:44px;height:44px}
   const h0 = location.hash.slice(1); if (PAGES[h0] && h0 !== "scores") showPage(h0, true);
 })();
 
+
+// Logos des 10 compétitions (barre du haut) : logo ESPN, sinon logo trouvé dans les matchs chargés, sinon rien
+(function(){
+  function fix(){
+    document.querySelectorAll('#compbar .cl').forEach(function(img){
+      if(img.dataset.done) return;
+      if(!img.dataset.bound){ img.dataset.bound='1'; img.addEventListener('error',function(){ img.removeAttribute('src'); img.dataset.err='1'; }); }
+      if(img.getAttribute('src') && !img.dataset.err) { if(img.complete&&img.naturalWidth>0) img.dataset.done='1'; return; }
+      try{
+        var re=new RegExp(img.dataset.lgre,'i'), m=all().find(function(x){return !x.off&&re.test(x.lg||'');});
+        if(m){ var u=lgLogoURLs([m]); if(u.length){ img.dataset.err=''; img.src=u[0]; try{ var st=JSON.parse(localStorage.getItem('fl_cl')||'{}'); st[img.closest('a').getAttribute('href').replace('.html','')]=u[0]; localStorage.setItem('fl_cl',JSON.stringify(st)); }catch(e){} } }
+      }catch(e){}
+    });
+  }
+  setInterval(fix,4000); setTimeout(fix,1500);
+})();
+
+/* Logo de la Botola Pro dans la barre des compétitions (TheSportsDB, ligue 4520), mémorisé pour les autres pages */
+(function () {
+  try {
+    var img = document.querySelector('#compbar a[href="botola-pro.html"] .cl');
+    if (!img || img.getAttribute("src")) return;
+    var st = {}; try { st = JSON.parse(localStorage.getItem("fl_cl") || "{}"); } catch (e) { }
+    if (st["botola-pro"]) { img.src = st["botola-pro"]; return; }
+    fetch("https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=4520").then(function (r) { return r.json(); }).then(function (j) {
+      var l = j && j.leagues && j.leagues[0], u = l && (l.strBadge || l.strLogo);
+      if (u && /^https?:/i.test(u)) { img.src = u; st["botola-pro"] = u; try { localStorage.setItem("fl_cl", JSON.stringify(st)); } catch (e) { } }
+    }).catch(function () { });
+  } catch (e) { }
+})();
 </script>
 <script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "011dde8c92c7439fbcf1b107ca987b0b"}'></script><!-- End Cloudflare Web Analytics -->
