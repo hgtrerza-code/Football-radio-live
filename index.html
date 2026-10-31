@@ -1521,9 +1521,11 @@ header{background:rgba(7,11,22,.97)!important}
         function radStart(btn) {
             if (RAD.timer) { clearTimeout(RAD.timer); RAD.timer = null; }
             RAD.want = true; RAD.src = btn.dataset.stream; RAD.name = btn.dataset.name; RAD.url = btn.dataset.url; RAD.retries = 0;
+            try { sessionStorage.setItem("fl_radio", JSON.stringify({ s: RAD.src, n: RAD.name, u: RAD.url })); } catch (e) { }   // mémorisé pour survivre à un changement de page
             radMedia(); radLoad();
         }
         function radStop() {
+            try { sessionStorage.removeItem("fl_radio"); } catch (e) { }
             RAD.want = false; if (RAD.timer) { clearTimeout(RAD.timer); RAD.timer = null; }
             if (RAD.hls) { try { RAD.hls.destroy(); } catch (e) { } RAD.hls = null; }
             RAD.au.pause(); RAD.au.removeAttribute("src"); RAD.au.load(); RAD.state = ""; radPaint();
@@ -1547,6 +1549,16 @@ header{background:rgba(7,11,22,.97)!important}
             document.addEventListener("pointerdown", () => { if (RAD.want && au.paused) radResume(); }, { passive: true });
         })();
         function stopRadio() { radStop(); }
+        // Reprise automatique de la radio après un rechargement / changement de page dans le même onglet
+        // (si le navigateur bloque la lecture automatique, un simple toucher sur l'écran la relance)
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                const o = JSON.parse(sessionStorage.getItem("fl_radio") || "null");
+                if (!o || !o.s || RAD.want) return;
+                RAD.want = true; RAD.src = o.s; RAD.name = o.n || "Radio"; RAD.url = o.u || ""; RAD.retries = 0;
+                radMedia(); radLoad();
+            } catch (e) { }
+        });
         function radiosFor(lg) {
             const n = String(lg || ""), k = [];
             if (/spanish|la ?liga|copa del rey|supercopa/i.test(n)) k.push("es");
@@ -1689,10 +1701,11 @@ header{background:rgba(7,11,22,.97)!important}
             const opts = `<option value="all">🌍 Toutes les compétitions</option>` + names.map(n => { const f = lgInfo(byLg[n] || [], n); return `<option value="${esc(n)}">${(codeEmoji(f.code) || f.emo || "⚽")} ${esc(lgDisp(n, byLg[n]))}</option>`; }).join("");
             if (lgSel.dataset.sig !== opts) { lgSel.innerHTML = opts; lgSel.dataset.sig = opts; lgSel.value = names.includes(cur) ? cur : "all"; }
             const t = localDay(new Date().toISOString());
-            let list = all().filter(m => (lgSel.value === "all" || m.lg === lgSel.value) && (!q || (m.home + " " + m.away + " " + m.lg + " " + lgDisp(m.lg, [m])).toLowerCase().includes(q)));
+            let list = all().filter(m => (lgSel.value === "all" || m.lg === lgSel.value) && (!window.compFilter || window.compFilter.test(m)) && (!q || (m.home + " " + m.away + " " + m.lg + " " + lgDisp(m.lg, [m])).toLowerCase().includes(q)));
             const lc = document.getElementById("live-count"); if (lc) lc.textContent = all().filter(m => m.state === "in").length;
             if (tab === "live") list = list.filter(m => m.state === "in").sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "fav") list = list.filter(m => window.isFavMatch && window.isFavMatch(m)).sort((a, b) => a.start.localeCompare(b.start));
+            else if (tab === "comp") list = list.sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "day") list = list.filter(m => localDay(m.start) === window.dayPick).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "today") list = list.filter(m => localDay(m.start) === t).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => b.start.localeCompare(a.start)).slice(0, 150);
@@ -2372,6 +2385,35 @@ header{background:rgba(7,11,22,.97)!important}
   setInterval(() => { if (!$("#table-view").hidden) loadTable(true); }, 10 * 60e3);
 
   buildDays(); status();
+  // ---------- Boutons des compétitions : la radio n'est jamais coupée ----------
+  // Changer de page arrêterait le lecteur. Quand une radio joue, on affiche donc la compétition ici même (même page, même lecteur).
+  const COMP_CTRY = { "ligue-des-champions": "Europe", "europa-league": "Europe", "conference-league": "Europe", "premier-league": "Angleterre", "laliga": "Espagne", "serie-a": "Italie", "bundesliga": "Allemagne", "ligue-1": "France", "liga-portugal": "Portugal", "botola-pro": "Maroc" };
+  const COMP_EXCL = /women|feminin|féminin|qualif|\bu-?\d{2}\b|youth|reserve/i;
+  function compChip() {
+    let el = $("#comp-chip");
+    if (!window.compFilter) { if (el) el.remove(); $$("#compbar a.on").forEach(a => a.classList.remove("on")); return; }
+    if (!el) { el = document.createElement("div"); el.id = "comp-chip"; el.className = "toolbar"; $("#matches").before(el); }
+    el.innerHTML = '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button><span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>';
+  }
+  $("#compbar").addEventListener("click", e => {
+    const a = e.target.closest("a"); if (!a || !RAD.want || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");
+    if (!img || !img.dataset.lgre || !COMP_CTRY[slug]) return;   // inconnu : navigation normale
+    e.preventDefault();
+    const re = new RegExp(img.dataset.lgre, "i"), ctry = COMP_CTRY[slug] + " · ";
+    window.compFilter = { name: a.textContent.trim(), test: m => { const raw = String(m.lg).replace(/​.*$/, ""); return re.test(raw) && !COMP_EXCL.test(raw) && lgDisp(m.lg, [m]).indexOf(ctry) === 0; } };
+    $$("#compbar a").forEach(x => x.classList.toggle("on", x === a));
+    showPage("scores");
+    tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
+    const lf = $("#league-filter"); if (lf) lf.value = "all"; const si = $("#search"); if (si) si.value = "";
+    compChip(); buildDays(); renderMatches(true); window.scrollTo({ top: 0 });
+  });
+  ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter) { window.compFilter = null; compChip(); } }, true));
+  document.addEventListener("click", e => {
+    if (!e.target.closest("#comp-clear")) return;
+    window.compFilter = null; compChip();
+    const b = $('#filters button[data-tab="today"]'); if (b) b.click();
+  });
   const h0 = location.hash.slice(1); if (PAGES[h0] && h0 !== "scores") showPage(h0, true);
 })();
 
