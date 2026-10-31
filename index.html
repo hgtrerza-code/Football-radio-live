@@ -36,7 +36,8 @@
     <title>FootLive Pro | Scores foot en direct, classements et radios</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
     <style>
         :root {
             --bg-dark: #0a0f1e; 
@@ -423,7 +424,7 @@ footer{margin-top:1.5rem;padding-bottom:1rem}
 body{font-feature-settings:"tnum" 1,"cv11" 1;-webkit-font-smoothing:antialiased}
 
 /* Décor : halos lumineux animés */
-body::before,body::after{content:"";position:fixed;z-index:-1;width:46vmax;height:46vmax;border-radius:50%;filter:blur(90px);opacity:.2;pointer-events:none;animation:fl-orb 24s ease-in-out infinite alternate}
+body::before,body::after{content:none}   /* halos flous animés supprimés (très coûteux pour le GPU) */
 body::before{background:var(--accent);top:-20vmax;left:-16vmax}
 body::after{background:#3b82f6;bottom:-22vmax;right:-18vmax;animation-delay:-9s}
 @keyframes fl-orb{to{transform:translate(6vmax,5vmax) scale(1.12)}}
@@ -593,6 +594,16 @@ h1 .brand-mark{width:44px;height:44px}
 @media(min-width:700px){#compbar .container{flex-wrap:wrap;justify-content:center;overflow:visible}}
 #compbar a .cl:not([src]){display:none}
 </style>
+<style id="perf">
+/* Performance : pas de flou d'arrière-plan, rendu différé des lignes hors écran */
+header,.competition-header,#radio-mini,#fab-top,.news-img span,.hero-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+header{background:rgba(7,11,22,.97)!important}
+#radio-mini{background:rgba(13,21,36,.99)!important}
+#fab-top{background:rgba(13,21,36,.95)!important}
+.m-wrap{content-visibility:auto;contain-intrinsic-size:auto 52px}
+.m-wrap.open{content-visibility:visible}
+.news-card{content-visibility:auto;contain-intrinsic-size:auto 280px}
+</style>
 </head>
 <body>
 <div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
@@ -682,7 +693,9 @@ h1 .brand-mark{width:44px;height:44px}
                 let last;
                 for (const u of tries) {
                     try {
-                        const r = await rf(u, init), ct = r.headers.get("content-type") || "";
+                        // délai maximum de 6 s par essai : si un Worker est lent ou saturé, on passe tout de suite à la source suivante
+                        const ctl = new AbortController(), tmo = setTimeout(() => ctl.abort(), 6000);
+                        const r = await rf(u, Object.assign({}, init, init && init.signal ? {} : { signal: ctl.signal })).finally(() => clearTimeout(tmo)), ct = r.headers.get("content-type") || "";
                         if (r.ok && (!m || !ct || /json/i.test(ct))) return r;
                         last = r;
                     } catch (e) { last = e; if (init && init.signal && init.signal.aborted) break; }
@@ -756,9 +769,15 @@ h1 .brand-mark{width:44px;height:44px}
                 const jj = await rr.json(); return (jj.events || []).map(ev => normalize(ev, jj, sl)).filter(Boolean);
             }));
             extra.forEach(x => { if (x.status === "fulfilled") x.value.forEach(m => { const o = seen.get(m.id); if (o) o.slug = m.slug; else { seen.set(m.id, m); evs.push(m); } }); });
-            await fixGenericLeagues(evs);
+            // ne bloque plus l'affichage : les noms génériques sont corrigés en arrière-plan puis l'écran est rafraîchi
+            const fixP = fixGenericLeagues(evs);
             evs.forEach(m => { m.lg = cleanLg(m.lg); });
+            const lgBefore = evs.map(m => m.lg);
             byDay[d] = evs.filter(m => !BLOCK.test(m.lg));
+            fixP.then(() => {
+                evs.forEach(m => { m.lg = cleanLg(m.lg); });
+                if (evs.some((m, i) => m.lg !== lgBefore[i])) { byDay[d] = evs.filter(m => !BLOCK.test(m.lg)); try { renderAll(); } catch (e) { } }
+            }).catch(() => { });
         }
         // Sources complémentaires (365Scores, GitHub) : en arrière-plan, avec délai maximum, elles ne bloquent jamais l'affichage
         const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("délai dépassé")), ms))]);
@@ -774,7 +793,7 @@ h1 .brand-mark{width:44px;height:44px}
             const need = [...new Set(bad.map(m => m.lid))].filter(id => !(id in LG_INFO));
             await Promise.allSettled(need.map(async id => {
                 try {
-                    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 8000);
+                    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 4000);
                     const r = await fetch("https://sports.core.api.espn.com/v2/sports/soccer/leagues/" + id, { signal: ctl.signal }); clearTimeout(t);
                     const j = await r.json(); LG_INFO[id] = { name: j.name || j.shortName || "", slug: j.slug || "" };
                 } catch (e) { LG_INFO[id] = null; }
@@ -968,7 +987,11 @@ h1 .brand-mark{width:44px;height:44px}
         }
         async function refresh(days) {
             if (days.length > 1) loadTsdb().then(renderAll);
-            const res = await Promise.allSettled(days.map(loadDay));
+            // premier affichage dès que « aujourd'hui » est chargé (sans attendre les 5 autres jours)
+            const todayK = ymd(new Date());
+            const res = await Promise.allSettled(days.map(d => loadDay(d).then(() => {
+                if (days.length > 1 && d === todayK) { lastErr = ""; lastOk = Date.now(); renderAll(); }
+            })));
             const fail = res.find(r => r.status === "rejected");
             if (res.every(r => r.status === "rejected")) lastErr = fail.reason.message; else { lastErr = ""; lastOk = Date.now(); }
             const ex = Promise.allSettled(days.map((d, i) => res[i].status === "fulfilled" ? extras(d) : null));
@@ -1095,7 +1118,17 @@ h1 .brand-mark{width:44px;height:44px}
             return "Monde";
         }
         // Nom affiché : « Pays · Compétition », sans numéro ni nom de phase
+        // Mémorisation : lgDisp est appelé des centaines de fois par rendu (ticker, filtre, recherche, groupes)
+        const lgDispMemo = new Map();
         function lgDisp(name, list) {
+            if (S365_LG[name]) return S365_LG[name].disp;
+            const l = list || [], f1 = l.find(m => m.fslug), f2 = l.find(m => m.slug && m.slug !== "all" && m.slug !== "tsdb");
+            const k = name + "\u0001" + (f1 ? f1.fslug : "") + "|" + (f2 ? f2.slug : "");
+            let v = lgDispMemo.get(k);
+            if (v === undefined) { v = lgDispRaw(name, list); lgDispMemo.set(k, v); }
+            return v;
+        }
+        function lgDispRaw(name, list) {
             if (S365_LG[name]) return S365_LG[name].disp;
             const n = cleanLg(String(name || "").replace(/\s*·\s*compétition\s+\d+\s*$/i, "").trim());
             const hit = LG_NAMES.find(r => r[0].test(n));
@@ -1906,11 +1939,13 @@ h1 .brand-mark{width:44px;height:44px}
             document.querySelectorAll("video").forEach(v => { if (v._want && v.paused && !v.ended) { const p = v.play(); if (p && p.catch) p.catch(() => { }); } });   // reprise au retour sur la page
         });
         setInterval(vidFlush, 5000);
-        document.getElementById("search").addEventListener("input", renderMatches);
+        let searchT; document.getElementById("search").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(() => renderMatches(true), 250); });
 
         refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER));
-        setInterval(() => refresh(allDays(0, 0)).then(refreshOpen), CFG.LIVE_REFRESH_MS);
-        setInterval(() => refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)), CFG.OTHER_REFRESH_MS);
+        // onglet masqué : on ralentit (1 rafraîchissement sur 4) au lieu de recharger toutes les 30 s pour rien
+        let hidTick = 0;
+        setInterval(() => { if (document.hidden && ++hidTick % 4) return; refresh(allDays(0, 0)).then(refreshOpen); }, CFG.LIVE_REFRESH_MS);
+        setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); }, CFG.OTHER_REFRESH_MS);
         document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0)); });
     </script>
 <script>
@@ -2007,7 +2042,8 @@ h1 .brand-mark{width:44px;height:44px}
     const s = e.target.closest(".fav-star"); if (!s) return;
     e.stopPropagation(); e.preventDefault(); toggleFav(s.dataset.team);
   }, true);
-  new MutationObserver(() => decorate()).observe($("#matches"), { childList: true });
+  let decQ = 0;
+  new MutationObserver(() => { if (decQ) return; decQ = requestAnimationFrame(() => { decQ = 0; decorate(); }); }).observe($("#matches"), { childList: true });
   $("#filters").insertAdjacentHTML("beforeend", '<button data-tab="fav"><span class="ic ic-today"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span> Favoris</button>');
 
   // ---------- Sélecteur de jour ----------
@@ -2311,7 +2347,8 @@ h1 .brand-mark{width:44px;height:44px}
   let lastSave = 0;
   function saveCache() {
     if (Date.now() - lastSave < 60000 || !all().length) return; lastSave = Date.now();
-    try { const s = JSON.stringify({ t: Date.now(), d: byDay }); if (s.length < 3.5e6) localStorage.setItem("fl_cache", s); } catch (e) { }
+    // sérialisation lourde : faite quand le navigateur est inactif, jamais pendant l'affichage
+    (window.requestIdleCallback || (f => setTimeout(f, 3000)))(() => { try { const s = JSON.stringify({ t: Date.now(), d: byDay }); if (s.length < 3.5e6) localStorage.setItem("fl_cache", s); } catch (e) { } }, { timeout: 8000 });
   }
   const baseRenderAll = window.renderAll;
   window.renderAll = function () {
@@ -2352,7 +2389,7 @@ h1 .brand-mark{width:44px;height:44px}
       }catch(e){}
     });
   }
-  setInterval(fix,4000); setTimeout(fix,1500);
+  var n=0, iv=setInterval(function(){ fix(); if(++n>=8) clearInterval(iv); },4000); setTimeout(fix,1500);
 })();
 
 /* Logo de la Botola Pro dans la barre des compétitions (TheSportsDB, ligue 4520), mémorisé pour les autres pages */
