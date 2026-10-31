@@ -75,13 +75,25 @@
 
   const TS = "https://www.thesportsdb.com/api/v1/json/3/";
   let tsIdP = null;
+  const TS_KNOWN = { Morocco: "4520" };   // identifiant TheSportsDB de la Botola Pro : plus besoin de le chercher (un appel de moins qui pouvait échouer)
+  async function retry(fn, n) {
+    let err;
+    for (let i = 0; i < (n || 2); i++) { try { return await fn(); } catch (e) { err = e; await new Promise(r => setTimeout(r, 700 * (i + 1))); } }
+    throw err;
+  }
   function tsId() {
-    return tsIdP || (tsIdP = (async () => {
-      const j = await fetchJSON(TS + "search_all_leagues.php?c=" + encodeURIComponent(TSDB_C) + "&s=Soccer");
+    if (tsIdP) return tsIdP;
+    if (TS_KNOWN[TSDB_C]) return (tsIdP = Promise.resolve(TS_KNOWN[TSDB_C]));
+    const K = "fl_tsid_" + TSDB_C; let c = ""; try { c = localStorage.getItem(K) || ""; } catch (e) { }
+    if (c) return (tsIdP = Promise.resolve(c));
+    return (tsIdP = (async () => {
+      const j = await retry(() => fetchJSON(TS + "search_all_leagues.php?c=" + encodeURIComponent(TSDB_C) + "&s=Soccer"));
       const ls = (j.countries || j.countrys || []).filter(l => !/women|cup|\b2\b|second|youth|u-?\d|amateur/i.test((l.strLeague || "") + " " + (l.strLeagueAlternate || "")));
       const top = ls.find(l => /botola|premier|pro/i.test(l.strLeague || "")) || ls[0];
-      return top ? top.idLeague : "";
-    })());
+      const id = top ? top.idLeague : "";
+      if (id) { try { localStorage.setItem(K, id); } catch (e) { } }
+      return id;
+    })().catch(e => { tsIdP = null; throw e; }));   // un échec n'est plus mémorisé : le prochain rafraîchissement réessaie
   }
   function tsNormalize(e) {
     const iso = e.strTimestamp ? (/[zZ]|\+/.test(e.strTimestamp) ? e.strTimestamp : e.strTimestamp.replace(" ", "T") + "Z") : (e.dateEvent + "T" + (e.strTime || "00:00:00") + "Z");
@@ -95,13 +107,74 @@
     }
     return { id: "ts" + e.idEvent, start: iso, state, off, label: off ? (st || "Reporté") : (st || ""), home: e.strHomeTeam, away: e.strAwayTeam, hl: e.strHomeTeamBadge, al: e.strAwayTeamBadge, h, a };
   }
+  // TheSportsDB (clé gratuite) limite vite le nombre de requêtes : le refus arrive sans en-tête CORS, d'où l'erreur « NetworkError » dans Firefox.
+  // On garde donc les résultats 10 min en mémoire locale, et on réessaie une fois avant d'abandonner.
   async function loadTsdb() {
     const id = await tsId(); if (!id) return [];
-    const evs = [];
+    const K = "fl_tsev_" + id; let cached = null; try { cached = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) { }
+    if (cached && Date.now() - cached.t < 600000) return cached.d;
+    const evs = []; let okAny = false;
     for (const ep of ["eventsnextleague", "eventspastleague"]) {
-      try { const j = await fetchJSON(TS + ep + ".php?id=" + id); (j.events || []).forEach(e => evs.push(tsNormalize(e))); } catch (e) { }
+      try { const j = await retry(() => fetchJSON(TS + ep + ".php?id=" + id)); okAny = true; (j.events || []).forEach(e => evs.push(tsNormalize(e))); } catch (e) { }
     }
-    return evs.filter(m => m.home && m.away);
+    if (!okAny) { if (cached) return cached.d; throw new Error("TheSportsDB indisponible"); }
+    const out = evs.filter(m => m.home && m.away);
+    try { localStorage.setItem(K, JSON.stringify({ t: Date.now(), d: out })); } catch (e) { }
+    return out;
+  }
+
+  // ---------- 365Scores (via votre Worker footlive2) : même source que la page d'accueil ----------
+  const C365 = { Morocco: /botola/i }[TSDB_C] || null, C365_EXCL = /\b2\b|d2|women|f[eé]minin|cup|coupe|throne|u-?\d/i;
+  const nk = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\b(fc|cf|afc|sc|ac|as|ud|cd|sd|club|de|the)\b/g, "").replace(/[^a-z0-9]/g, "");
+  const sameTeam = (a, b) => { a = nk(a); b = nk(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
+  const n365C = {};
+  async function get365(d) {
+    const dd = String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+    const c = n365C[dd]; if (c && Date.now() - c.t < 90000) return c.j;
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    const url = "https://webws.365scores.com/web/games/allscores/?appTypeId=5&langId=1&timezoneName=" + encodeURIComponent(tz) + "&userCountryId=-1&startDate=" + dd + "&endDate=" + dd + "&sports=1&showOdds=false";
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
+    try {
+      const r = await fetch(PROXY2 + "365?url=" + encodeURIComponent(url), { signal: ctl.signal });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = JSON.parse(await r.text()); if (!Array.isArray(j.games)) throw new Error("réponse inattendue");
+      n365C[dd] = { t: Date.now(), j }; return j;
+    } finally { clearTimeout(t); }
+  }
+  async function load365() {
+    if (!C365) return [];
+    const t = new Date(), res = await Promise.allSettled([-2, -1, 0, 1, 2, 3, 4, 5].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return get365(d); }));
+    const okRes = res.filter(r => r.status === "fulfilled").map(r => r.value);
+    if (!okRes.length) throw new Error("365Scores indisponible");
+    const out = [], seen = new Set(), img = (k, id) => "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_" + k + ":default1.png/v2/" + k + "/" + id;
+    okRes.forEach(j => {
+      const comps = new Map((j.competitions || []).map(c => [c.id, c]));
+      j.games.forEach(g => {
+        if (seen.has(g.id)) return;
+        const hc = g.homeCompetitor || {}, ac = g.awayCompetitor || {}; if (!hc.name || !ac.name || !g.startTime) return;
+        const cname = String(g.competitionDisplayName || (comps.get(g.competitionId) || {}).name || "");
+        if (!C365.test(cname) || C365_EXCL.test(cname)) return;
+        seen.add(g.id);
+        const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon/i.test(st), t0 = new Date(g.startTime).getTime();
+        const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
+        let state = "pre";
+        if (!off) {
+          if (g.statusGroup === 4 || /^(final|ended|finished|ft|aet|pen|after)/i.test(st)) state = "post";
+          else if (g.statusGroup === 3 || (g.gameTime > 0 && g.gameTime < 150) || /^(live|half|ht|\d+')/i.test(st)) state = "in";
+          else if (h != null && a != null && Date.now() - t0 > 3 * 3600e3) state = "post";
+        }
+        out.push({ id: "n" + g.id, start: g.startTime, state, off, label: off ? (st || "Reporté") : (state === "in" ? (g.gameTimeDisplay || st || "") : st), home: hc.name, away: ac.name, hl: img("Competitors", hc.id), al: img("Competitors", ac.id), h, a });
+      });
+    });
+    return out;
+  }
+  // Botola : 365Scores (direct, fiable) + TheSportsDB (calendrier complet) ; un match présent dans les deux n'est affiché qu'une fois
+  async function loadBotola() {
+    const r = await Promise.allSettled([load365(), loadTsdb()]);
+    if (r.every(x => x.status === "rejected")) throw new Error("sources indisponibles (365Scores et TheSportsDB)");
+    const A = r[0].status === "fulfilled" ? r[0].value : [], T = r[1].status === "fulfilled" ? r[1].value : [], out = A.slice();
+    T.forEach(m => { const t0 = new Date(m.start).getTime(); if (!A.some(x => Math.abs(new Date(x.start).getTime() - t0) < 4 * 3600e3 && (sameTeam(x.home, m.home) || sameTeam(x.away, m.away)))) out.push(m); });
+    return out;
   }
 
   let matches = [], loaded = false, lastErr = "", lastOk = 0, tab = "m";
@@ -131,7 +204,7 @@
   let timer = 0;
   async function refresh() {
     clearTimeout(timer);
-    try { matches = TSDB_C ? await loadTsdb() : await loadEspn(); lastErr = ""; lastOk = Date.now(); }
+    try { matches = TSDB_C ? await loadBotola() : await loadEspn(); lastErr = ""; lastOk = Date.now(); }
     catch (e) { lastErr = "Données indisponibles : " + e.message; }
     loaded = true;
     if (tab === "m") renderMatches();
@@ -158,12 +231,19 @@
     }).join("");
     return html;
   }
-  async function tsdbTable() {
+  async function tsdbTable() {   // classement TheSportsDB : mémorisé 10 min (et gardé en secours si la source refuse)
+    const K = "fl_tstb_" + TSDB_C; let c = null; try { c = JSON.parse(localStorage.getItem(K) || "null"); } catch (e) { }
+    if (c && c.h && Date.now() - c.t < 600000) return c.h;
+    const h = await tsdbTableRaw();
+    if (h) { try { localStorage.setItem(K, JSON.stringify({ t: Date.now(), h })); } catch (e) { } return h; }
+    return (c && c.h) || "";
+  }
+  async function tsdbTableRaw() {
     try {
       const id = await tsId(); if (!id) return "";
       const y = new Date().getFullYear();
       for (const s of [y + "-" + (y + 1), (y - 1) + "-" + y, String(y)]) {
-        const j = await fetchJSON(TS + "lookuptable.php?l=" + id + "&s=" + s);
+        const j = await retry(() => fetchJSON(TS + "lookuptable.php?l=" + id + "&s=" + s));
         if (j && j.table && j.table.length) {
           const f = (r, k) => esc(r[k] ?? "");
           return '<table><caption>Classement ' + esc(B.name) + ' ' + esc(s) + '</caption><thead><tr><th>#</th><th>Équipe</th><th>J</th><th>G</th><th>N</th><th>P</th><th>BP</th><th>BC</th><th>Diff</th><th>Pts</th></tr></thead><tbody>' +
@@ -229,6 +309,79 @@
   show(h0 === "classement" ? "s" : h0 === "actus" ? "n" : "m");
   refresh();
   document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - lastOk > 60000) refresh(); });
+})();
+
+/* Radio : reprise automatique de la radio lancée sur une autre page du site (même onglet).
+   L'état est mémorisé par la page d'accueil (sessionStorage "fl_radio"). Si le navigateur bloque la lecture automatique,
+   un simple toucher sur l'écran la relance. Le bouton « Arrêter » l'arrête partout. */
+(function () {
+  var K = "fl_radio", o = null;
+  try { o = JSON.parse(sessionStorage.getItem(K) || "null"); } catch (e) { }
+  if (!o || !o.s) return;
+  var au = new Audio(), hls = null, want = true, retries = 0, timer = 0, state = "connecting", bar = null, hlsP = null;
+  au.setAttribute("playsinline", "");
+  var css = document.createElement("style");
+  css.textContent = "#radio-mini{position:fixed;left:0;right:0;bottom:0;z-index:900;background:rgba(13,21,36,.99);border:1px solid #2ee59d;border-bottom:0;border-radius:16px 16px 0 0;padding:10px 16px;display:flex;align-items:center;gap:12px;color:#f8fafc;font-family:Inter,Arial,sans-serif}#radio-mini .in{flex:1;min-width:0}#radio-mini b{font-size:.85rem;display:block}#radio-mini small{color:#8b9bb4;font-size:.7rem}#radio-mini .rlive{background:#ef4444;color:#fff;font-size:.58rem;font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:8px;margin-right:4px}#radio-mini button{background:#111a2b;color:#f8fafc;border:1px solid #1f2c47;padding:6px 13px;border-radius:20px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit}#radio-mini button:hover{border-color:#2ee59d}#fab-top{bottom:84px}";
+  document.head.appendChild(css);
+  function paint() {
+    if (!bar) { bar = document.createElement("div"); bar.id = "radio-mini"; document.body.appendChild(bar); }
+    var t = { playing: "🔊 En lecture", connecting: "⏳ Connexion…", blocked: "👆 Touchez l'écran pour reprendre", error: "⚠️ Flux indisponible" }[state] || "";
+    bar.innerHTML = "";
+    var d = document.createElement("div"); d.className = "in";
+    var b = document.createElement("b"); b.textContent = o.n || "Radio";
+    var s = document.createElement("small"); s.innerHTML = '<span class="rlive">LIVE</span>'; s.appendChild(document.createTextNode(t));
+    d.appendChild(b); d.appendChild(s);
+    var btn = document.createElement("button"); btn.type = "button"; btn.textContent = "■ Arrêter"; btn.onclick = stop;
+    bar.appendChild(d); bar.appendChild(btn);
+  }
+  function loadHls() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+    return hlsP || (hlsP = new Promise(function (ok, ko) { var sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"; sc.onload = function () { ok(window.Hls); }; sc.onerror = function () { ko(new Error("hls")); }; document.head.appendChild(sc); }));
+  }
+  function play() {
+    var p = au.play();
+    if (p && p.catch) p.catch(function (err) { if (!want || (err && err.name === "AbortError")) return; if (err && err.name === "NotAllowedError") { state = "blocked"; paint(); } else reconnect(); });
+  }
+  function load() {
+    if (hls) { try { hls.destroy(); } catch (e) { } hls = null; }
+    state = "connecting"; paint();
+    if (/\.m3u8(\?|$)/i.test(o.s) && !au.canPlayType("application/vnd.apple.mpegurl")) {
+      loadHls().then(function (H) {
+        if (!want) return;
+        if (!H || !H.isSupported()) { state = "error"; return paint(); }
+        hls = new H(); hls.loadSource(o.s); hls.attachMedia(au);
+        hls.on(H.Events.MANIFEST_PARSED, play);
+        hls.on(H.Events.ERROR, function (_, d) { if (!d.fatal) return; if (d.type === H.ErrorTypes.NETWORK_ERROR) hls.startLoad(); else if (d.type === H.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError(); else reconnect(); });
+      }).catch(reconnect);
+    } else { au.src = o.s; au.load(); play(); }
+  }
+  function reconnect() {
+    if (!want || timer) return;
+    if (retries >= 10) { state = "error"; paint(); return; }
+    state = "connecting"; paint();
+    timer = setTimeout(function () { timer = 0; if (want) load(); }, Math.min(8000, 500 * Math.pow(2, retries++)));
+  }
+  function resume() {
+    if (!want || timer) return;
+    if (au.ended || au.error) load(); else if (au.paused) play();
+  }
+  function stop() {
+    want = false; if (timer) { clearTimeout(timer); timer = 0; }
+    try { sessionStorage.removeItem(K); } catch (e) { }
+    if (hls) { try { hls.destroy(); } catch (e) { } hls = null; }
+    au.pause(); au.removeAttribute("src"); au.load();
+    if (bar) { bar.remove(); bar = null; }
+  }
+  au.addEventListener("playing", function () { retries = 0; state = "playing"; paint(); });
+  au.addEventListener("pause", function () { if (want) setTimeout(resume, 300); });
+  au.addEventListener("ended", reconnect);
+  au.addEventListener("error", function () { if (want) reconnect(); });
+  document.addEventListener("pointerdown", function () { if (want && au.paused) resume(); }, { passive: true });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) resume(); });
+  window.addEventListener("online", function () { retries = 0; resume(); });
+  if ("mediaSession" in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({ title: o.n || "Radio", artist: "FootLive Pro — Radio en direct", album: "Football" }); navigator.mediaSession.setActionHandler("pause", stop); navigator.mediaSession.setActionHandler("stop", stop); } catch (e) { } }
+  function start() { load(); }
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 })();
 
 /* Logo de la Botola Pro dans la barre des compétitions (TheSportsDB, ligue 4520), mémorisé pour les autres pages */
