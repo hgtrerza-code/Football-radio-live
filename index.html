@@ -13,7 +13,11 @@
     <link rel="canonical" href="https://www.footlivepro.com/">
     <link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/">
     <link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="shortcut icon" href="/favicon.ico">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FootLive Pro">
     <meta property="og:locale" content="fr_FR">
@@ -1528,7 +1532,7 @@ h1 .brand-mark{width:44px;height:44px}
                 const ev = gy.closest(".d-ev"), nx = ev.nextElementSibling;
                 if (nx && nx.classList.contains("d-vid")) { nx.remove(); return; }
                 const box = document.createElement("div"); box.className = "d-vid yt-box"; box.dataset.playing = "1"; box.innerHTML = '<div class="note">Recherche de la vidéo…</div>'; ev.after(box);
-                ytSearch(gy.dataset.yq, { kind: "goal", home: gy.dataset.h, away: gy.dataset.a, start: gy.dataset.s, who: gy.dataset.who }).then(r => { if (!box.isConnected) return; const g = r.find(v => v.rel); if (g) ytPlay(box, g); else if (r.length) { delete box.dataset.playing; box.innerHTML = ytWarn + ytCards(r.slice(0, 3)) + ytExt(gy.dataset.yq) + '<button class="yt-close">✕ Fermer</button>'; } else { delete box.dataset.playing; box.innerHTML = '<div class="note">Pas de vidéo fiable de ce but pour le moment (elle peut apparaître plus tard).</div>' + ytExt(gy.dataset.yq) + '<button class="yt-close">✕ Fermer</button>'; } })
+                ytSearch(gy.dataset.yq, { kind: "goal", home: gy.dataset.h, away: gy.dataset.a, start: gy.dataset.s, who: gy.dataset.who }).then(r => { if (!box.isConnected) return; if (r.length) ytPlay(box, r[0]); else { delete box.dataset.playing; box.innerHTML = '<div class="note">Pas de vidéo fiable de ce but pour le moment (elle peut apparaître plus tard).</div>' + ytExt(gy.dataset.yq) + '<button class="yt-close">✕ Fermer</button>'; } })
                     .catch(() => { if (box.isConnected) { delete box.dataset.playing; box.innerHTML = '<div class="note">Recherche vidéo indisponible, réessaie dans un instant.</div>'; } });
                 return;
             }
@@ -1744,24 +1748,20 @@ h1 .brand-mark{width:44px;height:44px}
             const last = ctx.who ? (vnorm(ctx.who).trim().split(" ").filter(w => w.length >= 3).pop() || "") : "";
             const out = [];
             list.forEach(v => {
-                const t = vnorm(v.title); let bad = 0; const pb = v.pub > 0 ? (v.pub < 1e11 ? v.pub * 1000 : v.pub) : 0;
-                if (pb && st && pb < st - 3600e3) return;   // publiée avant le match : forcément une ancienne vidéo
+                const t = vnorm(v.title); let bad = 0;
                 if (vidHas(t, VID_BAD) || VID_GAME.test(t)) bad += 2;
                 if (!vidHas(t, VID_GOOD)) bad += 1;
                 if (typeof v.dur === "number" && !isNaN(v.dur)) { if (v.dur <= 0 || v.dur < (goal ? 3 : 60) || v.dur > (goal ? 300 : 1800)) bad += 1; }
-                if (pb && st && pb < st - 12 * 3600e3) bad += 2;
+                if (v.pub > 0 && st && v.pub < st - 12 * 3600e3) bad += 2;
                 const yrs = (t.match(/\b20\d{2}\b/g) || []).map(Number); if (yrs.length && !yrs.some(y => y === my || y === my - 1)) bad += 2;
                 const h = teamHit(t, ctx.home), a = teamHit(t, ctx.away), sc = !!last && t.includes(" " + last + " ");
-                const rel = goal ? ((h && a) || (sc && (h || a))) : (h && a);
-                if (!rel) bad += 2;
+                if (goal ? !((h && a) || (sc && (h || a))) : !(h && a)) bad += 2;
                 if (YT_FILTER && bad) return;
                 let score = (h ? 2 : 0) + (a ? 2 : 0) + (sc ? 4 : 0) + (VID_CHAN.some(c => vnorm(v.by).includes(" " + c + " ")) ? 3 : 0) - bad * 2;
                 if (!goal && vidHas(t, VID_HL)) score += 2;
-                out.push(Object.assign({ score, rel: !!rel }, v));
+                out.push(Object.assign({ score }, v));
             });
-            out.sort((x, z) => z.score - x.score);
-            const good = out.filter(x => x.rel);
-            return (good.length ? good : out).slice(0, YT_FILTER ? 5 : 8);
+            return out.sort((x, z) => z.score - x.score).slice(0, YT_FILTER ? 5 : 8);
         }
         function ytOne(a, q, ctx) {
             const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 7000);
@@ -1824,15 +1824,13 @@ h1 .brand-mark{width:44px;height:44px}
             box.dataset.playing = "1";
             box.innerHTML = `<div class="yt-frame"><iframe src="https://www.youtube-nocookie.com/embed/${esc(v.id)}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><button class="yt-close">✕ Fermer</button>`;
         }
-        const ytCards = r => r.map(v => `<div class="yt-card" data-id="${esc(v.id)}"><img src="https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg" alt="" loading="lazy"><div><b>▶ ${esc(v.title)}</b><small>${esc(v.by || "")}</small></div></div>`).join("");
-        const ytWarn = '<div class="note">⚠ Vidéos non vérifiées : vérifie qu\'il s\'agit du bon match.</div>';
         function ytRender(box) {
             const q = box.dataset.q; if (!q) return;
             const ctx = ytCtx(box), k = q + "|" + ctx.kind + (ctx.who || "");
             const draw = r => {
                 if (!box.isConnected || box.dataset.playing) return;
                 if (!r.length) { box.innerHTML = '<div class="note">Pas encore de vraie vidéo de buts / résumé fiable pour ce match (les résumés sortent en général dans l\'heure qui suit le coup de sifflet final).</div>' + ytExt(q) + '<button class="yt-retry">↻ Réessayer</button>'; return; }
-                box.innerHTML = (r.some(v => v.rel) ? "" : ytWarn) + ytCards(r);
+                box.innerHTML = r.map(v => `<div class="yt-card" data-id="${esc(v.id)}"><img src="https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg" alt="" loading="lazy"><div><b>▶ ${esc(v.title)}</b><small>${esc(v.by || "")}</small></div></div>`).join("");
             };
             const c = ytCached(k); if (c) return draw(c);
             box.innerHTML = '<div class="note">Recherche des vidéos…</div>';
