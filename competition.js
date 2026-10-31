@@ -131,7 +131,7 @@
         const lgo = (Array.isArray(e.logo) ? e.logo[0] : e.logo) || (t.logos && t.logos[0]) || t.logo || "", lg = (lgo && lgo.href) || (typeof lgo === "string" ? lgo : "");
         return '<tr class="' + (isFav(tn) ? "playing" : "") + '"><td>' + esc(sval(e, "rank") || i + 1) + '</td><td class="tn">' + (lg ? '<img src="' + esc(lg) + '" alt="" onerror="this.remove()">' : "") + esc(tn) + '</td><td>' + esc(sval(e, "gamesPlayed")) + '</td><td>' + esc(sval(e, "wins")) + '</td><td>' + esc(sval(e, "ties")) + '</td><td>' + esc(sval(e, "losses")) + '</td><td>' + esc(sval(e, "pointsFor")) + '</td><td>' + esc(sval(e, "pointsAgainst")) + '</td><td>' + esc(sval(e, "pointDifferential")) + '</td><td class="pts">' + esc(sval(e, "points")) + '</td></tr>';
       }).join("");
-      return '<table><caption>🏆 Classement ' + esc(name) + '</caption><thead><tr><th>#</th><th>Équipe</th><th>J</th><th>G</th><th>N</th><th>P</th><th>BP</th><th>BC</th><th>Diff</th><th>Pts</th></tr></thead><tbody>' + rows + '</tbody></table>';
+      return '<table><caption>Classement ' + esc(name) + '</caption><thead><tr><th>#</th><th>Équipe</th><th>J</th><th>G</th><th>N</th><th>P</th><th>BP</th><th>BC</th><th>Diff</th><th>Pts</th></tr></thead><tbody>' + rows + '</tbody></table>';
     }).join("");
     return html;
   }
@@ -143,7 +143,7 @@
         const j = await fetchJSON(TS + "lookuptable.php?l=" + id + "&s=" + s);
         if (j && j.table && j.table.length) {
           const f = (r, k) => esc(r[k] ?? "");
-          return '<table><caption>🏆 Classement ' + esc(B.name) + ' ' + esc(s) + '</caption><thead><tr><th>#</th><th>Équipe</th><th>J</th><th>G</th><th>N</th><th>P</th><th>BP</th><th>BC</th><th>Diff</th><th>Pts</th></tr></thead><tbody>' +
+          return '<table><caption>Classement ' + esc(B.name) + ' ' + esc(s) + '</caption><thead><tr><th>#</th><th>Équipe</th><th>J</th><th>G</th><th>N</th><th>P</th><th>BP</th><th>BC</th><th>Diff</th><th>Pts</th></tr></thead><tbody>' +
             j.table.map(r => '<tr class="' + (isFav(r.strTeam) ? "playing" : "") + '"><td>' + f(r, "intRank") + '</td><td class="tn">' + (r.strBadge ? '<img src="' + esc(r.strBadge) + '/tiny" alt="" onerror="this.remove()">' : "") + f(r, "strTeam") + '</td><td>' + f(r, "intPlayed") + '</td><td>' + f(r, "intWin") + '</td><td>' + f(r, "intDraw") + '</td><td>' + f(r, "intLoss") + '</td><td>' + f(r, "intGoalsFor") + '</td><td>' + f(r, "intGoalsAgainst") + '</td><td>' + f(r, "intGoalDifference") + '</td><td class="pts">' + f(r, "intPoints") + '</td></tr>').join("") + '</tbody></table>';
         }
       }
@@ -214,10 +214,10 @@
     var img = document.querySelector('#compbar a[href="botola-pro.html"] .cl');
     if (!img || img.getAttribute("src")) return;
     var st = {}; try { st = JSON.parse(localStorage.getItem("fl_cl") || "{}"); } catch (e) { }
-    if (st["botola-pro"]) { img.src = st["botola-pro"]; return; }
+    if (st["botola-pro"]) { img.classList.add("lt"); img.src = st["botola-pro"]; return; }
     fetch("https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=4520").then(function (r) { return r.json(); }).then(function (j) {
       var l = j && j.leagues && j.leagues[0], u = l && (l.strBadge || l.strLogo);
-      if (u && /^https?:/i.test(u)) { img.src = u; st["botola-pro"] = u; try { localStorage.setItem("fl_cl", JSON.stringify(st)); } catch (e) { } }
+      if (u && /^https?:/i.test(u)) { img.classList.add("lt"); img.src = u; st["botola-pro"] = u; try { localStorage.setItem("fl_cl", JSON.stringify(st)); } catch (e) { } }
     }).catch(function () { });
   } catch (e) { }
 })();
