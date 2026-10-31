@@ -1000,19 +1000,28 @@ header{background:rgba(7,11,22,.97)!important}
             renderAll();
             ex.then(() => { detectGoals(); renderAll(); });
         }
+        let _allMemo = null, _allSig = "", _arrId = new WeakMap(), _arrN = 0, _keyMemo = new WeakMap();
         const all = () => {
+            // résultat mis en cache : recalculé seulement quand les données ont réellement changé (sinon le site ralentit)
+            const ents = Object.entries(byDay);
+            const sig = ents.map(([k, a]) => { let id = _arrId.get(a); if (!id) { id = ++_arrN; _arrId.set(a, id); } return k + ":" + id + ":" + a.length; }).join("|");
+            if (_allMemo && sig === _allSig) return _allMemo.slice();
             const rk = m => m.gh ? 3 : !m.tsdb ? 0 : /^n/.test(String(m.id)) ? 1 : 2;   // priorité : ESPN > 365Scores > TheSportsDB > GitHub
-            const s = Object.values(byDay).flat().map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((a, b) => a[1] - b[1]);
+            const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away) }; _keyMemo.set(m, v); } return v; };
+            const same = (x, y) => !!x && !!y && (x === y || x.includes(y) || y.includes(x));
+            const s = ents.flatMap(e => e[1]).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
             const keep = [];
             for (const [m, t] of s) {
-                let dup = -1;
+                const km = kk(m); let dup = -1;
                 for (let k = keep.length - 1; k >= 0 && t - keep[k][1] < 6 * 3600e3; k--) {
-                    const o = keep[k][0];
-                    if (sameTeam(o.home, m.home) && sameTeam(o.away, m.away)) { dup = k; break; }
+                    const o = keep[k][0]; if (rk(o) === rk(m) && o.id !== m.id && rk(m) !== 2 && rk(m) !== 1) continue;
+                    const ko = kk(o);
+                    if (same(ko.h, km.h) && same(ko.a, km.a)) { dup = k; break; }
                 }
                 if (dup < 0) keep.push([m, t]); else if (rk(m) < rk(keep[dup][0])) keep[dup] = [m, t];
             }
-            return keep.map(x => x[0]);
+            _allMemo = keep.map(x => x[0]); _allSig = sig;
+            return _allMemo.slice();
         };
 
         // ===== Affichage =====
