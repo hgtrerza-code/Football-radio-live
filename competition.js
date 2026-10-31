@@ -42,14 +42,37 @@
     };
   }
   async function loadEspn() {
-    const t = new Date(), a = new Date(t), b = new Date(t); a.setDate(t.getDate() - 14); b.setDate(t.getDate() + 21);
+    const t = new Date(), day = o => { const d = new Date(t); d.setDate(t.getDate() + o); return ymd(d); };
+    const uniq = list => { const seen = new Set(); return list.filter(e => e && e.id && !seen.has(e.id) && seen.add(e.id)); };
+    const OFFS = [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7];
+    // 1) la compétition jour par jour (même type de requête que la page d'accueil)
+    for (const sl of SLUGS) {
+      const res = await Promise.all(OFFS.map(o => espn(sl, "scoreboard", "?dates=" + day(o) + "&limit=1000", null).catch(() => null)));
+      const evs = []; res.forEach(r => r && (r.events || []).forEach(e => evs.push(e)));
+      const out = uniq(evs.map(normalize).filter(Boolean));
+      if (out.length) return out;
+    }
+    // 2) comme la page d'accueil : tous les matchs du jour, filtrés sur cette compétition
+    const wanted = new Set(SLUGS);
+    const res = await Promise.all(OFFS.filter(o => o >= -2 && o <= 3).map(o => espn("all", "scoreboard", "?dates=" + day(o) + "&limit=1000", null).catch(() => null)));
+    const evs = [];
+    res.forEach(j => {
+      if (!j) return;
+      const ids = new Set((j.leagues || []).filter(l => wanted.has(l.slug)).map(l => String(l.id)));
+      (j.events || []).forEach(e => { const lid = ((e.uid || "").match(/l:(\d+)/) || [])[1]; if (lid && ids.has(lid)) evs.push(e); });
+    });
+    const out2 = uniq(evs.map(normalize).filter(Boolean));
+    if (out2.length) return out2;
+    // 3) dernier recours : plage de dates
+    const a = new Date(t), b = new Date(t); a.setDate(t.getDate() - 14); b.setDate(t.getDate() + 21);
     const qs = "?dates=" + ymd(a) + "-" + ymd(b) + "&limit=1000";
     for (const sl of SLUGS) {
       const j = await espn(sl, "scoreboard", qs, x => (x.events || []).length);
-      if (j) return j.events.map(normalize).filter(Boolean);
+      if (j) return uniq(j.events.map(normalize).filter(Boolean));
     }
     return [];
   }
+
   const TS = "https://www.thesportsdb.com/api/v1/json/3/";
   let tsIdP = null;
   function tsId() {
