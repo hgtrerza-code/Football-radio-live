@@ -406,7 +406,7 @@ footer{margin-top:1.5rem;padding-bottom:1rem}
 #compbar a.on{background:var(--accent);border-color:var(--accent);color:#04210f}
 /* Écran de démarrage */
 #splash{position:fixed;inset:0;z-index:5000;background:radial-gradient(600px 400px at 50% 40%,rgba(46,229,157,.2),transparent),#070b16;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .5s,visibility .5s}
-#splash.hide{opacity:0;visibility:hidden}
+#splash.hide{opacity:0;visibility:hidden;pointer-events:none}
 #splash .lg{width:116px;height:116px;filter:drop-shadow(0 12px 30px rgba(46,229,157,.45));animation:sp-pop .7s cubic-bezier(.2,1.4,.4,1)}
 #splash .lg svg{width:100%;height:100%}
 #splash .nm{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.5px}
@@ -588,7 +588,9 @@ h1 .brand-mark{width:44px;height:44px}
 }
 </style>
 <style>
-#compbar a .cl{width:20px;height:20px;object-fit:contain;background:#fff;border-radius:50%;padding:2px;flex-shrink:0}
+#compbar a .cl{width:20px;height:20px;object-fit:contain;background:rgba(255,255,255,.12);border-radius:50%;padding:2px;flex-shrink:0}
+#compbar a .cl.lt{background:#fff}
+@media(min-width:700px){#compbar .container{flex-wrap:wrap;justify-content:center;overflow:visible}}
 #compbar a .cl:not([src]){display:none}
 </style>
 </head>
@@ -606,7 +608,7 @@ h1 .brand-mark{width:44px;height:44px}
             </div>
         </div>
     </header>
-    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/i/leaguelogos/soccer/500/2.png" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/i/leaguelogos/soccer/500/15.png" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/i/leaguelogos/soccer/500/12.png" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/i/leaguelogos/soccer/500/10.png" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/i/leaguelogos/soccer/500/9.png" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/i/leaguelogos/soccer/500/20296.png" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/i/leaguelogos/soccer/500/14.png" data-id="14">Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
+    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/2.png" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/23.png" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/15.png" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/12.png" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/10.png" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/9.png" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/2310.png" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/20296.png" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/14.png" data-id="14">Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
     <main class="container">
     <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
@@ -1914,8 +1916,10 @@ h1 .brand-mark{width:44px;height:44px}
 <script>
 (function(){
   var sp=document.getElementById("splash");
-  window.addEventListener("load",function(){setTimeout(function(){sp.classList.add("hide")},1400)});
-  setTimeout(function(){sp.classList.add("hide")},3500);
+  function hide(){ if(sp) sp.classList.add("hide"); }
+  // l'écran d'accueil disparaît dès que la page est prête (plus d'attente forcée de 1,4 s après le chargement complet)
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){setTimeout(hide,500)}); else setTimeout(hide,500);
+  setTimeout(hide,1500);
 })();
 </script>
 <script>
@@ -2340,11 +2344,11 @@ h1 .brand-mark{width:44px;height:44px}
   function fix(){
     document.querySelectorAll('#compbar .cl').forEach(function(img){
       if(img.dataset.done) return;
-      if(!img.dataset.bound){ img.dataset.bound='1'; img.addEventListener('error',function(){ img.removeAttribute('src'); img.dataset.err='1'; }); }
+      if(!img.dataset.bound){ img.dataset.bound='1'; img.addEventListener('error',function(){ if(/\/500-dark\//.test(img.src)){ img.classList.add('lt'); img.src=img.src.replace('/500-dark/','/500/'); } else { img.removeAttribute('src'); img.dataset.err='1'; } }); }
       if(img.getAttribute('src') && !img.dataset.err) { if(img.complete&&img.naturalWidth>0) img.dataset.done='1'; return; }
       try{
         var re=new RegExp(img.dataset.lgre,'i'), m=all().find(function(x){return !x.off&&re.test(x.lg||'');});
-        if(m){ var u=lgLogoURLs([m]); if(u.length){ img.dataset.err=''; img.src=u[0]; try{ var st=JSON.parse(localStorage.getItem('fl_cl')||'{}'); st[img.closest('a').getAttribute('href').replace('.html','')]=u[0]; localStorage.setItem('fl_cl',JSON.stringify(st)); }catch(e){} } }
+        if(m){ var u=lgLogoURLs([m]); if(u.length){ img.dataset.err=''; img.classList.add('lt'); img.src=u[0]; try{ var st=JSON.parse(localStorage.getItem('fl_cl')||'{}'); st[img.closest('a').getAttribute('href').replace('.html','')]=u[0]; localStorage.setItem('fl_cl',JSON.stringify(st)); }catch(e){} } }
       }catch(e){}
     });
   }
@@ -2360,7 +2364,7 @@ h1 .brand-mark{width:44px;height:44px}
     if (st["botola-pro"]) { img.src = st["botola-pro"]; return; }
     fetch("https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=4520").then(function (r) { return r.json(); }).then(function (j) {
       var l = j && j.leagues && j.leagues[0], u = l && (l.strBadge || l.strLogo);
-      if (u && /^https?:/i.test(u)) { img.src = u; st["botola-pro"] = u; try { localStorage.setItem("fl_cl", JSON.stringify(st)); } catch (e) { } }
+      if (u && /^https?:/i.test(u)) { img.classList.add('lt'); img.src = u; st["botola-pro"] = u; try { localStorage.setItem("fl_cl", JSON.stringify(st)); } catch (e) { } }
     }).catch(function () { });
   } catch (e) { }
 })();
