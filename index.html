@@ -1705,7 +1705,7 @@ header{background:rgba(7,11,22,.97)!important}
             const lc = document.getElementById("live-count"); if (lc) lc.textContent = all().filter(m => m.state === "in").length;
             if (tab === "live") list = list.filter(m => m.state === "in").sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "fav") list = list.filter(m => window.isFavMatch && window.isFavMatch(m)).sort((a, b) => a.start.localeCompare(b.start));
-            else if (tab === "comp") list = list.sort((a, b) => a.start.localeCompare(b.start));
+            else if (tab === "comp") { const rk = m => m.state === "in" ? 0 : m.state === "pre" ? 1 : 2; list = list.sort((a, b) => rk(a) - rk(b) || (rk(a) === 2 ? b.start.localeCompare(a.start) : a.start.localeCompare(b.start))); }
             else if (tab === "day") list = list.filter(m => localDay(m.start) === window.dayPick).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "today") list = list.filter(m => localDay(m.start) === t).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => b.start.localeCompare(a.start)).slice(0, 150);
@@ -2393,13 +2393,11 @@ header{background:rgba(7,11,22,.97)!important}
     let el = $("#comp-chip");
     if (!window.compFilter) { if (el) el.remove(); $$("#compbar a.on").forEach(a => a.classList.remove("on")); return; }
     if (!el) { el = document.createElement("div"); el.id = "comp-chip"; el.className = "toolbar"; $("#matches").before(el); }
-    el.innerHTML = '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button><span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>';
+    el.innerHTML = '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>' + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
   }
-  $("#compbar").addEventListener("click", e => {
-    const a = e.target.closest("a"); if (!a || !RAD.want || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+  function applyComp(a) {
     const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");
-    if (!img || !img.dataset.lgre || !COMP_CTRY[slug]) return;   // inconnu : navigation normale
-    e.preventDefault();
+    if (!img || !img.dataset.lgre || !COMP_CTRY[slug]) return false;   // inconnu : navigation normale
     const re = new RegExp(img.dataset.lgre, "i"), ctry = COMP_CTRY[slug] + " · ";
     window.compFilter = { name: a.textContent.trim(), test: m => { const raw = String(m.lg).replace(/​.*$/, ""); return re.test(raw) && !COMP_EXCL.test(raw) && lgDisp(m.lg, [m]).indexOf(ctry) === 0; } };
     $$("#compbar a").forEach(x => x.classList.toggle("on", x === a));
@@ -2407,7 +2405,15 @@ header{background:rgba(7,11,22,.97)!important}
     tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
     const lf = $("#league-filter"); if (lf) lf.value = "all"; const si = $("#search"); if (si) si.value = "";
     compChip(); buildDays(); renderMatches(true); window.scrollTo({ top: 0 });
+    return true;
+  }
+  $("#compbar").addEventListener("click", e => {
+    const a = e.target.closest("a"); if (!a || !RAD.want || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    if (applyComp(a)) e.preventDefault();
   });
+  // Page de compétition (ex. ligue-1.html) : même page que l'accueil, filtrée sur la compétition
+  const cpSlug = document.documentElement.dataset.comp;
+  if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) applyComp(ca); }
   ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter) { window.compFilter = null; compChip(); } }, true));
   document.addEventListener("click", e => {
     if (!e.target.closest("#comp-clear")) return;
