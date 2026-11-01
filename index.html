@@ -1718,13 +1718,27 @@ header{background:rgba(7,11,22,.97)!important}
             return i < 0 ? 99 : i;
         }
         const mp = m => (_mpMemo[m.lg] ??= mainPri(m.lg, [m]));
+        // Niveau d'une compétition (bouton À venir) : 1 = 1re division / grands tournois, 2 = 2e division, 3 = coupes, qualifications, amicaux, féminines, jeunes
+        const CUP_RE = /cup|copa|coupe|pokal|coppa|ta[cç]a|beker|trophy|trophée|shield|supercopa|supercoppa|play-?off|qualif|friendl|amical/i;
+        const _tierMemo = Object.create(null);
+        function lgTier(k) {
+            if (_tierMemo[k] != null) return _tierMemo[k];
+            const raw = String(k || "").split(String.fromCharCode(8203))[0], r = lgRank(raw); let t;
+            if (r >= 500) t = 3;
+            else if (r === 200 || (r % 1 !== 0)) t = 2;
+            else if (r >= 24 && r < 100) t = 3;
+            else if (r === 100 && CUP_RE.test(raw)) t = 3;
+            else t = 1;
+            return (_tierMemo[k] = t);
+        }
+        const tierM = m => lgTier(m.lg);
         const BOTOLA_BTN = '';
         function grouped(list, rowFn, withBtn, byTime) {
             const g = {};
             list.forEach(m => (g[m.lg] ||= []).push(m));
             const br = lgRank("Moroccan Botola Pro"); let placed = !withBtn;
             const first = k => g[k].reduce((t, m) => (t === "" || m.start < t) ? m.start : t, "");
-            let out = Object.keys(g).sort((x, y) => { const px = mainPri(x, g[x]), py = mainPri(y, g[y]); if (byTime && px < 99 && py < 99) { const d = first(x).localeCompare(first(y)); if (d) return d; } return (px - py) || lgCmp(x, y); }).map(k => {
+            let out = Object.keys(g).sort((x, y) => { const px = mainPri(x, g[x]), py = mainPri(y, g[y]); if (byTime && px < 99 && py < 99) { const d = first(x).localeCompare(first(y)); if (d) return d; } if (byTime && px === 99 && py === 99) { const d = lgTier(x) - lgTier(y); if (d) return d; } return (px - py) || lgCmp(x, y); }).map(k => {
                 let pre = ""; if (!placed && lgRank(k) >= br) { pre = BOTOLA_BTN; placed = true; }
                 const sl = (g[k].find(m => m.slug && m.slug !== "all" && m.slug !== "tsdb") || {}).slug;
                 const sbtn = sl ? `<button class="standings-btn" data-std="${esc(sl)}">🏆 Classement</button>` : "";
@@ -1759,7 +1773,7 @@ header{background:rgba(7,11,22,.97)!important}
             else if (tab === "day") list = list.filter(m => localDay(m.start) === window.dayPick).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "today") list = list.filter(m => localDay(m.start) === t).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mp(a) - mp(b) || b.start.localeCompare(a.start)).slice(0, 150);
-            else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || a.start.localeCompare(b.start)).slice(0, 150);
+            else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || tierM(a) - tierM(b) || a.start.localeCompare(b.start)).slice(0, 150);
             document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next") : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`;
             radPaint();
         }
