@@ -1,0 +1,33 @@
+name: Aperçu des matchs du jour
+
+on:
+  schedule:
+    - cron: "5 */2 * * *"   # toutes les 2 h (UTC)
+  workflow_dispatch:         # lancement manuel possible
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apercu-matchs
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Générer l'aperçu
+        run: node scripts/update-apercu.mjs
+      - name: Commit si changement
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html matchs-du-jour.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Aperçu des matchs du jour"
+            git push
+          fi
