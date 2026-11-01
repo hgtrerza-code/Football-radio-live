@@ -1,6 +1,6 @@
 {
  "date": "2026-11-01",
- "generated": "2026-11-01T08:45:33.674Z",
+ "generated": "2026-11-01T10:37:27.778Z",
  "extra": 243,
  "matches": [
   {
@@ -315,8 +315,8 @@
    "id": "401888374",
    "lg": "Süper Lig",
    "start": "2026-11-01T10:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "7'",
    "home": "Amed SFK",
    "away": "Eyupspor",
    "h": 0,
@@ -524,8 +524,8 @@
    "id": "401877581",
    "lg": "J1 League",
    "start": "2026-11-01T06:00Z",
-   "state": "in",
-   "label": "85'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "Machida Zelvia",
    "away": "Gamba Osaka",
    "h": 0,
