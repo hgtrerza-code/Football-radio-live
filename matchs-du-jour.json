@@ -1,6 +1,6 @@
 {
  "date": "2026-11-01",
- "generated": "2026-11-01T20:32:08.842Z",
+ "generated": "2026-11-01T22:34:18.983Z",
  "extra": 243,
  "matches": [
   {
@@ -51,12 +51,12 @@
    "id": "401882826",
    "lg": "LaLiga",
    "start": "2026-11-01T20:00Z",
-   "state": "in",
-   "label": "27'",
+   "state": "post",
+   "label": "90'+4'",
    "home": "Athletic Club",
    "away": "Real Sociedad",
-   "h": 1,
-   "a": 0
+   "h": 2,
+   "a": 1
   },
   {
    "id": "401875002",
@@ -106,11 +106,11 @@
    "id": "401874949",
    "lg": "Serie A",
    "start": "2026-11-01T19:45Z",
-   "state": "in",
-   "label": "45'+2'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "Juventus",
    "away": "Napoli",
-   "h": 0,
+   "h": 2,
    "a": 0
   },
   {
@@ -172,8 +172,8 @@
    "id": "401876417",
    "lg": "Ligue 1",
    "start": "2026-11-01T19:45Z",
-   "state": "in",
-   "label": "45'+2'",
+   "state": "post",
+   "label": "90'+7'",
    "home": "Marseille",
    "away": "Toulouse",
    "h": 2,
@@ -216,11 +216,11 @@
    "id": "401885409",
    "lg": "Liga Portugal",
    "start": "2026-11-01T20:30Z",
-   "state": "in",
-   "label": "2'",
+   "state": "post",
+   "label": "90'+3'",
    "home": "Braga",
    "away": "FC Famalicao",
-   "h": 0,
+   "h": 3,
    "a": 0
   },
   {
@@ -370,34 +370,34 @@
    "id": "761927",
    "lg": "MLS",
    "start": "2026-11-01T20:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "90'+2'",
    "home": "Vancouver Whitecaps",
    "away": "Seattle Sounders FC",
-   "h": 0,
-   "a": 0
+   "h": 5,
+   "a": 1
   },
   {
    "id": "761931",
    "lg": "MLS",
    "start": "2026-11-01T21:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+3'",
    "home": "Atlanta United FC",
    "away": "Toronto FC",
-   "h": 0,
+   "h": 2,
    "a": 0
   },
   {
    "id": "761920",
    "lg": "MLS",
    "start": "2026-11-01T21:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+8'",
    "home": "Nashville SC",
    "away": "Red Bull New York",
-   "h": 0,
-   "a": 0
+   "h": 1,
+   "a": 2
   },
   {
    "id": "401841654",
@@ -425,19 +425,19 @@
    "id": "401841645",
    "lg": "Liga argentine",
    "start": "2026-11-01T21:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+4'",
    "home": "Belgrano (Córdoba)",
    "away": "Barracas Central",
-   "h": 0,
+   "h": 1,
    "a": 0
   },
   {
    "id": "401841650",
    "lg": "Liga argentine",
    "start": "2026-11-01T21:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+3'",
    "home": "Newell's Old Boys",
    "away": "Unión (Santa Fe)",
    "h": 0,
