@@ -1,6 +1,6 @@
 {
  "date": "2026-11-01",
- "generated": "2026-11-01T05:50:56.098Z",
+ "generated": "2026-11-01T06:52:26.292Z",
  "extra": 243,
  "matches": [
   {
@@ -491,22 +491,22 @@
    "id": "401877580",
    "lg": "J1 League",
    "start": "2026-11-01T04:00Z",
-   "state": "in",
-   "label": "88'",
+   "state": "post",
+   "label": "90'+6'",
    "home": "Yokohama F. Marinos",
    "away": "Kawasaki Frontale",
    "h": 4,
-   "a": 1
+   "a": 2
   },
   {
    "id": "401877582",
    "lg": "J1 League",
    "start": "2026-11-01T05:00Z",
    "state": "in",
-   "label": "45'+3'",
+   "label": "90'",
    "home": "JEF United Ichihara-Chiba",
    "away": "Avispa Fukuoka",
-   "h": 1,
+   "h": 2,
    "a": 0
   },
   {
@@ -514,11 +514,11 @@
    "lg": "J1 League",
    "start": "2026-11-01T05:00Z",
    "state": "in",
-   "label": "45'+3'",
+   "label": "81'",
    "home": "V-Varen Nagasaki",
    "away": "Tokyo Verdy 1969",
-   "h": 0,
-   "a": 0
+   "h": 1,
+   "a": 1
   },
   {
    "id": "401877581",
