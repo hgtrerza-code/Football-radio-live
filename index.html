@@ -753,6 +753,15 @@ header{background:rgba(7,11,22,.97)!important}
         }
         // Compétitions exclues définitivement + ligues ajoutées explicitement
         const BLOCK = /bolivia|scotti?s?h|scotland|isra[eëé]l|ligat ha|liga leumit|toto cup|liga portugal 2|liga portugal ii|segunda liga|ligapro|liga 2 sabseg|portug.* liga 2/i;
+        // Israël : toute compétition israélienne est bloquée en permanence (nom, pays affiché ou pays source)
+        const IL_BLOCK = /isra[eëé]l|ligat|leumit|liga alef|winner league/i;
+        function isBlockedMatch(m) {
+            const raw = String(m.lg || "").replace(/\u200b.*$/, "");
+            if (BLOCK.test(raw) || IL_BLOCK.test(raw)) return true;
+            try { const sl = S365_LG[m.lg]; if (sl && (sl.code === "il" || IL_BLOCK.test(sl.disp))) return true; } catch (e) { }
+            if (m.raw && IL_BLOCK.test(String(m.raw.strCountry || ""))) return true;
+            return false;
+        }
         const EXTRA = [];
         function lgUrl(slug, d) {
             const base = CFG.PROXY_URL ? CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + slug + "/scoreboard" : "https://site.api.espn.com/apis/site/v2/sports/soccer/" + slug + "/scoreboard";
@@ -773,10 +782,10 @@ header{background:rgba(7,11,22,.97)!important}
             const fixP = fixGenericLeagues(evs);
             evs.forEach(m => { m.lg = cleanLg(m.lg); });
             const lgBefore = evs.map(m => m.lg);
-            byDay[d] = evs.filter(m => !BLOCK.test(m.lg));
+            byDay[d] = evs.filter(m => !isBlockedMatch(m));
             fixP.then(() => {
                 evs.forEach(m => { m.lg = cleanLg(m.lg); });
-                if (evs.some((m, i) => m.lg !== lgBefore[i])) { byDay[d] = evs.filter(m => !BLOCK.test(m.lg)); try { renderAll(); } catch (e) { } }
+                if (evs.some((m, i) => m.lg !== lgBefore[i])) { byDay[d] = evs.filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } }
             }).catch(() => { });
         }
         // Sources complémentaires (365Scores, GitHub) : en arrière-plan, avec délai maximum, elles ne bloquent jamais l'affichage
@@ -929,7 +938,7 @@ header{background:rgba(7,11,22,.97)!important}
                 out.push({ id: "n" + g.id, tsdb: true, raw: { strStatus: st, strVenue: (g.venue && g.venue.name) || "", intRound: g.roundName || "", strCountry: cn }, slug: "tsdb", lg: key, lgl, start: g.startTime, state, off, label: off ? (st || "Reporté") : (state === "in" ? (g.gameTimeDisplay || st || "") : st), home: hc.name, away: ac.name, hl: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + hc.id, al: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + ac.id, h, a });
                 added++;
             });
-            byDay[d] = out.filter(m => !BLOCK.test(String(m.lg).replace(/\u200b\d+$/, "")));
+            byDay[d] = out.filter(m => !isBlockedMatch(m));
             n365Status = "365Scores : " + j.games.length + " matchs lus (" + fixed + " recoupés avec ESPN, " + added + " ajoutés).";
             try { console.log(n365Status); } catch (e) { }
         }
@@ -1013,7 +1022,7 @@ header{background:rgba(7,11,22,.97)!important}
             const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away), th: _tok(m.home), ta: _tok(m.away) }; _keyMemo.set(m, v); } return v; };
             const same = (x, y) => !!x && !!y && (x === y || x.includes(y) || y.includes(x));
             const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.includes(w));
-            const s = ents.flatMap(e => e[1]).filter(m => !BLOCK.test(String(m.lg))).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
+            const s = ents.flatMap(e => e[1]).filter(m => !isBlockedMatch(m)).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
             const keep = [], idx = new Map(), ids = new Map();
             const addIdx = (km, i) => { km.th.concat(km.ta, [km.h, km.a]).forEach(w => { if (!w) return; let l = idx.get(w); if (!l) { l = []; idx.set(w, l); } l.push(i); }); };
             for (const [m, t] of s) {
@@ -1706,18 +1715,19 @@ header{background:rgba(7,11,22,.97)!important}
         const lgCmp = (a, b) => ((window.compFilter && window.compFilter.main && window.compFilter.main(a)) ? 0 : 1) - ((window.compFilter && window.compFilter.main && window.compFilter.main(b)) ? 0 : 1) || lgRank(a) - lgRank(b) || a.localeCompare(b, "fr");
         // Les 10 compétitions de la barre : toujours affichées en premier (Direct, Aujourd'hui, Résultats, À venir), dans l'ordre de la barre
         const MAIN10 = [
-            [null, /^(uefa )?champions league$/i], ["Angleterre", /^(english )?premier league$/i], [null, /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i],
+            ["Europe", /^(uefa )?champions league$/i], ["Angleterre", /^(english )?premier league$/i], ["Espagne", /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i],
             ["Italie", /^(italian )?serie a( (?!2$|ii$|women).*)?$/i], ["Allemagne", /^(german )?bundesliga$/i], ["France", /^(french )?ligue 1( (?!2$|ii$|women).*)?$/i],
-            [null, /^(uefa )?europa league$/i], [null, /^(uefa )?(europa )?conference league$/i], [null, /^(portuguese )?(liga portugal|primeira liga)( .*)?$/i], [null, /^(moroccan )?botola pro( inwi)?$/i]
+            ["Europe", /^(uefa )?europa league$/i], ["Europe", /^(uefa )?(europa )?conference league$/i], ["Portugal", /^(portuguese )?(liga portugal|primeira liga)( .*)?$/i], ["Maroc", /^(moroccan )?botola pro( 1)?( inwi)?$/i]
         ];
         const _mpMemo = Object.create(null);
         function mainPri(k, arr) {
             const raw = String(k || "").split(String.fromCharCode(8203))[0]; let d = "";
             try { d = lgDisp(k, arr); } catch (e) { }
-            const i = MAIN10.findIndex(x => x[1].test(raw) && (x[0] === null || d.indexOf(x[0] + " · ") === 0));
+            const i = MAIN10.findIndex(x => x[1].test(raw) && d.indexOf(x[0] + " · ") === 0);
             return i < 0 ? 99 : i;
         }
         const mp = m => (_mpMemo[m.lg] ??= mainPri(m.lg, [m]));
+        const isMain10 = m => mp(m) < 99;   // vrai = match d'une des 10 compétitions de la barre
         // Niveau d'une compétition (bouton À venir) : 1 = 1re division / grands tournois, 2 = 2e division, 3 = coupes, qualifications, amicaux, féminines, jeunes
         const CUP_RE = /cup|copa|coupe|pokal|coppa|ta[cç]a|beker|trophy|trophée|shield|supercopa|supercoppa|play-?off|qualif|friendl|amical/i;
         const _tierMemo = Object.create(null);
@@ -1780,9 +1790,9 @@ header{background:rgba(7,11,22,.97)!important}
         function updateTicker() {
             const item = h => `<span class="ticker-item">${h}</span>`, items = [], A = all(), t = localDay(new Date().toISOString());
             const sc = m => `<span class="t-score">${m.h ?? 0} - ${m.a ?? 0}</span>`;
-            A.filter(m => m.state === "in").forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-live">● ${esc(m.label)}</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
-            A.filter(m => m.state === "post").sort((a, b) => b.start.localeCompare(a.start)).slice(0, 15).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-comp">Terminé</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
-            A.filter(m => m.state === "pre" && !m.off).sort((a, b) => a.start.localeCompare(b.start)).slice(0, 15).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-info">${new Date(m.start).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} ${hhmm(m.start)}</span> ${esc(m.home)} vs ${esc(m.away)}`)));
+            A.filter(m => m.state === "in").sort((a, b) => mp(a) - mp(b)).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-live">● ${esc(m.label)}</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
+            A.filter(m => m.state === "post").sort((a, b) => (isMain10(b) - isMain10(a)) || b.start.localeCompare(a.start)).slice(0, 15).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-comp">Terminé</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
+            A.filter(m => m.state === "pre" && !m.off).sort((a, b) => (isMain10(b) - isMain10(a)) || a.start.localeCompare(b.start)).slice(0, 15).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-info">${new Date(m.start).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} ${hhmm(m.start)}</span> ${esc(m.home)} vs ${esc(m.away)}`)));
             const today = A.filter(m => localDay(m.start) === t), live = today.filter(m => m.state === "in").length;
             const goals = today.reduce((n, m) => n + (m.state === "pre" ? 0 : (m.h || 0) + (m.a || 0)), 0);
             if (today.length) items.push(item(`🌍 <span class="t-info">${today.length}</span> matchs aujourd'hui · <span class="t-info">${live}</span> en direct · ⚽ <span class="t-info">${goals}</span> buts marqués`));
@@ -2143,7 +2153,7 @@ header{background:rgba(7,11,22,.97)!important}
 
   // ---------- Carte « À la une » ----------
   $("#scores-view").insertAdjacentHTML("afterbegin", '<div id="hero"></div>');
-  const heroPref = (a, b) => (window.isFavMatch(b) - window.isFavMatch(a)) || lgRank(a.lg) - lgRank(b.lg);
+  const heroPref = (a, b) => (isMain10(b) - isMain10(a)) || (window.isFavMatch(b) - window.isFavMatch(a)) || lgRank(a.lg) - lgRank(b.lg);
   function minOf(m) { const x = String(m.label || "").match(/(\d+)/); return x ? +x[1] : 0; }
   function heroScore(m) {
     const g = (m.h || 0) + (m.a || 0), d = Math.abs((m.h || 0) - (m.a || 0)), mn = minOf(m);
@@ -2155,7 +2165,7 @@ header{background:rgba(7,11,22,.97)!important}
   }
   function pickHeroes() {
     const A = all().filter(m => !m.off), now = Date.now(), T = m => new Date(m.start).getTime(), MAX = 5;
-    const live = A.filter(m => m.state === "in").sort((x, y) => heroScore(y) - heroScore(x));
+    const live = A.filter(m => m.state === "in").sort((x, y) => (isMain10(y) - isMain10(x)) || heroScore(y) - heroScore(x));
     const out = live.slice(0, MAX).map(m => ({ m, kind: "live", n: live.length }));
     if (out.length < 3) {
       const nx = A.filter(m => m.state === "pre" && T(m) > now - 600000 && T(m) < now + 36 * 3600e3).sort((x, y) => heroPref(x, y) || x.start.localeCompare(y.start));
@@ -2460,7 +2470,7 @@ header{background:rgba(7,11,22,.97)!important}
     "bundesliga": /^(german )?bundesliga$/i,
     "ligue-1": /^(french )?ligue 1( (?!2$|ii$|women).*)?$/i,
     "liga-portugal": /^(portuguese )?(liga portugal|primeira liga)( .*)?$/i,
-    "botola-pro": /^(moroccan )?botola pro( inwi)?$/i,
+    "botola-pro": /^(moroccan )?botola pro( 1)?( inwi)?$/i,
     "ligue-des-champions": /^(uefa )?champions league$/i,
     "europa-league": /^(uefa )?europa league$/i,
     "conference-league": /^(uefa )?(europa )?conference league$/i
