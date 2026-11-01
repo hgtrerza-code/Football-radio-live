@@ -1715,15 +1715,26 @@ header{background:rgba(7,11,22,.97)!important}
         const lgCmp = (a, b) => ((window.compFilter && window.compFilter.main && window.compFilter.main(a)) ? 0 : 1) - ((window.compFilter && window.compFilter.main && window.compFilter.main(b)) ? 0 : 1) || lgRank(a) - lgRank(b) || a.localeCompare(b, "fr");
         // Les 10 compétitions de la barre : toujours affichées en premier (Direct, Aujourd'hui, Résultats, À venir), dans l'ordre de la barre
         const MAIN10 = [
-            ["Europe", /^(uefa )?champions league$/i], ["Angleterre", /^(english )?premier league$/i], ["Espagne", /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i],
-            ["Italie", /^(italian )?serie a( (?!2$|ii$|women).*)?$/i], ["Allemagne", /^(german )?bundesliga$/i], ["France", /^(french )?ligue 1( (?!2$|ii$|women).*)?$/i],
-            ["Europe", /^(uefa )?europa league$/i], ["Europe", /^(uefa )?(europa )?conference league$/i], ["Portugal", /^(portuguese )?(liga portugal|primeira liga)( .*)?$/i], ["Maroc", /^(moroccan )?botola pro( 1)?( inwi)?$/i]
+            ["Europe", /^(uefa )?champions league$/i, 0], ["Angleterre", /^(english )?premier league$/i, 1], ["Espagne", /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i, 0],
+            ["Italie", /^(italian )?serie a( (?!2$|ii$|women).*)?$/i, 1], ["Allemagne", /^(german )?bundesliga$/i, 1], ["France", /^(french )?ligue 1( (?!2$|ii$|women).*)?$/i, 1],
+            ["Europe", /^(uefa )?europa league$/i, 0], ["Europe", /^(uefa )?(europa )?conference league$/i, 0], ["Portugal", /^(portuguese )?(liga portugal|primeira liga)( (?!2\b|ii\b|sabseg).*)?$/i, 0], ["Maroc", /^(moroccan )?botola pro( 1)?( inwi)?$/i, 0]
         ];
+        // Pays attendu pour chaque compétition (noms français ET anglais : ESPN, 365Scores et TheSportsDB n'écrivent pas le pays pareil)
+        const MAIN_CTRY = { "Europe": /^(europe|monde|international|uefa)$/i, "Angleterre": /^(angleterre|england|royaume-uni|united kingdom)$/i, "Espagne": /^(espagne|spain)$/i, "Italie": /^(italie|italy)$/i, "Allemagne": /^(allemagne|germany)$/i, "France": /^france$/i, "Portugal": /^portugal$/i, "Maroc": /^(maroc|morocco)$/i };
+        const MAIN_CODE = { "Europe": "eu", "Angleterre": "gb-eng", "Espagne": "es", "Italie": "it", "Allemagne": "de", "France": "fr", "Portugal": "pt", "Maroc": "ma" };
         const _mpMemo = Object.create(null);
         function mainPri(k, arr) {
-            const raw = String(k || "").split(String.fromCharCode(8203))[0]; let d = "";
+            const raw = String(k || "").split(String.fromCharCode(8203))[0].trim(); let d = "";
             try { d = lgDisp(k, arr); } catch (e) { }
-            const i = MAIN10.findIndex(x => x[1].test(raw) && d.indexOf(x[0] + " · ") === 0);
+            const pref = String(d).split(" · ")[0], m0 = (arr && arr[0]) || {};
+            let sl = null; try { sl = S365_LG[k]; } catch (e) { }
+            const cn = String((m0.raw && m0.raw.strCountry) || "");
+            const i = MAIN10.findIndex(x => {
+                if (!x[1].test(raw)) return false;
+                if (!x[2] && !(x[0] === "Espagne" && /primera/i.test(raw))) return true;   // nom sans ambiguïté (ex. Ligue des champions)
+                const re = MAIN_CTRY[x[0]];   // nom ambigu (Premier League, Serie A…) : on vérifie le pays, sans être trop strict
+                return re.test(pref) || (sl && sl.code === MAIN_CODE[x[0]]) || (cn && re.test(cn)) || /^(monde|autres compétitions|)$/i.test(pref);
+            });
             return i < 0 ? 99 : i;
         }
         const mp = m => (_mpMemo[m.lg] ??= mainPri(m.lg, [m]));
