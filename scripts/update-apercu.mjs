@@ -12,7 +12,7 @@ const SOURCES = [
 ];
 const MAX_PER_LEAGUE = 12, MAX_TOTAL = 80, MAX_LD = 25;
 
-const BLOCK = /bolivia|scotti?s?h|scotland|isra[eëé]l|ligat ha|liga leumit|toto cup|liga portugal 2|liga portugal ii|segunda liga|ligapro|liga 2 sabseg|portug.* liga 2|ligat|leumit|liga alef|winner league/i;
+const BLOCK = /ncaa|bolivia|scotti?s?h|scotland|isra[eëé]l|ligat ha|liga leumit|toto cup|liga portugal 2|liga portugal ii|segunda liga|ligapro|liga 2 sabseg|portug.* liga 2|ligat|leumit|liga alef|winner league/i;
 const PRIORITY = [/ligue des champions|champions league/i, /ligue europa|europa league/i, /ligue conf|conference league/i, /premier league/i, /laliga|la liga/i, /serie a/i, /bundesliga/i, /ligue 1/i, /primeira|liga portugal/i, /eredivisie/i, /mls|major league soccer/i];
 const FR = [
   [/^uefa champions league$/i, "Ligue des champions"], [/^uefa europa league$/i, "Ligue Europa"],
@@ -25,8 +25,8 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 const dayOf = d => new Date(d).toLocaleDateString("sv-SE", { timeZone: TZ });
 const hhmm = iso => new Date(iso).toLocaleTimeString("fr-FR", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
 
-async function getJSON(url) {
-  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
+async function getJSON(url, ms = 20000) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
   try {
     const r = await fetch(url, { signal: ctl.signal, headers: { "user-agent": "footlivepro-static-preview" } });
     if (!r.ok) throw new Error("HTTP " + r.status);
@@ -40,13 +40,26 @@ async function loadDate(ymd) {
   }
   throw last;
 }
-function leagueName(ev, top) {
+const GENERIC = /^(?:the )?(?:first|second|third|fourth|fifth|sixth|seventh|1st|2nd|3rd|4th|5th|6th|preliminary|qualifying|group|knockout|round|quarter|semi|final|play-?offs?|league phase|matchday|regular season|stage|phase)\b/i;
+const OTHER = "Football — autres compétitions";
+function rawLeague(ev, top) {
   const c = (ev.competitions && ev.competitions[0]) || {};
-  const lid = ((ev.uid || "").match(/l:(\d+)/) || [])[1];
+  const lid = ((ev.uid || "").match(/l:(\d+)/) || [])[1] || "";
   const fromTop = (top.leagues || []).find(l => String(l.id) === lid);
-  const raw = (ev.league && ev.league.name) || (c.league && c.league.name) || (fromTop && fromTop.name) || "Football — autres compétitions";
-  const hit = FR.find(([re]) => re.test(raw.trim()));
-  return hit ? hit[1] : raw.trim();
+  return { lid, raw: ((ev.league && ev.league.name) || (c.league && c.league.name) || (fromTop && fromTop.name) || "").trim() };
+}
+const frName = raw => { const hit = FR.find(([re]) => re.test(raw.trim())); return hit ? hit[1] : raw.trim(); };
+// Le flux "all" ne donne pas toujours le nom de la compétition : on le retrouve via l'identifiant ESPN (comme le fait le site).
+async function resolveLeagueNames(list) {
+  const need = [...new Set(list.filter(m => !m.raw || GENERIC.test(m.raw)).map(m => m.lid).filter(Boolean))];
+  const names = {};
+  await Promise.allSettled(need.map(async id => {
+    try { const j = await getJSON("https://sports.core.api.espn.com/v2/sports/soccer/leagues/" + id, 8000); names[id] = j.name || j.shortName || ""; } catch (e) { }
+  }));
+  for (const m of list) {
+    const fixed = (!m.raw || GENERIC.test(m.raw)) ? names[m.lid] : "";
+    m.lg = frName(fixed || (m.raw && !GENERIC.test(m.raw) ? m.raw : "") || OTHER);
+  }
 }
 function normalize(ev, top) {
   const c = (ev.competitions && ev.competitions[0]) || {}, cp = c.competitors || [];
@@ -56,7 +69,7 @@ function normalize(ev, top) {
   const off = /postponed|cancel|suspend|abandon/i.test((st.name || "") + " " + (st.description || ""));
   const num = v => (v === undefined || v === "" || v === null) ? null : Number(v);
   return {
-    id: String(ev.id), lg: leagueName(ev, top), start: ev.date,
+    id: String(ev.id), ...rawLeague(ev, top), lg: "", start: ev.date,
     state: off ? "off" : (st.state || "pre"),
     label: (ev.status && ev.status.displayClock) || st.shortDetail || "",
     home: home.team.displayName || home.team.name, away: away.team.displayName || away.team.name,
@@ -86,9 +99,10 @@ async function main() {
   const seen = new Map();
   for (const r of results) if (r.status === "fulfilled") for (const ev of (r.value.events || [])) {
     const m = normalize(ev, r.value);
-    if (m && dayOf(m.start) === today && !BLOCK.test(m.lg)) seen.set(m.id, m);
+    if (m && dayOf(m.start) === today) seen.set(m.id, m);
   }
-  const all = [...seen.values()].sort((a, b) => rank(a.lg) - rank(b.lg) || a.lg.localeCompare(b.lg) || a.start.localeCompare(b.start));
+  await resolveLeagueNames([...seen.values()]);
+  const all = [...seen.values()].filter(m => !BLOCK.test(m.lg) && !BLOCK.test(m.raw)).sort((a, b) => rank(a.lg) - rank(b.lg) || a.lg.localeCompare(b.lg) || a.start.localeCompare(b.start));
   const groups = new Map(); let kept = 0;
   for (const m of all) {
     if (kept >= MAX_TOTAL) break;
@@ -96,7 +110,7 @@ async function main() {
     g.push(m); groups.set(m.lg, g); kept++;
   }
   const extra = all.length - kept;
-  const matches = [...groups.values()].flat();
+  const matches = [...groups.values()].flat().map(({ raw, lid, ...m }) => m);
 
   // Rien de changé depuis la dernière exécution : on ne touche à rien (pas de commit inutile).
   let prev = null; try { prev = JSON.parse(fs.readFileSync(JSON_FILE, "utf8")); } catch (e) { }
