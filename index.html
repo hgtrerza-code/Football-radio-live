@@ -752,7 +752,7 @@ header{background:rgba(7,11,22,.97)!important}
             return base + "?dates=" + d + "&limit=1000";
         }
         // Compétitions exclues définitivement + ligues ajoutées explicitement
-        const BLOCK = /bolivia|scotti?s?h|scotland|isra[eëé]l|ligat ha|liga leumit|toto cup/i;
+        const BLOCK = /bolivia|scotti?s?h|scotland|isra[eëé]l|ligat ha|liga leumit|toto cup|liga portugal 2|liga portugal ii|segunda liga|ligapro|liga 2 sabseg|portug.* liga 2/i;
         const EXTRA = [];
         function lgUrl(slug, d) {
             const base = CFG.PROXY_URL ? CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + slug + "/scoreboard" : "https://site.api.espn.com/apis/site/v2/sports/soccer/" + slug + "/scoreboard";
