@@ -820,7 +820,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             }));
             extra.forEach(x => { if (x.status === "fulfilled") x.value.forEach(m => { const o = seen.get(m.id); if (o) o.slug = m.slug; else { seen.set(m.id, m); evs.push(m); } }); });
             // ne bloque plus l'affichage : les noms génériques sont corrigés en arrière-plan puis l'écran est rafraîchi
-            const fixP = fixGenericLeagues(evs);
+            const fixP = new Promise(r => setTimeout(r, 2500)).then(() => fixGenericLeagues(evs));
             evs.forEach(m => { m.lg = cleanLg(m.lg); });
             const lgBefore = evs.map(m => m.lg);
             byDay[d] = evs.filter(m => !isBlockedMatch(m));
@@ -831,9 +831,9 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
         }
         // Sources complémentaires (365Scores, GitHub) : en arrière-plan, avec délai maximum, elles ne bloquent jamais l'affichage
         const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("délai dépassé")), ms))]);
-        async function extras(d) {
+        async function extras(d, light) {
             if (N365) { try { await withTimeout(merge365(d), 9000); } catch (e) { n365Status = "365Scores : " + e.message; } }
-            try { await withTimeout(mergeGH(d), 9000); } catch (e) { ghStatus = "GitHub : " + e.message; }
+            if (!light) try { await withTimeout(mergeGH(d), 9000); } catch (e) { ghStatus = "GitHub : " + e.message; }
         }
         // Noms génériques ("First Round", "Group Stage"…) : on retrouve le vrai nom de la compétition pour ne pas mélanger deux coupes différentes
         const GENERIC_LG = /^(?:the )?(?:first|second|third|fourth|fifth|sixth|seventh|1st|2nd|3rd|4th|5th|6th|preliminary|qualifying|group|knockout|round|quarter|semi|final|play-?offs?|league phase|matchday|regular season|stage|phase)\b/i;
@@ -1044,7 +1044,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             })));
             const fail = res.find(r => r.status === "rejected");
             if (res.every(r => r.status === "rejected")) lastErr = fail.reason.message; else { lastErr = ""; lastOk = Date.now(); }
-            const ex = noExtras ? Promise.resolve() : Promise.allSettled(days.map((d, i) => res[i].status === "fulfilled" ? extras(d) : null));
+            const ex = noExtras === true ? Promise.resolve() : Promise.allSettled(days.map((d, i) => res[i].status === "fulfilled" ? extras(d, noExtras === "light") : null));
             await Promise.race([ex, new Promise(r => setTimeout(r, 1200))]);   // si les compléments sont déjà en cache : un seul affichage
             detectGoals();
             renderAll();
@@ -1795,20 +1795,25 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
         }
         const tierM = m => lgTier(m.lg);
         const BOTOLA_BTN = '';
-        function grouped(list, rowFn, withBtn, byTime) {
+        function grouped(list, rowFn, withBtn, byTime, limit) {
+            let used = 0, hidden = 0;
             const g = {};
             list.forEach(m => (g[m.lg] ||= []).push(m));
             const br = lgRank("Moroccan Botola Pro"); let placed = !withBtn;
             const first = k => g[k].reduce((t, m) => (t === "" || m.start < t) ? m.start : t, "");
             let out = Object.keys(g).sort((x, y) => { const px = mainPri(x, g[x]), py = mainPri(y, g[y]); if (byTime && px < 99 && py < 99) { const d = first(x).localeCompare(first(y)); if (d) return d; } if (byTime && px === 99 && py === 99) { const d = lgTier(x) - lgTier(y); if (d) return d; } return (px - py) || lgCmp(x, y); }).map(k => {
+                if (limit && used >= limit) { hidden += g[k].length; return ""; } used += g[k].length;
                 let pre = ""; if (!placed && lgRank(k) >= br) { pre = BOTOLA_BTN; placed = true; }
                 const sl = (g[k].find(m => m.slug && m.slug !== "all" && m.slug !== "tsdb") || {}).slug;
                 const sbtn = sl ? `<button class="standings-btn" data-std="${esc(sl)}">🏆 Classement</button>` : "";
                 const sbox = sl && stdOpen.has(sl) && stdCache[sl] ? `<div class="standings std-box" data-slug="${esc(sl)}">${stdCache[sl].html}</div>` : "";
                 return pre + `<section class="competition-group"><div class="competition-header">${lgFlag(g[k], k)}<span class="flag">${lgIcon(g[k])}</span>${esc(lgDisp(k, g[k]))}${sbtn}<span class="count">${g[k].length} match(s)</span></div>${sbox}${g[k].map(rowFn).join("")}</section>`;
             }).join("");
+            if (hidden) out += `<button class="btn-action btn-accent" id="more-matches" type="button" style="margin:8px auto 18px">Afficher plus de matchs (${hidden} restants)</button>`;
             return placed ? out : out + BOTOLA_BTN;
         }
+        let mLimit = 40, mSig = "";
+        document.addEventListener("click", e => { if (e.target.closest("#more-matches")) { mLimit += 60; renderMatches(true); } });
         function renderLive() {
             if (vidBusy()) { vidPending = true; return; }
             const box = document.getElementById("live-list"), meta = document.getElementById("live-meta");
@@ -1836,7 +1841,8 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             else if (tab === "today") list = list.filter(m => localDay(m.start) === t).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mp(a) - mp(b) || b.start.localeCompare(a.start)).slice(0, 150);
             else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || tierM(a) - tierM(b) || a.start.localeCompare(b.start)).slice(0, 150);
-            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next") : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`;
+            { const sg = tab + "|" + lgSel.value + "|" + q + "|" + window.dayPick + "|" + (window.compFilter ? window.compFilter.name : ""); if (sg !== mSig) { mSig = sg; mLimit = 40; } }
+            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`;
             radPaint();
         }
         function updateTicker() {
@@ -1854,7 +1860,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             tickerSig = html;
             const track = document.getElementById("ticker-track");
             track.innerHTML = html + html;
-            track.style.setProperty("--ticker-duration", Math.max(30, (track.scrollWidth / 2) / 70) + "s");
+            track.style.setProperty("--ticker-duration", Math.max(30, items.length * 4.5) + "s");
         }
         function renderAll() {
             renderLive(); renderMatches(); updateTicker();
@@ -2080,8 +2086,12 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
         setInterval(vidFlush, 5000);
         let searchT; document.getElementById("search").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(() => renderMatches(true), 250); });
 
-        refresh(allDays(0, 0), true).then(() => {
-            (window.requestIdleCallback || (f => setTimeout(f, 2000)))(() => refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)), { timeout: 6000 });
+        refresh(allDays(0, 0), "light").then(() => {
+            // les autres jours et les sources complémentaires (GitHub…) ne se chargent qu'à la première interaction, ou après 20 s
+            let done = false; const evs = ["pointerdown", "keydown", "scroll", "touchstart"];
+            const go = () => { if (done) return; done = true; evs.forEach(x => removeEventListener(x, go)); refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); };
+            evs.forEach(x => addEventListener(x, go, { passive: true }));
+            setTimeout(go, document.documentElement.dataset.comp === "botola-pro" ? 1500 : 20000);
         });
         // onglet masqué : on ralentit (1 rafraîchissement sur 4) au lieu de recharger toutes les 30 s pour rien
         let hidTick = 0;
