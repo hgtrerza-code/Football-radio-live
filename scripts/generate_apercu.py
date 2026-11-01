@@ -8,6 +8,7 @@ ajouter l'option --index pour que ce script s'en charge aussi.
 Utilise uniquement la bibliothèque standard Python. À lancer à la racine du dépôt.
 """
 import html, json, os, re, sys, urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -40,7 +41,7 @@ CSS = ("#apercu-matchs{margin:1.5rem 0 0;padding:1rem 0;border-top:1px solid var
        "#apercu-matchs ul{list-style:none;padding:0}#apercu-matchs li{padding:.15rem 0}"
        "#apercu-matchs time{color:var(--accent);font-weight:600;margin-right:.25rem}"
        "#apercu-matchs .ap-upd{font-size:.75rem}"
-       "#apercu-matchs .ap-tbl{overflow-x:auto}#apercu-matchs table{border-collapse:collapse;width:100%;font-size:.8rem}"
+       "#apercu-matchs .ap-tbl{overflow-x:auto}#apercu-matchs table{border-collapse:collapse;width:100%;max-width:560px;font-size:.8rem}"
        "#apercu-matchs th,#apercu-matchs td{padding:.2rem .45rem;text-align:center;border-bottom:1px solid var(--border)}"
        "#apercu-matchs td:nth-child(2),#apercu-matchs th:nth-child(2){text-align:left}")
 
@@ -64,14 +65,35 @@ def fetch(kind, slug, query=""):
         p = os.path.join(mock, f"{kind}_{slug}.json")
         return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else None
     base = ESPN_STD if kind == "standings" else ESPN
+    first = None
     for u in (f"{WORKER}soccer/{slug}/{kind}{query}", f"{base}{slug}/{kind}{query}"):
         try:
             d = http_get(u)
         except Exception:
             continue
         if isinstance(d, dict) and ("events" in d or "children" in d or "standings" in d):
-            return d
-    return None
+            if kind != "scoreboard" or d.get("events"):
+                return d
+            first = first or d  # réponse vide : on essaie la source suivante
+    return first
+
+
+def fetch_days(code, now):
+    """Scores jour par jour (comme le site) : de J-2 à J+3, sans doublons."""
+    days = [(now.date() + timedelta(days=n)).strftime("%Y%m%d") for n in range(-2, 4)]
+    with ThreadPoolExecutor(6) as ex:
+        res = list(ex.map(lambda d: fetch("scoreboard", code, f"?dates={d}&limit=300"), days))
+    evs, seen, ok = [], set(), False
+    for r in res:
+        if r is None:
+            continue
+        ok = True
+        for e in r.get("events") or []:
+            if e.get("id") in seen:
+                continue
+            seen.add(e.get("id"))
+            evs.append(e)
+    return {"events": evs} if ok else None
 
 
 def to_int(v):
@@ -251,18 +273,18 @@ def write_if_changed(path, old, new):
 
 def main():
     now = datetime.now(PARIS)
-    q = f"?dates={now.date() - timedelta(days=3):%Y%m%d}-{now.date() + timedelta(days=7):%Y%m%d}&limit=300"
     per_comp = []
     for slug, (name, codes) in COMPS.items():
         ev = std = None
         for code in codes:
-            e, s = fetch("scoreboard", code, q), fetch("standings", code)
+            e, s = fetch_days(code, now), fetch("standings", code)
             if (e and e.get("events")) or s:
                 ev, std = e, s
                 break
             ev = ev or e
         events = parse_events(ev, name)
         rows = parse_standings(std)
+        print(f"  {name} : {len(events)} matchs récupérés, {len(rows)} lignes de classement")
         path = f"{slug}.html"
         if ev is None and std is None:
             print(f"! {name} : aucune donnée, page laissée telle quelle")
