@@ -1,6 +1,6 @@
 {
  "date": "2026-11-01",
- "generated": "2026-11-01T10:37:27.778Z",
+ "generated": "2026-11-01T12:44:23.101Z",
  "extra": 243,
  "matches": [
   {
@@ -62,11 +62,11 @@
    "id": "401875002",
    "lg": "Serie A",
    "start": "2026-11-01T11:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "54'",
    "home": "Como",
    "away": "Venezia",
-   "h": 0,
+   "h": 1,
    "a": 0
   },
   {
@@ -227,11 +227,11 @@
    "id": "401875560",
    "lg": "Eredivisie",
    "start": "2026-11-01T11:15Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "69'",
    "home": "PEC Zwolle",
    "away": "ADO Den Haag",
-   "h": 0,
+   "h": 1,
    "a": 0
   },
   {
@@ -271,8 +271,8 @@
    "id": "401878959",
    "lg": "Jupiler Pro League",
    "start": "2026-11-01T12:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "14'",
    "home": "Cercle Brugge KSV",
    "away": "Antwerp",
    "h": 0,
@@ -315,12 +315,12 @@
    "id": "401888374",
    "lg": "Süper Lig",
    "start": "2026-11-01T10:30Z",
-   "state": "in",
-   "label": "7'",
+   "state": "post",
+   "label": "90'+7'",
    "home": "Amed SFK",
    "away": "Eyupspor",
-   "h": 0,
-   "a": 0
+   "h": 5,
+   "a": 1
   },
   {
    "id": "401888261",
@@ -634,19 +634,19 @@
    "id": "401885072",
    "lg": "2. Bundesliga",
    "start": "2026-11-01T12:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "14'",
    "home": "Hannover 96",
    "away": "Dynamo Dresden",
    "h": 0,
-   "a": 0
+   "a": 1
   },
   {
    "id": "401885067",
    "lg": "2. Bundesliga",
    "start": "2026-11-01T12:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "14'",
    "home": "SpVgg Greuther Fürth",
    "away": "Holstein Kiel",
    "h": 0,
@@ -656,12 +656,12 @@
    "id": "401885073",
    "lg": "2. Bundesliga",
    "start": "2026-11-01T12:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "14'",
    "home": "St. Pauli",
    "away": "1. FC Nürnberg",
    "h": 0,
-   "a": 0
+   "a": 1
   }
  ]
 }
