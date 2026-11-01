@@ -619,6 +619,22 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 @media(min-width:1100px){#hero{min-height:350px}}
 #apercu-matchs{content-visibility:auto;contain-intrinsic-size:auto 1200px}
 
+/* ===== Lignes de match : étoile + nom + logo toujours alignés (logo jamais renvoyé sous le nom) ===== */
+.m-row{grid-template-columns:78px minmax(0,1fr) auto minmax(0,1fr)}
+.m-home,.m-away{display:flex;align-items:center;gap:6px;min-width:0;line-height:1.25;overflow-wrap:break-word}
+.m-home{justify-content:flex-end;text-align:right}
+.m-away{justify-content:flex-start;text-align:left}
+.m-home .m-logo,.m-away .m-logo{flex:0 0 auto;width:22px;height:22px;margin:0}
+.m-row .fav-star{flex:0 0 auto;margin:0;padding:2px 3px}
+@media (max-width:600px){
+  .m-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;padding:.6rem .55rem;font-size:.8rem}
+  .m-date{grid-column:1/-1}
+  .m-home,.m-away{gap:5px}
+  .m-home .m-logo,.m-away .m-logo{width:20px;height:20px}
+  .m-score{min-width:54px;font-size:.95rem;padding:3px 6px}
+  .m-row .fav-star{font-size:.95rem;padding:2px}
+}
+
 #apercu-matchs{margin:1.5rem 0 0;padding:1rem 0;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem;line-height:1.6}
 #apercu-matchs h2{font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.25rem}
 #apercu-matchs h3{font-size:.9rem;font-weight:600;color:var(--text-main);margin:.9rem 0 .25rem}
