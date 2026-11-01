@@ -2,7 +2,7 @@ name: Aperçu pages compétitions
 
 on:
   schedule:
-    - cron: "7,37 * * * *"
+    - cron: "7 * * * *"
   workflow_dispatch:
 
 permissions:
