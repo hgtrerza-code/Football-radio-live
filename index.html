@@ -639,6 +639,24 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 #apercu-matchs time{color:var(--accent);font-weight:600;margin-right:.25rem}
 #apercu-matchs .ap-upd{font-size:.75rem}
 </style>
+<style id="perf-css">
+/* Perf : animations composées (transform/opacity) au lieu de box-shadow/width/height/filter */
+.pulse,.ic-live,.hl-live i{position:relative;box-shadow:none}
+.pulse{animation:none}
+.hl-live i{animation:none}
+.ic-live{animation:ic-blink 1s ease-in-out infinite}
+.pulse::after,.ic-live::after,.hl-live i::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--live-red);opacity:0;animation:pulse-ring 1.5s infinite;will-change:transform,opacity}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.7}70%,100%{transform:scale(3);opacity:0}}
+.goal-toast::after{width:100%;transform-origin:left center;animation-name:tv-bar-x}
+@keyframes tv-bar-x{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.rB .eq i{height:14px;transform-origin:bottom;animation-name:rq-eq-y}
+@keyframes rq-eq-y{0%,100%{transform:scaleY(.22)}50%{transform:scaleY(1)}}
+@keyframes ic-flash{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.75}}
+@keyframes tv-tag-pulse{from{opacity:1}to{opacity:.8}}
+/* Perf : le navigateur saute le rendu des groupes hors écran (moins de Style/Layout, TBT en baisse) */
+.competition-group{content-visibility:auto;contain-intrinsic-size:auto 420px}
+@media (prefers-reduced-motion:reduce){.pulse::after,.ic-live::after,.hl-live i::after{animation:none}}
+</style>
 </head>
 <body>
 <script>try{if(sessionStorage.getItem("fl_splash"))document.write("<style>#splash{display:none!important}</style>");else sessionStorage.setItem("fl_splash","1")}catch(e){}</script><div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
@@ -744,7 +762,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             };
         })();
         // Logos ESPN : version redimensionnée (les PNG « 500 » pèsent 100 à 300 Kio chacun)
-        const sm = (u, w) => { const m = String(u || "").match(/^https?:\/\/a\.espncdn\.com(\/i\/(?:teamlogos|leaguelogos)\/[^?#]+\.png)/i); return m ? "https://a.espncdn.com/combiner/i?img=" + m[1] + "&w=" + (w || 96) + "&h=" + (w || 96) : u; };
+        const sm = (u, w) => { const m = String(u || "").match(/^https?:\/\/a\.espncdn\.com(\/i\/(?:teamlogos|leaguelogos)\/[^?#]+\.png)/i); return m ? "https://a.espncdn.com/combiner/i?img=" + m[1] + "&w=" + (w || 64) + "&h=" + (w || 64) : u; };
         const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
         const ymd = d => d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
         const localDay = iso => new Date(iso).toLocaleDateString("sv-SE");
@@ -837,7 +855,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
         }
         // Noms génériques ("First Round", "Group Stage"…) : on retrouve le vrai nom de la compétition pour ne pas mélanger deux coupes différentes
         const GENERIC_LG = /^(?:the )?(?:first|second|third|fourth|fifth|sixth|seventh|1st|2nd|3rd|4th|5th|6th|preliminary|qualifying|group|knockout|round|quarter|semi|final|play-?offs?|league phase|matchday|regular season|stage|phase)\b/i;
-        const LG_INFO = {};
+        const LG_INFO = (() => { try { return JSON.parse(localStorage.getItem("fl_lginfo") || "{}") || {}; } catch (e) { return {}; } })();
         async function fixGenericLeagues(evs) {
             const bad = evs.filter(m => !m.tsdb && m.lid && isGenericLg(m.lg || ""));
             const need = [...new Set(bad.map(m => m.lid))].filter(id => !(id in LG_INFO));
@@ -848,6 +866,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
                     const j = await r.json(); LG_INFO[id] = { name: j.name || j.shortName || "", slug: j.slug || "" };
                 } catch (e) { LG_INFO[id] = null; }
             }));
+            try { const keep = {}; Object.keys(LG_INFO).forEach(k => { if (LG_INFO[k]) keep[k] = LG_INFO[k]; }); localStorage.setItem("fl_lginfo", JSON.stringify(keep)); } catch (e) { }
             bad.forEach(m => {
                 const i = LG_INFO[m.lid];
                 if (i && i.name) { m.fslug = i.slug; m.lg = i.name; }
@@ -1224,7 +1243,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             const c = lgCountry(list || [], name);
             return base.toLowerCase().startsWith(c.toLowerCase()) ? base : c + " · " + base;
         }
-        const logo = u => u ? `<img class="m-logo" src="${esc(u)}" alt="" loading="lazy" onerror="this.remove()">` : "";
+        const logo = u => u ? `<img class="m-logo" src="${esc(u)}" alt="" width="20" height="20" loading="lazy" decoding="async" onerror="this.remove()">` : "";
         const open = new Set(), cache = {};   // cache[id] = { html, t, loading }
         const chev = '<span class="chev">▸</span>';
         function wrap(m, row) {
@@ -2254,7 +2273,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
     const sig = list.map(p => [p.kind, p.n, p.m.id, p.m.h, p.m.a, p.m.label].join("|")).join("~");
     if (sig === heroSig) return; heroSig = sig;
     const keepId = ($("#hero .hero-card.on") || {}).dataset ? $("#hero .hero-card.on").dataset.id : null;
-    const tm = (n, l) => '<div class="hl-team">' + (l ? '<img src="' + esc(String(l).replace("w=96&h=96", "w=160&h=160")) + '" alt="" width="58" height="58" decoding="async">' : '<span class="hl-ph">' + esc(initials(n)) + '</span>') + '<b>' + esc(n) + '</b></div>';
+    const tm = (n, l) => '<div class="hl-team">' + (l ? '<img src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=128&h=128")) + '" alt="" width="58" height="58" decoding="async">' : '<span class="hl-ph">' + esc(initials(n)) + '</span>') + '<b>' + esc(n) + '</b></div>';
     const slide = p => {
       const m = p.m;
       const lab = p.kind === "live" ? '<span class="hl-live"><i></i>EN DIRECT' + (p.n > 1 ? " · " + p.n + " matchs" : "") + '</span>' : p.kind === "next" ? '<span class="hl-next">PROCHAIN MATCH</span>' : '<span class="hl-end">TERMINÉ</span>';
@@ -2593,7 +2612,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
     if (!img || img.getAttribute("src")) return;
     var st = {}; try { st = JSON.parse(localStorage.getItem("fl_cl") || "{}"); } catch (e) { }
     if (st["botola-pro"]) { img.src = st["botola-pro"]; return; }
-    fetch("https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=4520").then(function (r) { return r.json(); }).then(function (j) {
+    new Promise(function (ok) { if (window.requestIdleCallback) requestIdleCallback(ok, { timeout: 6000 }); else setTimeout(ok, 3000); }).then(function () { return fetch("https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=4520"); }).then(function (r) { return r.json(); }).then(function (j) {
       var l = j && j.leagues && j.leagues[0], u = l && (l.strBadge || l.strLogo);
       if (u && /^https?:/i.test(u)) { img.classList.add('lt'); img.src = u; st["botola-pro"] = u; try { localStorage.setItem("fl_cl", JSON.stringify(st)); } catch (e) { } }
     }).catch(function () { });
