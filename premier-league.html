@@ -647,10 +647,17 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 /* Perf : le navigateur saute le rendu des groupes hors écran (moins de Style/Layout, TBT en baisse) */
 .competition-group{content-visibility:auto;contain-intrinsic-size:auto 420px}
 @media (prefers-reduced-motion:reduce){.pulse::after,.ic-live::after,.hl-live i::after{animation:none}}
+/* Squelettes : l'éclat passe par transform (composité) au lieu de background-position */
+.sk{position:relative;overflow:hidden;background:var(--bg-card);animation:none}
+.sk::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);transform:translateX(-100%);animation:fl-sk2 1.3s infinite;will-change:transform}
+@keyframes fl-sk2{to{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){.sk::after{animation:none}}
+.nosplash #splash{display:none!important}
+h1{will-change:opacity}
 </style>
 </head>
 <body>
-<script>try{if(sessionStorage.getItem("fl_splash"))document.write("<style>#splash{display:none!important}</style>");else sessionStorage.setItem("fl_splash","1")}catch(e){}</script><div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
+<script>try{if(sessionStorage.getItem("fl_splash"))document.documentElement.classList.add("nosplash");else sessionStorage.setItem("fl_splash","1")}catch(e){}</script><div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
 <div id="goal-toasts" aria-live="polite"></div>
 
     <header>
@@ -751,7 +758,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             };
         })();
         // Logos ESPN : version redimensionnée (les PNG « 500 » pèsent 100 à 300 Kio chacun)
-        const sm = (u, w) => { const m = String(u || "").match(/^https?:\/\/a\.espncdn\.com(\/i\/(?:teamlogos|leaguelogos)\/[^?#]+\.png)/i); return m ? "https://a.espncdn.com/combiner/i?img=" + m[1] + "&w=" + (w || 64) + "&h=" + (w || 64) : u; };
+        const sm = (u, w) => { const m = String(u || "").match(/^https?:\/\/a\.espncdn\.com(\/i\/(?:teamlogos|leaguelogos)\/[^?#]+\.png)/i); return m ? "https://a.espncdn.com/combiner/i?img=" + m[1] + "&w=" + (w || 56) + "&h=" + (w || 56) : u; };
         const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
         const ymd = d => d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
         const localDay = iso => new Date(iso).toLocaleDateString("sv-SE");
@@ -1232,7 +1239,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
             const c = lgCountry(list || [], name);
             return base.toLowerCase().startsWith(c.toLowerCase()) ? base : c + " · " + base;
         }
-        const logo = u => u ? `<img class="m-logo" src="${esc(u)}" alt="" width="20" height="20" loading="lazy" decoding="async" onerror="this.remove()">` : "";
+        const logo = u => u ? `<img class="m-logo" src="${esc(String(u).replace(/w=64&h=64/, "w=40&h=40"))}" alt="" width="20" height="20" loading="lazy" decoding="async" onerror="this.remove()">` : "";
         const open = new Set(), cache = {};   // cache[id] = { html, t, loading }
         const chev = '<span class="chev">▸</span>';
         function wrap(m, row) {
@@ -2262,12 +2269,12 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
     const sig = list.map(p => [p.kind, p.n, p.m.id, p.m.h, p.m.a, p.m.label].join("|")).join("~");
     if (sig === heroSig) return; heroSig = sig;
     const keepId = ($("#hero .hero-card.on") || {}).dataset ? $("#hero .hero-card.on").dataset.id : null;
-    const tm = (n, l) => '<div class="hl-team">' + (l ? '<img src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=128&h=128")) + '" alt="" width="58" height="58" decoding="async">' : '<span class="hl-ph">' + esc(initials(n)) + '</span>') + '<b>' + esc(n) + '</b></div>';
-    const slide = p => {
+    const tm = (n, l, lz) => '<div class="hl-team">' + (l ? '<img src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=96&h=96")) + '" alt="" width="58" height="58" decoding="async"' + (lz ? ' loading="lazy"' : '') + '>' : '<span class="hl-ph">' + esc(initials(n)) + '</span>') + '<b>' + esc(n) + '</b></div>';
+    const slide = (p, si) => {
       const m = p.m;
       const lab = p.kind === "live" ? '<span class="hl-live"><i></i>EN DIRECT' + (p.n > 1 ? " · " + p.n + " matchs" : "") + '</span>' : p.kind === "next" ? '<span class="hl-next">PROCHAIN MATCH</span>' : '<span class="hl-end">TERMINÉ</span>';
       const mid = p.kind === "next" ? '<div class="hl-vs">VS</div><div class="hl-cd" data-t="' + esc(m.start) + '"></div>' : '<div class="hl-score">' + (m.h ?? 0) + ' <i>-</i> ' + (m.a ?? 0) + '</div><div class="hl-min">' + esc(m.label || "") + '</div>';
-      return '<div class="hero-card" data-id="' + esc(m.id) + '" data-k="' + p.kind + '"><div class="hl-top">' + lab + '<span class="hl-lg">' + esc(lgDisp(m.lg, [m])) + '</span></div><div class="hl-main">' + tm(m.home, m.hl) + '<div class="hl-mid">' + mid + '</div>' + tm(m.away, m.al) + '</div></div>';
+      return '<div class="hero-card" data-id="' + esc(m.id) + '" data-k="' + p.kind + '"><div class="hl-top">' + lab + '<span class="hl-lg">' + esc(lgDisp(m.lg, [m])) + '</span></div><div class="hl-main">' + tm(m.home, m.hl, si > 0) + '<div class="hl-mid">' + mid + '</div>' + tm(m.away, m.al, si > 0) + '</div></div>';
     };
     const dots = list.length > 1 ? '<div class="hl-dots">' + list.map((_, k) => '<button type="button" class="hl-dot" data-i="' + k + '" aria-label="Match ' + (k + 1) + '"></button>').join("") + '</div>' : "";
     box.innerHTML = '<div class="hero-wrap">' + list.map(slide).join("") + dots + '</div>';
@@ -2508,7 +2515,12 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
   let raT = 0;
   window.renderAll = function () {
     if (raT) return;
-    raT = setTimeout(() => { raT = 0; try { baseRenderAll(); renderHero(); decorate(); buildDays(); status(); saveCache(); } catch (e) { console.warn(e); } }, 120);
+    raT = setTimeout(() => {
+      raT = 0;
+      const steps = [renderHero, baseRenderAll, decorate, buildDays, status, saveCache];
+      const run = i => { if (i >= steps.length) return; try { steps[i](); } catch (e) { console.warn(e); } setTimeout(() => run(i + 1), 0); };
+      run(0);
+    }, 120);
   };
   const fab = $("#fab-top");
   window.addEventListener("scroll", () => fab.classList.toggle("show", window.scrollY > 600), { passive: true });
@@ -2609,6 +2621,6 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 })();
 </script>
 <script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "011dde8c92c7439fbcf1b107ca987b0b"}'></script><!-- End Cloudflare Web Analytics -->
+<!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
