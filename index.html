@@ -675,7 +675,7 @@ header{background:rgba(7,11,22,.97)!important}
             PROXY_URL: "https://footlive.hgtrerza.workers.dev",    // votre Worker actuel (scores / classements)
             PROXY2_URL: "https://footlive2.hgtrerza.workers.dev",   // 2e Worker (worker-court.js) : vidéos YouTube (/yt) et 365Scores (/365)
             ESPN: "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
-            DAYS_BEFORE: 2, DAYS_AFTER: 3,           // fenêtre de jours chargée autour d'aujourd'hui
+            DAYS_BEFORE: 2, DAYS_AFTER: 4,           // fenêtre de jours chargée autour d'aujourd'hui
             LIVE_REFRESH_MS: 30 * 1000,              // jour en cours (direct)
             OTHER_REFRESH_MS: 30 * 60 * 1000         // autres jours
         };
@@ -1704,12 +1704,26 @@ header{background:rgba(7,11,22,.97)!important}
             return 100;
         }
         const lgCmp = (a, b) => ((window.compFilter && window.compFilter.main && window.compFilter.main(a)) ? 0 : 1) - ((window.compFilter && window.compFilter.main && window.compFilter.main(b)) ? 0 : 1) || lgRank(a) - lgRank(b) || a.localeCompare(b, "fr");
+        // Les 10 compétitions de la barre : toujours affichées en premier (Direct, Aujourd'hui, Résultats, À venir), dans l'ordre de la barre
+        const MAIN10 = [
+            ["Europe", /^(uefa )?champions league$/i], ["Angleterre", /^(english )?premier league$/i], ["Espagne", /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i],
+            ["Italie", /^(italian )?serie a( (?!2$|ii$|women).*)?$/i], ["Allemagne", /^(german )?bundesliga$/i], ["France", /^(french )?ligue 1( (?!2$|ii$|women).*)?$/i],
+            ["Europe", /^(uefa )?europa league$/i], ["Europe", /^(uefa )?(europa )?conference league$/i], ["Portugal", /^(portuguese )?(liga portugal|primeira liga)( .*)?$/i], ["Maroc", /^(moroccan )?botola pro( inwi)?$/i]
+        ];
+        const _mpMemo = Object.create(null);
+        function mainPri(k, arr) {
+            const raw = String(k || "").split(String.fromCharCode(8203))[0]; let d = "";
+            try { d = lgDisp(k, arr); } catch (e) { }
+            const i = MAIN10.findIndex(x => x[1].test(raw) && d.indexOf(x[0] + " · ") === 0);
+            return i < 0 ? 99 : i;
+        }
+        const mp = m => (_mpMemo[m.lg] ??= mainPri(m.lg, [m]));
         const BOTOLA_BTN = '';
         function grouped(list, rowFn, withBtn) {
             const g = {};
             list.forEach(m => (g[m.lg] ||= []).push(m));
             const br = lgRank("Moroccan Botola Pro"); let placed = !withBtn;
-            let out = Object.keys(g).sort(lgCmp).map(k => {
+            let out = Object.keys(g).sort((x, y) => (mainPri(x, g[x]) - mainPri(y, g[y])) || lgCmp(x, y)).map(k => {
                 let pre = ""; if (!placed && lgRank(k) >= br) { pre = BOTOLA_BTN; placed = true; }
                 const sl = (g[k].find(m => m.slug && m.slug !== "all" && m.slug !== "tsdb") || {}).slug;
                 const sbtn = sl ? `<button class="standings-btn" data-std="${esc(sl)}">🏆 Classement</button>` : "";
@@ -1743,8 +1757,8 @@ header{background:rgba(7,11,22,.97)!important}
             else if (tab === "comp") { const rk = m => m.state === "in" ? 0 : m.state === "pre" ? 1 : 2; list = list.sort((a, b) => rk(a) - rk(b) || (rk(a) === 2 ? b.start.localeCompare(a.start) : a.start.localeCompare(b.start))); }
             else if (tab === "day") list = list.filter(m => localDay(m.start) === window.dayPick).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "today") list = list.filter(m => localDay(m.start) === t).sort((a, b) => a.start.localeCompare(b.start));
-            else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => b.start.localeCompare(a.start)).slice(0, 150);
-            else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => a.start.localeCompare(b.start)).slice(0, 150);
+            else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mp(a) - mp(b) || b.start.localeCompare(a.start)).slice(0, 150);
+            else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || a.start.localeCompare(b.start)).slice(0, 150);
             document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true) : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`;
             radPaint();
         }
@@ -2099,7 +2113,7 @@ header{background:rgba(7,11,22,.97)!important}
   $(".search-box").insertAdjacentHTML("beforebegin", '<div class="daystrip" id="daystrip"></div>');
   function buildDays() {
     const box = $("#daystrip"), t = new Date(); if (!box) return;
-    box.innerHTML = [-2, -1, 0, 1, 2, 3].map(o => {
+    box.innerHTML = [-2, -1, 0, 1, 2, 3, 4].map(o => {
       const d = new Date(t); d.setDate(t.getDate() + o); const k = d.toLocaleDateString("sv-SE");
       const lb = o === 0 ? "AUJ." : d.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "").toUpperCase();
       return '<button data-day="' + k + '" class="' + (tab === "day" && window.dayPick === k ? "on" : "") + '"><small>' + lb + '</small><b>' + d.getDate() + '</b></button>';
