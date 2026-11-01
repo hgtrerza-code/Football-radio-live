@@ -1,0 +1,138 @@
+{
+ "date": "2026-11-01",
+ "generated": "2026-11-01T04:47:58.132Z",
+ "matches": [
+  {
+   "id": "401876916",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'+7'",
+   "home": "Pachuca",
+   "away": "Tigres UANL",
+   "h": 3,
+   "a": 0
+  },
+  {
+   "id": "401878616",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'+2'",
+   "home": "Carolina Ascent FC",
+   "away": "Lexington SC",
+   "h": 1,
+   "a": 0
+  },
+  {
+   "id": "401878071",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'+5'",
+   "home": "Llaneros FC",
+   "away": "Atlético Junior",
+   "h": 3,
+   "a": 2
+  },
+  {
+   "id": "401890743",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Butler",
+   "away": "DePaul",
+   "h": 3,
+   "a": 1
+  },
+  {
+   "id": "401901264",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Davidson",
+   "away": "Saint Louis",
+   "h": 1,
+   "a": 1
+  },
+  {
+   "id": "401892275",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Elon",
+   "away": "Campbell",
+   "h": 3,
+   "a": 0
+  },
+  {
+   "id": "401899055",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Furman",
+   "away": "Wofford",
+   "h": 4,
+   "a": 1
+  },
+  {
+   "id": "401891860",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Jacksonville",
+   "away": "Florida Gulf Coast",
+   "h": 3,
+   "a": 1
+  },
+  {
+   "id": "401898084",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Pennsylvania",
+   "away": "Columbia",
+   "h": 1,
+   "a": 1
+  },
+  {
+   "id": "401887784",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Providence",
+   "away": "Seton Hall",
+   "h": 0,
+   "a": 1
+  },
+  {
+   "id": "401892221",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Stetson",
+   "away": "Central Arkansas",
+   "h": 1,
+   "a": 3
+  },
+  {
+   "id": "401889893",
+   "lg": "Football — autres compétitions",
+   "start": "2026-10-31T23:00Z",
+   "state": "post",
+   "label": "90'",
+   "home": "Dayton",
+   "away": "VCU",
+   "h": 2,
+   "a": 0
+  }
+ ]
+}
