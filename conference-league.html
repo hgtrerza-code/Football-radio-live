@@ -34,6 +34,8 @@
     <meta name="twitter:image" content="https://www.footlivepro.com/og-image.png">
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://www.footlivepro.com/#site","name":"FootLive Pro","url":"https://www.footlivepro.com/","inLanguage":"fr","publisher":{"@id":"https://www.footlivepro.com/#org"}},{"@type":"Organization","@id":"https://www.footlivepro.com/#org","name":"FootLive Pro","url":"https://www.footlivepro.com/","logo":{"@type":"ImageObject","url":"https://www.footlivepro.com/favicon-192x192.png","width":192,"height":192}},{"@type":"CollectionPage","@id":"https://www.footlivepro.com/conference-league.html#page","url":"https://www.footlivepro.com/conference-league.html","name":"Conference League : scores en direct | FootLive Pro","description":"Conference League en direct : scores, résultats, prochains matchs et classement de la phase de ligue de la troisième compétition européenne de l’UEFA.","inLanguage":"fr","isPartOf":{"@id":"https://www.footlivepro.com/#site"},"breadcrumb":{"@id":"https://www.footlivepro.com/conference-league.html#bc"}},{"@type":"BreadcrumbList","@id":"https://www.footlivepro.com/conference-league.html#bc","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.footlivepro.com/"},{"@type":"ListItem","position":2,"name":"Conference League","item":"https://www.footlivepro.com/conference-league.html"}]},{"@type":"FAQPage","@id":"https://www.footlivepro.com/conference-league.html#faq","mainEntity":[{"@type":"Question","name":"Où suivre les scores de la Conference League en direct ?","acceptedAnswer":{"@type":"Answer","text":"Sur cette page : les matchs en cours s’affichent avec un score actualisé automatiquement. Touchez un match pour voir ses statistiques détaillées."}},{"@type":"Question","name":"Comment voir le classement de la Conference League ?","acceptedAnswer":{"@type":"Answer","text":"Utilisez le bouton « Classement » affiché à côté de la compétition : il ouvre le classement mis à jour."}},{"@type":"Question","name":"Quand se jouent les matchs de la Conference League ?","acceptedAnswer":{"@type":"Answer","text":"Généralement le jeudi. Les horaires sont affichés dans votre fuseau horaire."}}]}]}</script>
     <!--APERCU-LD-START--><!--APERCU-LD-END--><title>Conference League : scores en direct | FootLive Pro</title>
+    <link rel="preconnect" href="https://footlive.hgtrerza.workers.dev" crossorigin>
+    <link rel="preconnect" href="https://a.espncdn.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -603,6 +605,30 @@ header{background:rgba(7,11,22,.97)!important}
 .m-wrap{content-visibility:auto;contain-intrinsic-size:auto 52px}
 .m-wrap.open{content-visibility:visible}
 .news-card{content-visibility:auto;contain-intrinsic-size:auto 280px}
+
+/* ===== Anti-CLS : police de secours aux métriques d'Inter + espace réservé aux blocs injectés par JS ===== */
+@font-face{font-family:'Inter Fallback';src:local('Arial'),local('Helvetica Neue'),local('Roboto');size-adjust:107.4%;ascent-override:90.2%;descent-override:22.5%;line-gap-override:0%}
+body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,sans-serif}
+#hero{min-height:205px;contain:layout}
+#daystrip{min-height:58px}
+#matches{min-height:100vh}
+#static-note{min-height:1.6em}
+#tabbar{min-height:46px}
+@media(min-width:700px){#hero{min-height:300px}}
+@media(min-width:1100px){#hero{min-height:350px}}
+#apercu-matchs{content-visibility:auto;contain-intrinsic-size:auto 1200px}
+
+/* ===== Lignes de match sur téléphone (PC inchangé) ===== */
+@media (max-width:600px){
+  .m-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;padding:.6rem .55rem;font-size:.8rem}
+  .m-date{grid-column:1/-1}
+  .m-home,.m-away{display:flex;align-items:center;gap:5px;min-width:0;line-height:1.25;overflow-wrap:break-word}
+  .m-home{justify-content:flex-end;text-align:right}
+  .m-away{justify-content:flex-start;text-align:left}
+  .m-home .m-logo,.m-away .m-logo{flex:0 0 auto;width:20px;height:20px;margin:0}
+  .m-score{min-width:54px;font-size:.95rem;padding:3px 6px}
+  .m-row .fav-star{font-size:.95rem;padding:2px}
+}
 </style>
 <style id="apercu-css">#apercu-matchs{margin:1.5rem 0 0;padding:1rem 0;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem;line-height:1.6}#apercu-matchs h2{font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.25rem}#apercu-matchs h3{font-size:.9rem;font-weight:600;color:var(--text-main);margin:.9rem 0 .25rem}#apercu-matchs ul{list-style:none;padding:0}#apercu-matchs li{padding:.15rem 0}#apercu-matchs time{color:var(--accent);font-weight:600;margin-right:.25rem}#apercu-matchs .ap-upd{font-size:.75rem}#apercu-matchs .ap-tbl{overflow-x:auto}#apercu-matchs table{border-collapse:collapse;width:100%;max-width:560px;font-size:.8rem}#apercu-matchs th,#apercu-matchs td{padding:.2rem .45rem;text-align:center;border-bottom:1px solid var(--border)}#apercu-matchs td:nth-child(2),#apercu-matchs th:nth-child(2){text-align:left}</style></head>
 <body>
@@ -613,17 +639,19 @@ header{background:rgba(7,11,22,.97)!important}
         <div class="container header-content">
             <h1><span class="brand-mark"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12h"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12h)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></span><b>FootLive <span>Pro</span></b><span class="sr-only"> : Conference League en direct, scores, résultats et classement</span></h1>
         </div>
+        <nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="#scores" data-go="scores" class="on"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span>Scores</a><a href="#radio" data-go="radio"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="15" cy="14" r="3"/><path d="M6 12h3M6 15h3"/></svg></span>Radio</a><a href="#table" data-go="table"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span>Classements</a><a href="#news" data-go="news"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Actus</a></div></nav>
         <div class="container">
             <div class="ticker" id="ticker" aria-label="Actualités du football mondial">
                 <div class="ticker-viewport"><div class="ticker-track" id="ticker-track"><span class="ticker-item">Chargement des infos du football…</span></div></div>
             </div>
         </div>
     </header>
-    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/2.png" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/23.png" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/15.png" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/12.png" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/10.png" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/9.png" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/2310.png" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/20296.png" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/i/leaguelogos/soccer/500-dark/14.png" data-id="14">Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
+    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
     <main class="container">
     <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
     <div id="scores-view">
+        <div id="hero"></div>
         <div class="sec-title">📅 Calendrier & résultats <small>touchez un match pour voir les statistiques détaillées</small></div>
         <div class="control-group">
             <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
@@ -635,6 +663,7 @@ header{background:rgba(7,11,22,.97)!important}
                 </div>
                 <select class="region-select" id="league-filter"><option value="all">🌍 Toutes les ligues</option></select>
             </div>
+            <div class="daystrip" id="daystrip"></div>
             <div class="search-box"><input type="text" id="search" placeholder="🔍 Rechercher une équipe..."></div>
         </div>
         <div id="matches"><div class="sk tall"></div><div class="sk tall"></div><div class="sk"></div><div class="sk"></div></div>
@@ -703,6 +732,8 @@ header{background:rgba(7,11,22,.97)!important}
                 throw last || new Error("réseau indisponible");
             };
         })();
+        // Logos ESPN : version redimensionnée (les PNG « 500 » pèsent 100 à 300 Kio chacun)
+        const sm = (u, w) => { const m = String(u || "").match(/^https?:\/\/a\.espncdn\.com(\/i\/(?:teamlogos|leaguelogos)\/[^?#]+\.png)/i); return m ? "https://a.espncdn.com/combiner/i?img=" + m[1] + "&w=" + (w || 96) + "&h=" + (w || 96) : u; };
         const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
         const ymd = d => d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
         const localDay = iso => new Date(iso).toLocaleDateString("sv-SE");
@@ -726,7 +757,7 @@ header{background:rgba(7,11,22,.97)!important}
             const lid = ((ev.uid || "").match(/l:(\d+)/) || [])[1];
             const fromTop = (top.leagues || []).find(l => String(l.id) === lid);
             const href = fromTop && fromTop.logos && fromTop.logos[0] && fromTop.logos[0].href;
-            return href || (lid ? "https://a.espncdn.com/i/leaguelogos/soccer/500/" + lid + ".png" : "");
+            return sm(href || (lid ? "https://a.espncdn.com/i/leaguelogos/soccer/500/" + lid + ".png" : ""));
         }
         function normalize(ev, top, forced) {
             const c = (ev.competitions && ev.competitions[0]) || {};
@@ -741,7 +772,7 @@ header{background:rgba(7,11,22,.97)!important}
                 id: ev.id, slug: forced || slugOf(ev, top), lg: leagueOf(ev, top), lid: ((ev.uid || "").match(/l:(\d+)/) || [])[1] || "", lgl: leagueLogo(ev, top), start: ev.date, state, off,
                 label: off ? (st.description || "Reporté") : ht ? "Mi-temps" : ((ev.status && ev.status.displayClock) || st.shortDetail || ""),
                 home: home.team.displayName || home.team.name, away: away.team.displayName || away.team.name,
-                hl: home.team.logo, al: away.team.logo,
+                hl: sm(home.team.logo), al: sm(away.team.logo),
                 h: home.score === undefined || home.score === "" ? null : Number(home.score),
                 a: away.score === undefined || away.score === "" ? null : Number(away.score)
             };
@@ -993,7 +1024,7 @@ header{background:rgba(7,11,22,.97)!important}
             ghStatus = ok ? "GitHub (openfootball) : " + ok + "/" + GH_LEAGUES.length + " championnats lus, " + added + " matchs ajoutés pour ce jour." : "GitHub (openfootball) : source indisponible pour la saison " + season + ".";
             try { console.log(ghStatus); } catch (e) { }
         }
-        async function refresh(days) {
+        async function refresh(days, noExtras) {
             if (days.length > 1) loadTsdb().then(renderAll);
             // premier affichage dès que « aujourd'hui » est chargé (sans attendre les 5 autres jours)
             const todayK = ymd(new Date());
@@ -1002,7 +1033,7 @@ header{background:rgba(7,11,22,.97)!important}
             })));
             const fail = res.find(r => r.status === "rejected");
             if (res.every(r => r.status === "rejected")) lastErr = fail.reason.message; else { lastErr = ""; lastOk = Date.now(); }
-            const ex = Promise.allSettled(days.map((d, i) => res[i].status === "fulfilled" ? extras(d) : null));
+            const ex = noExtras ? Promise.resolve() : Promise.allSettled(days.map((d, i) => res[i].status === "fulfilled" ? extras(d) : null));
             await Promise.race([ex, new Promise(r => setTimeout(r, 1200))]);   // si les compléments sont déjà en cache : un seul affichage
             detectGoals();
             renderAll();
@@ -1049,9 +1080,9 @@ header{background:rgba(7,11,22,.97)!important}
         const FLAG = "⚽";
         // Logo de la compétition : plusieurs sources essayées l'une après l'autre, ⚽ seulement en dernier recours
         function lgLogoURLs(list) {
-            const u = []; list.forEach(m => { if (m.lgl) u.push(m.lgl); });
+            const u = []; list.forEach(m => { if (m.lgl) u.push(sm(m.lgl)); });
             const lid = (list.find(m => m.lid) || {}).lid;
-            if (lid) u.push("https://a.espncdn.com/i/leaguelogos/soccer/500/" + lid + ".png", "https://a.espncdn.com/i/leaguelogos/soccer/500-dark/" + lid + ".png");
+            if (lid) u.push(sm("https://a.espncdn.com/i/leaguelogos/soccer/500/" + lid + ".png"), sm("https://a.espncdn.com/i/leaguelogos/soccer/500-dark/" + lid + ".png"));
             return [...new Set(u)];
         }
         function lgNext(img) {
@@ -1229,7 +1260,7 @@ header{background:rgba(7,11,22,.97)!important}
                 const rows = entries.map((e, i) => {
                     const t = (e.team && typeof e.team === "object") ? e.team : { displayName: typeof e.team === "string" ? e.team : "" };
                     const tn = t.displayName || t.shortDisplayName || t.name || t.location || t.abbreviation || (typeof e.team === "string" ? e.team : "") || e.displayName || e.name || "";
-                    const lgo = (Array.isArray(e.logo) ? e.logo[0] : e.logo) || (t.logos && t.logos[0]) || t.logo || "", lg = (lgo && lgo.href) || (typeof lgo === "string" ? lgo : "");
+                    const lgo = (Array.isArray(e.logo) ? e.logo[0] : e.logo) || (t.logos && t.logos[0]) || t.logo || "", lg = sm((lgo && lgo.href) || (typeof lgo === "string" ? lgo : ""), 48);
                     const playing = hi && hi.has(tn) ? "playing" : "";
                     return `<tr class="${playing}"><td>${esc(sval(e, "rank") || i + 1)}</td><td class="tn">${lg ? `<img src="${esc(lg)}" alt="" onerror="this.remove()">` : ""}${esc(tn)}</td><td>${esc(sval(e, "gamesPlayed"))}</td><td>${esc(sval(e, "wins"))}</td><td>${esc(sval(e, "ties"))}</td><td>${esc(sval(e, "losses"))}</td><td>${esc(sval(e, "pointsFor"))}</td><td>${esc(sval(e, "pointsAgainst"))}</td><td>${esc(sval(e, "pointDifferential"))}</td><td class="pts">${esc(sval(e, "points"))}</td></tr>`;
                 }).join("");
@@ -2038,7 +2069,9 @@ header{background:rgba(7,11,22,.97)!important}
         setInterval(vidFlush, 5000);
         let searchT; document.getElementById("search").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(() => renderMatches(true), 250); });
 
-        refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER));
+        refresh(allDays(0, 0), true).then(() => {
+            (window.requestIdleCallback || (f => setTimeout(f, 2000)))(() => refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)), { timeout: 6000 });
+        });
         // onglet masqué : on ralentit (1 rafraîchissement sur 4) au lieu de recharger toutes les 30 s pour rien
         let hidTick = 0;
         setInterval(() => { if (document.hidden && ++hidTick % 4) return; refresh(allDays(0, 0)).then(refreshOpen); }, CFG.LIVE_REFRESH_MS);
@@ -2145,7 +2178,6 @@ header{background:rgba(7,11,22,.97)!important}
 
   // ---------- Sélecteur de jour ----------
   window.dayPick = "";
-  $(".search-box").insertAdjacentHTML("beforebegin", '<div class="daystrip" id="daystrip"></div>');
   function buildDays() {
     const box = $("#daystrip"), t = new Date(); if (!box) return;
     box.innerHTML = [-2, -1, 0, 1, 2, 3, 4].map(o => {
@@ -2162,7 +2194,6 @@ header{background:rgba(7,11,22,.97)!important}
   $("#filters").addEventListener("click", () => buildDays());
 
   // ---------- Carte « À la une » ----------
-  $("#scores-view").insertAdjacentHTML("afterbegin", '<div id="hero"></div>');
   const heroPref = (a, b) => (isMain10(b) - isMain10(a)) || (window.isFavMatch(b) - window.isFavMatch(a)) || lgRank(a.lg) - lgRank(b.lg);
   function minOf(m) { const x = String(m.label || "").match(/(\d+)/); return x ? +x[1] : 0; }
   function heroScore(m) {
@@ -2202,7 +2233,7 @@ header{background:rgba(7,11,22,.97)!important}
     const sig = list.map(p => [p.kind, p.n, p.m.id, p.m.h, p.m.a, p.m.label].join("|")).join("~");
     if (sig === heroSig) return; heroSig = sig;
     const keepId = ($("#hero .hero-card.on") || {}).dataset ? $("#hero .hero-card.on").dataset.id : null;
-    const tm = (n, l) => '<div class="hl-team">' + (l ? '<img src="' + esc(l) + '" alt="" loading="lazy">' : '<span class="hl-ph">' + esc(initials(n)) + '</span>') + '<b>' + esc(n) + '</b></div>';
+    const tm = (n, l) => '<div class="hl-team">' + (l ? '<img src="' + esc(String(l).replace("w=96&h=96", "w=160&h=160")) + '" alt="" width="58" height="58" decoding="async">' : '<span class="hl-ph">' + esc(initials(n)) + '</span>') + '<b>' + esc(n) + '</b></div>';
     const slide = p => {
       const m = p.m;
       const lab = p.kind === "live" ? '<span class="hl-live"><i></i>EN DIRECT' + (p.n > 1 ? " · " + p.n + " matchs" : "") + '</span>' : p.kind === "next" ? '<span class="hl-next">PROCHAIN MATCH</span>' : '<span class="hl-end">TERMINÉ</span>';
@@ -2425,9 +2456,6 @@ header{background:rgba(7,11,22,.97)!important}
     if (!fromHistory) { try { history.pushState(null, "", p === "scores" ? location.pathname + location.search : "#" + p); } catch (e) { } }
     window.scrollTo({ top: 0 });
   };
-  const oldBar = $("#tabbar"); if (oldBar) oldBar.remove();
-  $("header").querySelector(".header-content").insertAdjacentHTML("afterend",
-    '<nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="#scores" data-go="scores" class="on"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span>Scores</a><a href="#radio" data-go="radio"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="15" cy="14" r="3"/><path d="M6 12h3M6 15h3"/></svg></span>Radio</a><a href="#table" data-go="table"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span>Classements</a><a href="#news" data-go="news"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Actus</a></div></nav>');
   $("#tabbar").addEventListener("click", e => { const a = e.target.closest("a[data-go]"); if (!a) return; e.preventDefault(); showPage(a.dataset.go); });
   window.addEventListener("popstate", () => showPage(location.hash.slice(1) || "scores", true));
   $$(".header-actions [data-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
@@ -2448,9 +2476,10 @@ header{background:rgba(7,11,22,.97)!important}
     (window.requestIdleCallback || (f => setTimeout(f, 3000)))(() => { try { const s = JSON.stringify({ t: Date.now(), d: byDay }); if (s.length < 3.5e6) localStorage.setItem("fl_cache", s); } catch (e) { } }, { timeout: 8000 });
   }
   const baseRenderAll = window.renderAll;
+  let raT = 0;
   window.renderAll = function () {
-    baseRenderAll();
-    try { renderHero(); decorate(); buildDays(); status(); saveCache(); } catch (e) { console.warn(e); }
+    if (raT) return;
+    raT = setTimeout(() => { raT = 0; try { baseRenderAll(); renderHero(); decorate(); buildDays(); status(); saveCache(); } catch (e) { console.warn(e); } }, 120);
   };
   const fab = $("#fab-top");
   window.addEventListener("scroll", () => fab.classList.toggle("show", window.scrollY > 600), { passive: true });
@@ -2509,7 +2538,7 @@ header{background:rgba(7,11,22,.97)!important}
   });
   // Page de compétition (ex. ligue-1.html) : même page que l'accueil, filtrée sur la compétition
   const cpSlug = document.documentElement.dataset.comp;
-  if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) applyComp(ca); }
+  if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) { const t0 = document.title; applyComp(ca); document.title = t0; } }
   ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter) { window.compFilter = null; compChip(); } }, true));
   document.addEventListener("click", e => {
     if (!e.target.closest("#comp-clear")) return;
