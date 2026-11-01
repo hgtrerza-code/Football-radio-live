@@ -675,7 +675,7 @@ header{background:rgba(7,11,22,.97)!important}
             PROXY_URL: "https://footlive.hgtrerza.workers.dev",    // votre Worker actuel (scores / classements)
             PROXY2_URL: "https://footlive2.hgtrerza.workers.dev",   // 2e Worker (worker-court.js) : vidéos YouTube (/yt) et 365Scores (/365)
             ESPN: "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
-            DAYS_BEFORE: 2, DAYS_AFTER: 3,           // fenêtre de jours chargée autour d'aujourd'hui
+            DAYS_BEFORE: 2, DAYS_AFTER: 4,           // fenêtre de jours chargée autour d'aujourd'hui
             LIVE_REFRESH_MS: 30 * 1000,              // jour en cours (direct)
             OTHER_REFRESH_MS: 30 * 60 * 1000         // autres jours
         };
@@ -2086,7 +2086,7 @@ header{background:rgba(7,11,22,.97)!important}
   $(".search-box").insertAdjacentHTML("beforebegin", '<div class="daystrip" id="daystrip"></div>');
   function buildDays() {
     const box = $("#daystrip"), t = new Date(); if (!box) return;
-    box.innerHTML = [-2, -1, 0, 1, 2, 3].map(o => {
+    box.innerHTML = [-2, -1, 0, 1, 2, 3, 4].map(o => {
       const d = new Date(t); d.setDate(t.getDate() + o); const k = d.toLocaleDateString("sv-SE");
       const lb = o === 0 ? "AUJ." : d.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "").toUpperCase();
       return '<button data-day="' + k + '" class="' + (tab === "day" && window.dayPick === k ? "on" : "") + '"><small>' + lb + '</small><b>' + d.getDate() + '</b></button>';
