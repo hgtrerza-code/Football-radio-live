@@ -752,7 +752,7 @@ header{background:rgba(7,11,22,.97)!important}
             return base + "?dates=" + d + "&limit=1000";
         }
         // Compétitions exclues définitivement + ligues ajoutées explicitement
-        const BLOCK = /bolivia|scotti?s?h|scotland/i;
+        const BLOCK = /bolivia|scotti?s?h|scotland|isra[eëé]l|ligat ha|liga leumit|toto cup/i;
         const EXTRA = [];
         function lgUrl(slug, d) {
             const base = CFG.PROXY_URL ? CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + slug + "/scoreboard" : "https://site.api.espn.com/apis/site/v2/sports/soccer/" + slug + "/scoreboard";
@@ -1013,7 +1013,7 @@ header{background:rgba(7,11,22,.97)!important}
             const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away), th: _tok(m.home), ta: _tok(m.away) }; _keyMemo.set(m, v); } return v; };
             const same = (x, y) => !!x && !!y && (x === y || x.includes(y) || y.includes(x));
             const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.includes(w));
-            const s = ents.flatMap(e => e[1]).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
+            const s = ents.flatMap(e => e[1]).filter(m => !BLOCK.test(String(m.lg))).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
             const keep = [], idx = new Map(), ids = new Map();
             const addIdx = (km, i) => { km.th.concat(km.ta, [km.h, km.a]).forEach(w => { if (!w) return; let l = idx.get(w); if (!l) { l = []; idx.set(w, l); } l.push(i); }); };
             for (const [m, t] of s) {
