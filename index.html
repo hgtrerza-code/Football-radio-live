@@ -684,6 +684,27 @@ h1{will-change:opacity}
 .cb-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .cb-chips a{border:1px solid var(--border);background:var(--bg-card);color:var(--text-main);text-decoration:none;font-weight:700;font-size:.8rem;padding:8px 13px;border-radius:999px}.cb-chips a:hover{border-color:var(--accent);color:var(--accent)}
 .cb-chips button{border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font:700 .8rem/1 Inter,sans-serif;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;flex:0 0 auto}.cb-chips button:hover{color:var(--text-main);border-color:var(--accent)}.cb-chips button.on{background:var(--accent);border-color:var(--accent);color:#04210f}#cb-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}#cb-tabs::-webkit-scrollbar{display:none}
+.cb-card{display:flex;align-items:center;gap:10px}.cb-card .tx{min-width:0}
+.cb-lw{position:relative;width:34px;height:34px;flex:0 0 auto;border-radius:50%;background:linear-gradient(135deg,#334155,#475569);color:#fff;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.cb-lw::before{content:attr(data-i)}
+.cb-lw img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;border-radius:50%;padding:3px;box-sizing:border-box}
+.cb-lgn{display:block;font-size:.62rem;color:var(--text-muted);font-weight:600;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#clubs-view .m-row{cursor:default}#clubs-view .m-home strong,#clubs-view .m-away strong{font-weight:800}
+.cb-sc{display:grid;grid-template-columns:26px 1fr 90px auto;gap:10px;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px;font-size:.9rem}
+.cb-sc .n{color:var(--text-muted);font-weight:800;text-align:center}.cb-sc .nm{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb-sc .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}.cb-sc .bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.cb-sc .g{font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cb-sc:first-child{border-color:rgba(34,197,94,.45)}
+.cb-seo{margin:2rem 0 1rem;padding:1rem 4px 0;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)}
+.cb-seo h2{font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem}.cb-seo h3{font-size:.9rem;font-weight:600;color:var(--text-main);margin:.9rem 0 .2rem}
+.cb-seo ul{padding-left:1.1rem;margin:.3rem 0}.cb-seo a{color:var(--accent);text-decoration:none}.cb-seo a:hover{text-decoration:underline}
+.bt-row{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px}
+.bt-row .n{text-align:center;font-weight:800;color:var(--text-muted)}
+.bt-row .pl{min-width:0;display:flex;align-items:center;gap:10px}.bt-row .pl>div{min-width:0}.bt-row .pl b{display:block;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bt-row .pl small{display:block;color:var(--text-muted);font-size:.72rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bt-row .g{font-weight:800;color:var(--accent);font-size:1.05rem;text-align:right;white-space:nowrap}.bt-row .g small{display:block;color:var(--text-muted);font-weight:600;font-size:.66rem}
+.bt-row:nth-child(-n+3){border-color:rgba(34,197,94,.4)}
+.bt-av{position:relative;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#334155,#475569);flex:0 0 auto;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:800}
+.bt-av::before{content:attr(data-i)}.bt-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#1e293b}
 </style>
 </head>
 <body>
@@ -694,7 +715,7 @@ h1{will-change:opacity}
         <div class="container header-content">
             <h1><span class="brand-mark"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12h"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12h)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></span><b>FootLive <span>Pro</span></b><span class="sr-only"> : scores de football en direct, classements et radios sport</span></h1>
         </div>
-        <nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="#scores" data-go="scores" class="on"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span>Scores</a><a href="#radio" data-go="radio"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="15" cy="14" r="3"/><path d="M6 12h3M6 15h3"/></svg></span>Radio</a><a href="#clubs" data-go="clubs"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8l2.2 1.6-.8 2.6h-2.8l-.8-2.6z"/></svg></span>Clubs</a><a href="#table" data-go="table"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span>Classements</a><a href="#news" data-go="news"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Actus</a></div></nav>
+        <nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="#scores" data-go="scores" class="on"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span>Scores</a><a href="#radio" data-go="radio"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="15" cy="14" r="3"/><path d="M6 12h3M6 15h3"/></svg></span>Radio</a><a href="#clubs" data-go="clubs"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8l2.2 1.6-.8 2.6h-2.8l-.8-2.6z"/></svg></span>Clubs</a><a href="#table" data-go="table"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span>Classements</a><a href="#buteurs" data-go="buteurs"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V8l3-3h12l3 3v10"/><path d="M3 18h18M8 5v13M16 5v13M3 11h18"/></svg></span>Buteurs</a><a href="#news" data-go="news"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Actus</a></div></nav>
         <div class="container">
             <div class="ticker" id="ticker" aria-label="Actualités du football mondial">
                 <div class="ticker-viewport"><div class="ticker-track" id="ticker-track"><span class="ticker-item">Chargement des infos du football…</span></div></div>
@@ -738,6 +759,7 @@ h1{will-change:opacity}
         <h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">FootLive Pro : scores de football en direct, classements, actualités et radios sport</h2>
         <p>FootLive Pro est un site gratuit pour suivre le football du monde entier en temps réel. Retrouvez les scores en direct, les résultats et le programme des matchs de la Ligue 1, de la Premier League, de LaLiga, de la Serie A, de la Bundesliga, de la Ligue des champions, de la Ligue Europa et de nombreux autres championnats.</p>
         <p>Consultez les classements de chaque compétition, lisez les dernières actualités foot issues de sources reconnues (ESPN, BBC Sport, The Guardian, Sky Sports, L’Équipe) et écoutez des radios sport du monde entier en direct, directement depuis votre téléphone ou votre ordinateur. Les données se mettent à jour automatiquement.</p>
+        <p>Explorez aussi nos pages dédiées : <a href="clubs/" style="color:var(--accent)">résultats, prochain match et calendrier des grands clubs</a> et <a href="buteurs/" style="color:var(--accent)">classement des meilleurs buteurs par compétition</a>, par exemple en <a href="buteurs/eng.1.html" style="color:var(--accent)">Premier League</a>, <a href="buteurs/esp.1.html" style="color:var(--accent)">LaLiga</a>, <a href="buteurs/ita.1.html" style="color:var(--accent)">Serie A</a>, <a href="buteurs/ger.1.html" style="color:var(--accent)">Bundesliga</a> ou <a href="buteurs/fra.1.html" style="color:var(--accent)">Ligue 1</a>.</p>
         <div class="faq">
         <h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Questions fréquentes</h2>
         <h3>Comment suivre un match de foot en direct ?</h3>
@@ -2649,7 +2671,7 @@ h1{will-change:opacity}
     ["urawa-red-diamonds", "Urawa Red Diamonds", "Japon", "🇯🇵", "J1 League", "urawa"]
   ];
   const clubOf = s => CLUBS.find(c => c[0] === s);
-  $("main").insertAdjacentHTML("beforeend", '<div id="clubs-view" hidden><div id="cb-hub"></div><div id="cb-det" hidden></div></div>');
+  $("main").insertAdjacentHTML("beforeend", '<div id="clubs-view" hidden><div id="cb-hub"></div><div id="cb-det" hidden></div><section id="cb-seo" class="cb-seo" aria-label="À propos des clubs"></section></div>');
   const cbNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
   const cbYmd = d => d.toISOString().slice(0, 10).replace(/-/g, "");
   const cbJ = u => fetch(u).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
@@ -2667,7 +2689,7 @@ h1{will-change:opacity}
       let lg = String((ev.league && ev.league.name) || (c.league && c.league.name) || (top && top.name) || "").replace(/\u200b.*$/, "");
       try { if (typeof cleanLg === "function") lg = cleanLg(lg); } catch (e) { }
       const st = (ev.status && ev.status.type) || {};
-      out[ev.id] = { id: ev.id, lg, start: ev.date, state: st.state || "pre", off: /postponed|cancel|suspend|abandon/i.test((st.name || "") + " " + (st.description || "")), home: hn, away: an, hs: h.score, as: a.score, isH, logo: isH ? h.team.logo : a.team.logo };
+      out[ev.id] = { id: ev.id, lg, start: ev.date, state: st.state || "pre", off: /postponed|cancel|suspend|abandon/i.test((st.name || "") + " " + (st.description || "")), home: hn, away: an, hs: h.score, as: a.score, isH, logo: isH ? h.team.logo : a.team.logo, hl: cbSm(h.team.logo), al: cbSm(a.team.logo), tid: String((isH ? h : a).team.id || ""), slug: (top && top.slug) || (ev.league && ev.league.slug) || "" };
     });
   }
   const cbCache = {};
@@ -2687,11 +2709,84 @@ h1{will-change:opacity}
   const cbDL = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" });
   const cbTF = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" });
   const cbTeams = m => (m.isH ? "<strong>" + esc(m.home) + "</strong>" : esc(m.home)) + " – " + (m.isH ? esc(m.away) : "<strong>" + esc(m.away) + "</strong>");
+  const cbSm = u => String(u || "").replace(/^http:/, "https:");
+  const cbIni = n => String(n).split(/\s+/).filter(w => /^[A-Za-zÀ-ÿ]/.test(w)).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  const cbLg = u => u ? '<img class="m-logo" src="' + esc(u) + '" alt="" width="20" height="20" loading="lazy" decoding="async" onerror="this.remove()">' : "";
   function cbRow(m) {
-    const d = new Date(m.start); let s = "", cls = "";
-    if (m.off) s = "Reporté"; else if (m.state !== "pre") { s = esc(m.hs) + " – " + esc(m.as); if (m.state === "in") cls = " l"; else { const us = m.isH ? +m.hs : +m.as, th = m.isH ? +m.as : +m.hs; if (us > th) cls = " w"; } }
-    const sub = m.state === "in" ? '<em style="color:var(--live-red);font-weight:800">● EN DIRECT</em>' : "<em>" + esc(m.lg) + "</em>";
-    return '<div class="cb-row"><div class="d">' + cbDF.format(d) + "<b>" + (m.state === "pre" || m.state === "in" ? cbTF.format(d) : "") + '</b></div><div class="m">' + cbTeams(m) + sub + '</div><div class="s' + cls + '">' + s + "</div></div>";
+    const d = new Date(m.start), live = m.state === "in";
+    const when = live ? '<span class="m-live">● EN DIRECT</span>' : cbDF.format(d) + (m.state === "pre" ? "<br>" + cbTF.format(d) : "");
+    const mid = m.off ? "Reporté" : m.state === "pre" ? "vs" : esc(m.hs ?? 0) + " - " + esc(m.as ?? 0);
+    const hn = m.isH ? "<strong>" + esc(m.home) + "</strong>" : esc(m.home), an = m.isH ? esc(m.away) : "<strong>" + esc(m.away) + "</strong>";
+    return '<div class="m-row' + (live ? " live" : "") + '"><div class="m-date">' + when + '<span class="cb-lgn" title="' + esc(m.lg) + '">' + esc(m.lg) + '</span></div><div class="m-home">' + hn + cbLg(m.hl) + '</div><div class="m-score' + (m.state === "pre" ? " next" : "") + '">' + mid + '</div><div class="m-away">' + cbLg(m.al) + an + "</div></div>";
+  }
+  // ----- Logos des clubs (liste) -----
+  let cbLogos = (() => { try { return JSON.parse(localStorage.getItem("fl_cblogos") || "{}") || {}; } catch (e) { return {}; } })();
+  const cbSaveLogos = () => { try { localStorage.setItem("fl_cblogos", JSON.stringify(cbLogos)); } catch (e) { } };
+  const cbLogoImg = u => '<img src="' + esc(u) + '" alt="" width="34" height="34" loading="lazy" decoding="async" onerror="this.remove()">';
+  function cbFillLogos() {
+    $$("#cb-list .cb-card[data-club]").forEach(a => { const w = a.querySelector(".cb-lw"), u = cbLogos[a.dataset.club]; if (w && u && !w.querySelector("img")) w.insertAdjacentHTML("beforeend", cbLogoImg(u)); });
+  }
+  let cbLogoBusy = false, cbLogoAt = 0, cbRE = null;
+  async function cbLoadLogos() {
+    if (cbLogoBusy || Date.now() - cbLogoAt < 6 * 3600e3) return;
+    cbLogoBusy = true; cbRE = cbRE || CLUBS.map(c => new RegExp(c[5], "i"));
+    const b = new Date(cbToday() + "T12:00:00Z"), seen = new Set(), reqs = [];
+    for (let i = -3; i <= 4; i++) {
+      const d = new Date(b); d.setUTCDate(d.getUTCDate() + i);
+      reqs.push(cbSC("dates=" + cbYmd(d) + "&limit=1000").then(j => {
+        (j.events || []).forEach(ev => (((ev.competitions || [])[0] || {}).competitors || []).forEach(x => {
+          const t = x.team || {}, n = cbNorm(t.displayName || t.name); if (!n || !t.logo || seen.has(n) || cbEXC.test(n)) return; seen.add(n);
+          CLUBS.forEach((c, k) => { if (!cbLogos[c[0]] && cbRE[k].test(n)) cbLogos[c[0]] = cbSm(t.logo); });
+        }));
+      }).catch(() => { }));
+    }
+    await Promise.all(reqs); cbSaveLogos(); cbLogoBusy = false; cbLogoAt = Date.now(); cbFillLogos();
+  }
+  // ----- Meilleurs buteurs du club (championnat) -----
+  const CB_NAT = /^(uefa|conmebol|caf|concacaf|afc|fifa)\./i;
+  function cbPick(list) {
+    const cnt = {}; let tid = "";
+    list.forEach(m => { if (!m.slug || m.slug === "all") return; if (m.tid) tid = tid || m.tid; cnt[m.slug] = (cnt[m.slug] || 0) + (CB_NAT.test(m.slug) || /friendl|cup|copa|coupe|pokal|supercup/i.test(m.slug) ? 1 : 5); });
+    const sl = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0]; return sl && tid ? { slug: sl, tid } : null;
+  }
+  const cbSumJ = (slug, id) => {
+    const q = "?event=" + encodeURIComponent(id), d = "https://site.api.espn.com/apis/site/v2/sports/soccer/" + slug + "/summary" + q;
+    return CFG.PROXY_URL ? cbJ(CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + slug + "/summary" + q).catch(() => cbJ(d)) : cbJ(d);
+  };
+  function cbPaintSc(slug, goals, total, done) {
+    if (cbCur !== slug || $("#clubs-view").hidden) return; const box = $("#cb-sc"); if (!box) return;
+    const arr = Object.entries(goals).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10), mx = arr.length ? arr[0][1] : 1;
+    if (arr.length && done >= total) { cbTopSc[slug] = { n: arr[0][0], g: arr[0][1] }; cbSeo(slug); }
+    const prog = done < total ? '<div class="note">Calcul en cours… ' + done + "/" + total + " matchs analysés</div>" : "";
+    box.innerHTML = (arr.length ? arr.map((x, i) => '<div class="cb-sc"><span class="n">' + (i + 1) + '</span><span class="nm">' + esc(x[0]) + '</span><span class="bar"><i style="width:' + Math.round(x[1] / mx * 100) + '%"></i></span><span class="g">⚽ ' + x[1] + (x[1] > 1 ? " buts" : " but") + "</span></div>").join("") : (done < total ? "" : '<div class="empty">Aucun but enregistré pour le moment.</div>')) + prog;
+  }
+  async function cbScorers(slug, list) {
+    const box = $("#cb-sc"); if (!box) return; const pk = cbPick(list);
+    const none = () => { if (cbCur === slug && $("#cb-sc")) $("#cb-sc").innerHTML = '<div class="empty">Statistiques de buteurs indisponibles pour le moment.</div>'; };
+    if (!pk) return none();
+    const lgm = list.find(m => m.slug === pk.slug); if (lgm && $("#cb-sct")) $("#cb-sct").innerHTML = "⚽ Meilleurs buteurs <small>buts marqués · " + esc(lgm.lg) + "</small>";
+    const ck = "fl_cbsc_" + pk.slug + "_" + pk.tid; let cached = null; try { cached = JSON.parse(localStorage.getItem(ck) || "null"); } catch (e) { }
+    if (cached && Date.now() - cached.t < 6 * 3600e3) return cbPaintSc(slug, cached.v, 1, 1);
+    let ids = []; try { const j = await cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/" + pk.slug + "/teams/" + pk.tid + "/schedule"); ids = (j.events || []).filter(e => { const c = (e.competitions || [])[0] || {}, st = (c.status && c.status.type) || (e.status && e.status.type) || {}; return st.state === "post" || st.completed; }).map(e => e.id); } catch (e) { }
+    if (!ids.length) return none();
+    const goals = {}; let done = 0; const q = ids.slice();
+    async function worker() {
+      while (q.length) {
+        const id = q.shift();
+        try {
+          const sm = await cbSumJ(pk.slug, id);
+          (sm.keyEvents || []).forEach(e => {
+            const ty = ((e.type && e.type.text) || "") + " " + (e.text || "");
+            if (!(e.scoringPlay || /goal/i.test((e.type && e.type.text) || "")) || /disallow|no goal|cancel|own goal|shootout/i.test(ty) || String((e.team || {}).id) !== pk.tid) return;
+            const at = ((e.participants || [])[0] || {}).athlete, nm = at && at.displayName; if (nm) goals[nm] = (goals[nm] || 0) + 1;
+          });
+        } catch (e) { }
+        done++; cbPaintSc(slug, goals, ids.length, done);
+      }
+    }
+    await Promise.all([worker(), worker(), worker(), worker()]);
+    try { localStorage.setItem(ck, JSON.stringify({ t: Date.now(), v: goals })); } catch (e) { }
+    cbPaintSc(slug, goals, ids.length, ids.length);
   }
   const CB_GROUPS = [["Angleterre", "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Espagne", "🇪🇸"], ["Italie", "🇮🇹"], ["Allemagne", "🇩🇪"], ["France", "🇫🇷"], ["Portugal", "🇵🇹"], ["Pays-Bas", "🇳🇱"], ["Reste de l'Europe", "🇪🇺"], ["Amérique du Sud", "🌎"], ["Amérique du Nord", "🌎"], ["Afrique", "🌍"], ["Asie", "🌏"]];
   const CB_G2 = { "Belgique": "Reste de l'Europe", "Turquie": "Reste de l'Europe", "Autriche": "Reste de l'Europe", "Grèce": "Reste de l'Europe", "Ukraine": "Reste de l'Europe", "Brésil": "Amérique du Sud", "Argentine": "Amérique du Sud", "États-Unis": "Amérique du Nord", "Mexique": "Amérique du Nord", "Égypte": "Afrique", "Maroc": "Afrique", "Afrique du Sud": "Afrique", "Tunisie": "Afrique", "Arabie saoudite": "Asie", "Qatar": "Asie", "Japon": "Asie" };
@@ -2702,16 +2797,16 @@ h1{will-change:opacity}
     CB_GROUPS.forEach(g => {
       if (cbGrp !== "all" && cbGrp !== g[0]) return;
       const cs = CLUBS.filter(c => cbGroupOf(c) === g[0] && (!q || cbNorm(c[1] + " " + c[0].replace(/-/g, " ")).indexOf(q) >= 0)); if (!cs.length) return;
-      h += '<div class="cb-cty">' + g[1] + " " + esc(g[0]) + ' <small style="color:var(--text-muted);font-weight:600">· ' + cs.length + '</small></div><div class="cb-grid">' + cs.map(c => '<a class="cb-card" href="#club-' + c[0] + '" data-club="' + c[0] + '">' + esc(c[1]) + "<small>" + esc(c[2]) + " · " + esc(c[4]) + "</small></a>").join("") + "</div>";
+      h += '<div class="cb-cty">' + g[1] + " " + esc(g[0]) + ' <small style="color:var(--text-muted);font-weight:600">· ' + cs.length + '</small></div><div class="cb-grid">' + cs.map(c => '<a class="cb-card" href="#club-' + c[0] + '" data-club="' + c[0] + '"><span class="cb-lw" data-i="' + esc(cbIni(c[1])) + '">' + (cbLogos[c[0]] ? cbLogoImg(cbLogos[c[0]]) : "") + '</span><span class="tx">' + esc(c[1]) + "<small>" + esc(c[2]) + " · " + esc(c[4]) + "</small></span></a>").join("") + "</div>";
     });
     return h || '<div class="empty">Aucun club trouvé.</div>';
   }
   function renderHub() {
     $("#cb-hub").innerHTML = '<div class="sec-title">🛡️ Clubs <small>' + CLUBS.length + ' grands clubs du monde : prochain match, résultats et calendrier</small></div><input class="cb-q" id="cb-q" type="search" placeholder="🔍 Rechercher un club..." aria-label="Rechercher un club">' +
       '<div class="cb-chips" id="cb-tabs">' + [["all", "Tous"]].concat(CB_GROUPS.map(g => [g[0], g[0]])).map(g => '<button type="button" data-g="' + esc(g[0]) + '" class="' + (g[0] === cbGrp ? "on" : "") + '">' + esc(g[1]) + "</button>").join("") + '</div><div id="cb-list">' + cbHub() + "</div>";
-    $("#cb-q").value = cbQ;
-    $("#cb-q").addEventListener("input", e => { cbQ = e.target.value; $("#cb-list").innerHTML = cbHub(); });
-    $("#cb-tabs").addEventListener("click", e => { const b = e.target.closest("button[data-g]"); if (!b) return; cbGrp = b.dataset.g; $$("#cb-tabs button").forEach(x => x.classList.toggle("on", x === b)); $("#cb-list").innerHTML = cbHub(); });
+    $("#cb-q").value = cbQ; cbFillLogos(); cbLoadLogos();
+    $("#cb-q").addEventListener("input", e => { cbQ = e.target.value; $("#cb-list").innerHTML = cbHub(); cbFillLogos(); });
+    $("#cb-tabs").addEventListener("click", e => { const b = e.target.closest("button[data-g]"); if (!b) return; cbGrp = b.dataset.g; $$("#cb-tabs button").forEach(x => x.classList.toggle("on", x === b)); $("#cb-list").innerHTML = cbHub(); cbFillLogos(); });
   }
   let cbCur = null;
   async function renderClubDetail(slug) {
@@ -2721,22 +2816,24 @@ h1{will-change:opacity}
       '<div class="cb-next" id="cb-next"><small>Prochain match</small><div class="t">Chargement…</div></div>' +
       '<div class="sec-title">📅 Prochains matchs <small>heure de Paris</small></div><div id="cb-up"><div class="sk"></div><div class="sk"></div></div>' +
       '<div class="sec-title">✅ Derniers résultats</div><div id="cb-res"><div class="sk"></div><div class="sk"></div></div>' +
+      '<div class="sec-title" id="cb-sct">⚽ Meilleurs buteurs <small>buts marqués</small></div><div id="cb-sc"><div class="sk"></div><div class="sk"></div></div>' +
       (CLUBS.some(x => x[4] === c[4] && x[0] !== slug) ? '<div class="sec-title">🛡️ Autres clubs · ' + esc(c[4]) + '</div><div class="cb-chips">' + CLUBS.filter(x => x[4] === c[4] && x[0] !== slug).map(x => '<a href="#club-' + x[0] + '" data-club="' + x[0] + '">' + esc(x[1]) + "</a>").join("") + "</div>" : "");
     let list = []; try { list = await cbLoad(slug); } catch (e) { }
     if (cbCur !== slug || $("#clubs-view").hidden) return;
-    const lg = list.find(m => m.logo); if (lg) { const im = $("#cb-logo"); im.src = lg.logo; im.hidden = false; }
+    const lg = list.find(m => m.logo); if (lg) { const im = $("#cb-logo"); im.src = lg.logo; im.hidden = false; cbLogos[slug] = cbSm(lg.logo); cbSaveLogos(); }
     const up = list.filter(m => m.state !== "post" && !m.off).sort((a, b) => new Date(a.start) - new Date(b.start));
     const past = list.filter(m => m.state === "post").sort((a, b) => new Date(b.start) - new Date(a.start));
     if (up.length) { const n = up[0]; $("#cb-next").innerHTML = "<small>" + (n.state === "in" ? "En direct" : "Prochain match") + '</small><div class="t">' + cbTeams(n) + '</div><div class="w">' + (n.state === "in" ? esc(n.hs) + " – " + esc(n.as) + " · " : "") + cbDL.format(new Date(n.start)) + (n.state === "pre" ? " à " + cbTF.format(new Date(n.start)) + " (heure de Paris)" : "") + " · " + esc(n.lg) + "</div>"; }
     else $("#cb-next").innerHTML = '<small>Prochain match</small><div class="t">Aucun match annoncé dans les prochains jours</div><div class="w">Le calendrier se met à jour automatiquement.</div>';
     $("#cb-up").innerHTML = up.length ? up.slice(0, 5).map(cbRow).join("") : '<div class="empty">Aucun match à venir pour le moment.</div>';
     $("#cb-res").innerHTML = past.length ? past.slice(0, 5).map(cbRow).join("") : '<div class="empty">Aucun résultat récent.</div>';
+    cbScorers(slug, list); cbSeo(slug);
   }
   function renderClubs(slug) {
     if (!$("#cb-q")) renderHub();
     const det = slug && clubOf(slug);
     $("#cb-hub").hidden = !!det; $("#cb-det").hidden = !det;
-    if (det) renderClubDetail(slug); else cbCur = null;
+    cbSeo(det ? slug : null); if (det) renderClubDetail(slug); else cbCur = null;
   }
   $("#clubs-view").addEventListener("click", e => {
     const a = e.target.closest("a[data-club]"); if (a) { e.preventDefault(); showPage("club-" + a.dataset.club); return; }
@@ -2744,22 +2841,150 @@ h1{will-change:opacity}
   });
   setInterval(() => { if (!$("#clubs-view").hidden && cbCur && !document.hidden) { delete cbCache[cbCur]; renderClubDetail(cbCur); } }, 60e3);
 
+  // ---------- SEO dynamique (meta, JSON-LD) ----------
+  const MD0 = (document.querySelector('meta[name="description"]') || {}).content || "";
+  const setMeta = d => { const m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute("content", d || MD0); };
+  function setLD(id, o) {
+    let e = document.getElementById(id);
+    if (!o) { if (e) e.remove(); return; }
+    if (!e) { e = document.createElement("script"); e.type = "application/ld+json"; e.id = id; document.head.appendChild(e); }
+    e.textContent = JSON.stringify(o);
+  }
+  const btFind = k => LEAGUES.find(l => l[0].split("|")[0] === k);
+  const btKey = l => l[0].split("|")[0];
+  const BT_TOP = ["eng.1", "esp.1", "ger.1", "ita.1", "fra.1", "mar.1", "por.1", "ned.1", "bel.1", "tur.1", "uefa.champions", "uefa.europa", "uefa.europa.conf"];
+  const btLeagues = LEAGUES.filter(l => !/nwsl|charity|super_cup|^fifa\.world$|^uefa\.euro/.test(l[0]));
+  const cbTopSc = {};
+
+  // ----- SEO des pages Clubs -----
+  function cbSeo(slug) {
+    const box = $("#cb-seo"); if (!box) return; const c = slug && clubOf(slug);
+    if (!c) {
+      box.innerHTML = "<h2>Clubs de football : résultats, prochain match et calendrier</h2>" +
+        "<p>FootLive Pro réunit " + CLUBS.length + " grands clubs du monde (Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Liga Portugal, Botola Pro, Saudi Pro League, MLS et plus). Pour chaque club, retrouvez le prochain match, les derniers résultats, le calendrier et les meilleurs buteurs, mis à jour automatiquement.</p>" +
+        CB_GROUPS.map(g => { const cs = CLUBS.filter(x => cbGroupOf(x) === g[0]); return cs.length ? "<p><b>" + esc(g[0]) + " :</b> " + cs.map(x => '<a href="#club-' + x[0] + '" data-club="' + x[0] + '">' + esc(x[1]) + "</a>").join(", ") + ".</p>" : ""; }).join("") +
+        "<h3>Comment suivre un club ?</h3><p>Choisissez un club dans la liste : sa page affiche le match à venir avec l’heure de Paris, les résultats récents et le classement des meilleurs buteurs. Les scores en direct s’actualisent sans recharger la page.</p>";
+      setMeta("Résultats, prochain match, calendrier et meilleurs buteurs de " + CLUBS.length + " grands clubs de football : Real Madrid, PSG, Manchester City, Barça, Wydad, Raja et plus. Gratuit sur FootLive Pro."); setLD("cb-ld", null); return;
+    }
+    const list = (cbCache[slug] || {}).v || [], dt = m => new Date(m.start);
+    const up = list.filter(m => m.state !== "post" && !m.off).sort((a, b) => dt(a) - dt(b)), past = list.filter(m => m.state === "post").sort((a, b) => dt(b) - dt(a));
+    const sc = m => esc(m.home) + " " + esc(m.hs ?? 0) + "–" + esc(m.as ?? 0) + " " + esc(m.away);
+    const nextTxt = up.length ? "Le prochain match de " + esc(c[1]) + " : " + esc(up[0].home) + " – " + esc(up[0].away) + " le " + cbDL.format(dt(up[0])) + (up[0].state === "pre" ? " à " + cbTF.format(dt(up[0])) + " (heure de Paris)" : " (en cours)") + ", en " + esc(up[0].lg) + "." : "Aucun match de " + esc(c[1]) + " n’est annoncé dans les prochains jours ; le calendrier se met à jour automatiquement.";
+    const lastTxt = past.length ? "Dernier résultat de " + esc(c[1]) + " : " + sc(past[0]) + " (" + esc(past[0].lg) + ")." : "Aucun résultat récent n’est disponible pour le moment.";
+    const top = cbTopSc[slug], bl = btLeagues.find(l => cbNorm(l[2]) === cbNorm(c[4]) || cbNorm(l[2]).indexOf(cbNorm(c[4])) === 0 || cbNorm(c[4]).indexOf(cbNorm(l[2])) === 0);
+    const topTxt = top ? esc(top.n) + " est le meilleur buteur de " + esc(c[1]) + " avec " + top.g + (top.g > 1 ? " buts" : " but") + " marqués en championnat cette saison." : "Le classement des meilleurs buteurs de " + esc(c[1]) + " est affiché sur cette page et se met à jour automatiquement.";
+    box.innerHTML = "<h2>" + esc(c[1]) + " : résultats, prochain match et calendrier</h2>" +
+      "<p>" + esc(c[1]) + " (" + esc(c[2]) + ") évolue en " + esc(c[4]) + ". Suivez ses résultats, son prochain match, son calendrier et ses meilleurs buteurs en direct sur FootLive Pro. " + nextTxt + "</p>" +
+      (past.length ? "<ul>" + past.slice(0, 5).map(m => "<li>" + cbDF.format(dt(m)) + " : " + sc(m) + " (" + esc(m.lg) + ")</li>").join("") + "</ul>" : "") +
+      "<h3>Quand joue " + esc(c[1]) + " ?</h3><p>" + nextTxt + "</p>" +
+      "<h3>Quel est le dernier résultat de " + esc(c[1]) + " ?</h3><p>" + lastTxt + "</p>" +
+      "<h3>Qui est le meilleur buteur de " + esc(c[1]) + " ?</h3><p>" + topTxt + "</p>" +
+      (bl ? '<p><a href="#buteurs-' + esc(btKey(bl)) + '" data-bt="' + esc(btKey(bl)) + '">Voir le classement des buteurs de ' + esc(bl[2]) + "</a></p>" : "");
+    setMeta(c[1] + " : prochain match, derniers résultats, calendrier et meilleurs buteurs. Scores en direct sur FootLive Pro.");
+    setLD("cb-ld", { "@context": "https://schema.org", "@type": "SportsTeam", "name": c[1], "sport": "Soccer", "memberOf": { "@type": "SportsOrganization", "name": c[4] }, "location": { "@type": "Place", "name": c[2] }, "url": "https://www.footlivepro.com/#club-" + slug });
+  }
+
+  // ----- Page Buteurs par compétition -----
+  const btOpts = () => { const g = []; btLeagues.forEach(l => { let x = g.find(y => y.n === l[3]); if (!x) g.push(x = { n: l[3], a: [] }); x.a.push(l); }); return g.map(x => '<optgroup label="' + esc(x.n) + '">' + x.a.map(l => '<option value="' + esc(btKey(l)) + '">' + esc(lgLabel(l)) + "</option>").join("") + "</optgroup>").join(""); };
+  $("main").insertAdjacentHTML("beforeend", '<div id="scorers-view" hidden><div class="sec-title">⚽ Meilleurs buteurs <small>classement des buteurs de chaque compétition</small></div>' +
+    '<div class="cb-chips" id="bt-chips">' + BT_TOP.map(k => { const l = btFind(k); return l ? '<a href="#buteurs-' + esc(k) + '" data-bt="' + esc(k) + '">' + esc(lgLabel(l)) + "</a>" : ""; }).join("") + "</div>" +
+    '<div class="toolbar"><select class="region-select" id="bt-league" aria-label="Choisir une compétition">' + btOpts() + '</select><button class="btn-action" id="bt-reload">↻ Actualiser</button></div>' +
+    '<div id="bt-box"></div><p class="note">Buts marqués en compétition, d’après les statistiques publiées par ESPN. Mise à jour automatique.</p>' +
+    '<section id="bt-seo" class="cb-seo" aria-label="À propos des meilleurs buteurs"></section></div>');
+  const btAth = j => {
+    const out = [];
+    (j.athletes || []).forEach(x => {
+      const at = x.athlete || {}; let g = null, a = null, p = null;
+      (x.categories || []).forEach(c => (c.names || []).forEach((k, i) => { const v = parseFloat(String((c.totals || [])[i]).replace(/[^\d.]/g, "")); if (isNaN(v)) return; if (k === "totalGoals") g = v; else if (k === "goalAssists") a = v; else if (k === "appearances" || k === "gamesPlayed") p = v; }));
+      if (g == null || !at.displayName) return;
+      out.push({ n: at.displayName, t: at.teamName || at.teamShortName || (((at.teams || [])[0]) || {}).displayName || "", g, a, p, img: (at.headshot && at.headshot.href) || "" });
+    });
+    return out;
+  };
+  const btHttps = u => String(u || "").replace(/^http:/, "https:");
+  async function btCore(sl) {
+    const y = new Date().getUTCFullYear();
+    for (const yr of [y, y - 1]) {
+      try {
+        const j = await cbJ("https://sports.core.api.espn.com/v2/sports/soccer/leagues/" + sl + "/seasons/" + yr + "/types/1/leaders?limit=25");
+        const cat = (j.categories || []).find(c => /goal/i.test(c.name || "") && !/assist|against|conced/i.test(c.name || "")); if (!cat) continue;
+        const rows = await Promise.all((cat.leaders || []).slice(0, 20).map(async l => {
+          try {
+            const [at, tm] = await Promise.all([l.athlete && l.athlete.$ref ? cbJ(btHttps(l.athlete.$ref)) : null, l.team && l.team.$ref ? cbJ(btHttps(l.team.$ref)).catch(() => null) : null]);
+            return at && at.displayName ? { n: at.displayName, t: (tm && (tm.displayName || tm.name)) || "", g: +l.value || parseFloat(l.displayValue) || 0, a: null, p: null, img: (at.headshot && at.headshot.href) || "" } : null;
+          } catch (e) { return null; }
+        }));
+        const r = rows.filter(Boolean); if (r.length) return r;
+      } catch (e) { }
+    }
+    return [];
+  }
+  async function btLoad(key, force) {
+    const l = btFind(key), ck = "fl_bt_" + key; let c = null; try { c = JSON.parse(localStorage.getItem(ck) || "null"); } catch (e) { }
+    if (c && !force && Date.now() - c.t < 3 * 3600e3) return c.v;
+    let rows = [];
+    for (const sl of l[0].split("|")) {
+      try { rows = btAth(await cbJ("https://site.web.api.espn.com/apis/common/v3/sports/soccer/" + sl + "/statistics/byathlete?region=us&lang=en&contentorigin=espn&isqualified=true&page=1&limit=30&sort=offensive.totalGoals%3Adesc")); } catch (e) { }
+      rows = rows.filter(r => r.g > 0); if (!rows.length) rows = (await btCore(sl)).filter(r => r.g > 0);
+      if (rows.length) break;
+    }
+    rows = rows.sort((a, b) => b.g - a.g || (b.a || 0) - (a.a || 0) || a.n.localeCompare(b.n)).slice(0, 25);
+    if (rows.length) { try { localStorage.setItem(ck, JSON.stringify({ t: Date.now(), v: rows })); } catch (e) { } }
+    return rows;
+  }
+  const btMedal = i => ["🥇", "🥈", "🥉"][i] || String(i + 1);
+  function btRowHTML(r, i) {
+    const sub = [r.t, r.p != null ? r.p + " match" + (r.p > 1 ? "s" : "") : "", r.a != null ? r.a + " passe" + (r.a > 1 ? "s" : "") + " déc." : ""].filter(Boolean).join(" · ");
+    return '<div class="bt-row"><div class="n">' + btMedal(i) + '</div><div class="pl"><span class="bt-av" data-i="' + esc(cbIni(r.n)) + '">' + (r.img ? '<img src="' + esc(btHttps(r.img)) + '" alt="" width="38" height="38" loading="lazy" decoding="async" onerror="this.remove()">' : "") + "</span><div><b>" + esc(r.n) + "</b><small>" + esc(sub) + '</small></div></div><div class="g">⚽ ' + r.g + "<small>" + (r.g > 1 ? "buts" : "but") + "</small></div></div>";
+  }
+  function btSeo(key, rows) {
+    const l = btFind(key), nm = l[2], top = rows && rows[0], box = $("#bt-seo"); if (!box) return;
+    const line = r => esc(r.n) + (r.t ? " (" + esc(r.t) + ")" : "") + " : " + r.g + (r.g > 1 ? " buts" : " but");
+    const ans = top ? esc(top.n) + (top.t ? " (" + esc(top.t) + ")" : "") + " est actuellement en tête du classement des buteurs de " + esc(nm) + " avec " + top.g + (top.g > 1 ? " buts" : " but") + "." : "Le classement des buteurs de " + esc(nm) + " se met à jour automatiquement dès que les statistiques sont disponibles.";
+    box.innerHTML = "<h2>Meilleurs buteurs " + esc(nm) + " : classement des buteurs de la saison</h2>" +
+      "<p>Classement des meilleurs buteurs de " + esc(nm) + " avec le nombre de buts marqués par chaque joueur, mis à jour automatiquement sur FootLive Pro. " + ans + "</p>" +
+      (rows && rows.length ? "<ul>" + rows.slice(0, 5).map((r, i) => "<li>" + (i + 1) + ". " + line(r) + "</li>").join("") + "</ul>" : "") +
+      "<h3>Qui est le meilleur buteur de " + esc(nm) + " ?</h3><p>" + ans + "</p>" +
+      "<h3>Comment est calculé le classement des buteurs ?</h3><p>Le classement compte les buts marqués par chaque joueur dans la compétition, d’après les statistiques publiées par ESPN. Les égalités sont départagées par le nombre de passes décisives.</p>" +
+      "<h3>Autres classements de buteurs</h3><p>" + BT_TOP.filter(k => k !== key).map(k => { const x = btFind(k); return x ? '<a href="#buteurs-' + esc(k) + '" data-bt="' + esc(k) + '">' + esc(x[2]) + "</a>" : ""; }).filter(Boolean).join(" · ") + "</p>";
+    setMeta("Meilleurs buteurs " + nm + " : classement des buteurs avec le nombre de buts marqués" + (top ? ". " + top.n + " en tête avec " + top.g + (top.g > 1 ? " buts" : " but") : "") + ". Mis à jour automatiquement sur FootLive Pro.");
+    setLD("bt-ld", rows && rows.length ? { "@context": "https://schema.org", "@type": "ItemList", "name": "Meilleurs buteurs " + nm, "itemListElement": rows.slice(0, 10).map((r, i) => ({ "@type": "ListItem", "position": i + 1, "name": r.n + " : " + r.g + (r.g > 1 ? " buts" : " but") })) } : null);
+  }
+  let btCur = null;
+  async function renderButeurs(k, force) {
+    const l = (k && btFind(k)) || (btCur && btFind(btCur)) || btFind("eng.1"), key = btKey(l); btCur = key;
+    $("#bt-league").value = key; $$("#bt-chips a").forEach(a => a.classList.toggle("on", a.dataset.bt === key));
+    const box = $("#bt-box"); box.innerHTML = skel(6); btSeo(key, null);
+    let rows = []; try { rows = await btLoad(key, force); } catch (e) { }
+    if (btCur !== key || $("#scorers-view").hidden) return;
+    box.innerHTML = rows.length ? rows.map(btRowHTML).join("") : '<div class="note">Classement des buteurs indisponible pour cette compétition pour le moment.</div>';
+    btSeo(key, rows);
+  }
+  $("#bt-league").onchange = e => showPage("buteurs-" + e.target.value);
+  $("#bt-reload").onclick = () => renderButeurs(btCur, true);
+  document.addEventListener("click", e => { const a = e.target.closest("a[data-bt]"); if (a) { e.preventDefault(); showPage("buteurs-" + a.dataset.bt); } });
+
   // ---------- Navigation ----------
-  const PAGES = { scores: "#scores-view", table: "#table-view", news: "#news-view", radio: "#radio-view", clubs: "#clubs-view" };
+  const PAGES = { scores: "#scores-view", table: "#table-view", news: "#news-view", radio: "#radio-view", clubs: "#clubs-view", buteurs: "#scorers-view" };
   const inited = {};
-  const PAGE_TITLES = { scores: "Scores en direct", table: "Classements", news: "Actualités", radio: "Radio sport", clubs: "Clubs" };
+  const PAGE_TITLES = { scores: "Scores en direct", table: "Classements", news: "Actualités", radio: "Radio sport", clubs: "Clubs", buteurs: "Meilleurs buteurs" };
   window.showPage = function (p, fromHistory) {
-    let club = null;
+    let club = null, bt = null;
     if (/^club-/.test(p)) { club = p.slice(5); p = "clubs"; if (!clubOf(club)) club = null; }
+    if (/^buteurs-/.test(p)) { bt = p.slice(8); p = "buteurs"; if (!btFind(bt)) bt = null; }
     if (!PAGES[p]) p = "scores";
+    setMeta(null);
     Object.keys(PAGES).forEach(k => { const el = $(PAGES[k]); if (el) el.hidden = k !== p; });
     $$("#tabbar [data-go]").forEach(b => { const on = b.dataset.go === p; b.classList.toggle("on", on); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     if (p === "radio") { if (typeof renderRadioPage === "function") renderRadioPage(); if (!inited.radio) { inited.radio = 1; rbSearch(); } }
     if (p === "table" && !inited.table) { inited.table = 1; loadTable(); }
     if (p === "news" && !inited.news) { inited.news = 1; loadNews(); }
     if (p === "clubs") renderClubs(club);
-    document.title = (p === "clubs" && club ? clubOf(club)[1] + " : prochain match et résultats" : PAGE_TITLES[p]) + " | FootLive Pro";
-    if (!fromHistory) { try { history.pushState(null, "", p === "scores" ? location.pathname + location.search : "#" + (p === "clubs" && club ? "club-" + club : p)); } catch (e) { } }
+    if (p === "buteurs") renderButeurs(bt);
+    if (p !== "clubs") setLD("cb-ld", null);
+    if (p !== "buteurs") setLD("bt-ld", null);
+    document.title = (p === "clubs" && club ? clubOf(club)[1] + " : prochain match et résultats" : p === "buteurs" ? "Meilleurs buteurs" + (bt ? " " + btFind(bt)[2] : "") + " : classement" : PAGE_TITLES[p]) + " | FootLive Pro";
+    if (!fromHistory) { try { history.pushState(null, "", p === "scores" ? location.pathname + location.search : "#" + (p === "clubs" && club ? "club-" + club : p === "buteurs" && bt ? "buteurs-" + bt : p)); } catch (e) { } }
     window.scrollTo({ top: 0 });
   };
   $("#tabbar").addEventListener("click", e => { const a = e.target.closest("a[data-go]"); if (!a) return; e.preventDefault(); showPage(a.dataset.go); });
@@ -2856,7 +3081,7 @@ h1{will-change:opacity}
     window.compFilter = null; compChip();
     const b = $('#filters button[data-tab="today"]'); if (b) b.click();
   });
-  const h0 = location.hash.slice(1); if ((PAGES[h0] || /^club-/.test(h0)) && h0 !== "scores") showPage(h0, true);
+  const h0 = location.hash.slice(1); if ((PAGES[h0] || /^club-/.test(h0) || /^buteurs-/.test(h0)) && h0 !== "scores") showPage(h0, true);
 })();
 
 
