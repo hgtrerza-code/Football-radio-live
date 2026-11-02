@@ -1,6 +1,6 @@
 {
  "date": "2026-11-02",
- "generated": "2026-11-02T14:57:07.706Z",
+ "generated": "2026-11-02T16:58:51.034Z",
  "extra": 61,
  "matches": [
   {
@@ -241,8 +241,8 @@
    "id": "401883144",
    "lg": "LaLiga 2",
    "start": "2026-11-02T13:00Z",
-   "state": "in",
-   "label": "90'+4'",
+   "state": "post",
+   "label": "90'+20'",
    "home": "Tenerife",
    "away": "FC Andorra",
    "h": 2,
@@ -254,12 +254,12 @@
    "id": "401883146",
    "lg": "LaLiga 2",
    "start": "2026-11-02T15:15Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "81'",
    "home": "Real Oviedo",
    "away": "Las Palmas",
-   "h": 0,
-   "a": 0,
+   "h": 2,
+   "a": 3,
    "venue": "Estadio Carlos Tartiere",
    "place": "Oviedo, Spain"
   },
