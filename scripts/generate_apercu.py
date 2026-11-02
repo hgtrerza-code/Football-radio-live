@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 SITE = "https://www.footlivepro.com/"
+LOGO = SITE + "og-image.png"  # image utilisée dans le JSON-LD (champ "image")
 WORKER = "https://footlive.hgtrerza.workers.dev/"
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/"
 ESPN_STD = "https://site.api.espn.com/apis/v2/sports/soccer/"
@@ -118,6 +119,9 @@ def parse_events(d, league):
             start = datetime.fromisoformat(str(ev.get("date")).replace("Z", "+00:00"))
         except ValueError:
             continue
+        venue = c.get("venue") or {}
+        addr = venue.get("address") or {}
+        place = ", ".join(x for x in (addr.get("city"), addr.get("country")) if x)
         out.append({
             "start": start, "league": league, "off": off,
             "state": "pre" if off else (st.get("state") or "pre"),
@@ -125,6 +129,7 @@ def parse_events(d, league):
             "home": (home.get("team") or {}).get("displayName") or "?",
             "away": (away.get("team") or {}).get("displayName") or "?",
             "hs": to_int(home.get("score")), "as": to_int(away.get("score")),
+            "venue": (venue.get("fullName") or "").strip(), "place": place,
         })
     out.sort(key=lambda m: m["start"])
     return out
@@ -217,9 +222,15 @@ def index_section(per_comp, others, now):
 def ld_block(evs, page_url):
     graph = [{
         "@type": "SportsEvent", "name": f'{m["home"]} - {m["away"]}',
-        "startDate": m["start"].astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "sport": "Football",
+        "startDate": m["start"].astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
+        "endDate": (m["start"] + timedelta(hours=2)).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
+        "sport": "Football",
         "eventStatus": "https://schema.org/EventPostponed" if m["off"] else "https://schema.org/EventScheduled",
-        "location": {"@type": "Place", "name": m["league"]},
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "location": {"@type": "Place", "name": m.get("venue") or m["league"],
+                     "address": m.get("place") or "Non communiqué"},
+        "organizer": {"@type": "Organization", "name": m["league"]},
+        "image": [LOGO],
         "homeTeam": {"@type": "SportsTeam", "name": m["home"]},
         "awayTeam": {"@type": "SportsTeam", "name": m["away"]}, "url": page_url,
     } for m in evs[:40]]
