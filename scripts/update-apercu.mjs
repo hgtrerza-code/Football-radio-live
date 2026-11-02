@@ -9,7 +9,7 @@ const JSON_FILE = "matchs-du-jour.json";
 const PROXY = "https://footlive.hgtrerza.workers.dev/soccer/";            // votre Worker (même source que le site)
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/";     // secours direct
 const MAX_PER_LEAGUE = 12, MAX_TOTAL = 80, MAX_LD = 25;
-const LOGO = "https://www.footlivepro.com/icon-512.png"; // ⚠️ mettez l'URL réelle de votre logo (image accessible)
+const LOGO = "https://www.footlivepro.com/og-image.png"; // image de partage du site
 
 // Compétitions principales : interrogées une par une, donc leur nom est toujours connu. L'ordre = l'ordre d'affichage.
 const TOP = [
