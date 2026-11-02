@@ -851,7 +851,7 @@ h1{will-change:opacity}
             byDay[d] = evs.filter(m => !isBlockedMatch(m));
             fixP.then(() => {
                 evs.forEach(m => { m.lg = cleanLg(m.lg); });
-                if (evs.some((m, i) => m.lg !== lgBefore[i])) { byDay[d] = evs.filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } }
+                if (evs.some((m, i) => m.lg !== lgBefore[i])) { const cur = byDay[d] || [], have = new Set(cur); byDay[d] = cur.concat(evs.filter(m => !have.has(m))).filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } }   // fusion (et non remplacement) : on garde les matchs 365Scores/GitHub déjà ajoutés
             }).catch(() => { });
         }
         // Sources complémentaires (365Scores, GitHub) : en arrière-plan, avec délai maximum, elles ne bloquent jamais l'affichage
