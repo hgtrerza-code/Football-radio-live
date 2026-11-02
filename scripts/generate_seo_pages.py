@@ -166,6 +166,21 @@ def club_matches(club, matches, lg_names):
 _SC_CACHE = {}
 
 
+HEADSHOT = "https://a.espncdn.com/i/headshots/soccer/players/full/{id}.png"
+
+
+def photo(at):
+    """URL de la photo d'un joueur (ESPN) : champ headshot, sinon adresse construite avec l'identifiant."""
+    u = ((at or {}).get("headshot") or {}).get("href")
+    if not u and (at or {}).get("id"):
+        u = HEADSHOT.format(id=at["id"])
+    return str(u or "").replace("http:", "https:")
+
+
+def initials(n):
+    return "".join(w[0] for w in re.findall(r"[A-Za-zÀ-ÿ]\S*", str(n))[:2]).upper()
+
+
 def _athletes(j):
     rows = []
     for x in (j or {}).get("athletes", []):
@@ -188,7 +203,7 @@ def _athletes(j):
         team = at.get("teamName") or at.get("teamShortName") or \
             ((at.get("teams") or [{}])[0] or {}).get("displayName") or ""
         rows.append(dict(n=at["displayName"], t=team, g=int(g), a=None if a is None else int(a),
-                         p=None if p is None else int(p)))
+                         p=None if p is None else int(p), img=photo(at)))
     return [r for r in rows if r["g"] > 0]
 
 
@@ -208,7 +223,7 @@ def _core_leaders(sl):
             tm = fetch_json(ref(l.get("team"))) if ref(l.get("team")) else None
             if at and at.get("displayName"):
                 rows.append(dict(n=at["displayName"], t=(tm or {}).get("displayName") or "",
-                                 g=int(float(l.get("value") or 0)), a=None, p=None))
+                                 g=int(float(l.get("value") or 0)), a=None, p=None, img=photo(at)))
         rows = [r for r in rows if r["g"] > 0]
         if rows:
             return rows
@@ -254,6 +269,8 @@ th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--bd)}th{colo
 .cta{display:inline-block;background:var(--ac);color:#04210f;font-weight:800;padding:10px 16px;border-radius:12px;margin:10px 0}.cta:hover{text-decoration:none;filter:brightness(1.1)}
 footer{border-top:1px solid var(--bd);margin-top:2.5rem;padding:1rem 0 2rem;color:var(--mu);font-size:.82rem}footer a{color:var(--mu);margin-right:14px}
 .grp{font-weight:800;margin:1.2rem 0 .3rem}
+.pl{display:flex;align-items:center;gap:10px}.av{position:relative;width:40px;height:40px;flex:0 0 auto;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#334155,#475569);color:#fff;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.av::before{content:attr(data-i)}.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#1e293b}
 @media(max-width:560px){.m li{grid-template-columns:1fr auto}.m .d{grid-column:1/-1}}
 """
 
@@ -402,6 +419,11 @@ def clubs_index(clubs):
 
 
 # ----------------------------------------------------------------------------- pages buteurs
+def av_img(r):
+    return (f'<img src="{e(r["img"])}" alt="{e(r["n"])}" width="40" height="40" loading="lazy" decoding="async" onerror="this.remove()">'
+            if r.get("img") else "")
+
+
 def scorers_page(lg, rows, others):
     name = lg["name"]
     if rows:
@@ -413,7 +435,7 @@ def scorers_page(lg, rows, others):
             ("Comment est calculé le classement des buteurs ?",
              "Le classement compte les buts marqués par chaque joueur dans la compétition, d’après les statistiques publiées par ESPN. Les égalités sont départagées par le nombre de passes décisives.")]
     table = ("<table><thead><tr><th class='n'>#</th><th>Joueur</th><th>Équipe</th><th>Matchs</th><th>Passes déc.</th><th>Buts</th></tr></thead><tbody>"
-             + "".join(f"<tr><td class='n'>{i + 1}</td><td>{e(r['n'])}</td><td>{e(r['t'])}</td><td>{'' if r['p'] is None else r['p']}</td><td>{'' if r['a'] is None else r['a']}</td><td class='g'>{r['g']}</td></tr>" for i, r in enumerate(rows[:25]))
+             + "".join(f"<tr><td class='n'>{i + 1}</td><td><span class='pl'><span class='av' data-i='{e(initials(r['n']))}'>{av_img(r)}</span>{e(r['n'])}</span></td><td>{e(r['t'])}</td><td>{'' if r['p'] is None else r['p']}</td><td>{'' if r['a'] is None else r['a']}</td><td class='g'>{r['g']}</td></tr>" for i, r in enumerate(rows[:25]))
              + "</tbody></table>") if rows else "<p>Classement indisponible pour le moment.</p>"
     chips = "".join(f'<a href="/buteurs/{o["key"]}.html">{e(o["name"])}</a>' for o in others)
     path = f"/buteurs/{lg['key']}.html"
