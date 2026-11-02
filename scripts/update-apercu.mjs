@@ -9,6 +9,7 @@ const JSON_FILE = "matchs-du-jour.json";
 const PROXY = "https://footlive.hgtrerza.workers.dev/soccer/";            // votre Worker (même source que le site)
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/";     // secours direct
 const MAX_PER_LEAGUE = 12, MAX_TOTAL = 80, MAX_LD = 25;
+const LOGO = "https://www.footlivepro.com/icon-512.png"; // ⚠️ mettez l'URL réelle de votre logo (image accessible)
 
 // Compétitions principales : interrogées une par une, donc leur nom est toujours connu. L'ordre = l'ordre d'affichage.
 const TOP = [
@@ -65,12 +66,15 @@ function normalize(ev, top) {
   const st = (ev.status && ev.status.type) || {};
   const off = /postponed|cancel|suspend|abandon/i.test((st.name || "") + " " + (st.description || ""));
   const num = v => (v === undefined || v === "" || v === null) ? null : Number(v);
+  const v = c.venue || {};
   return {
     id: String(ev.id), ...rawLeague(ev, top), lg: "", known: false, start: ev.date,
     state: off ? "off" : (st.state || "pre"),
     label: (ev.status && ev.status.displayClock) || st.shortDetail || "",
     home: home.team.displayName || home.team.name, away: away.team.displayName || away.team.name,
-    h: num(home.score), a: num(away.score)
+    h: num(home.score), a: num(away.score),
+    venue: v.fullName || "",
+    place: [v.address && v.address.city, v.address && v.address.country].filter(Boolean).join(", ")
   };
 }
 // Compétitions hors liste : on retrouve le nom via l'identifiant ESPN (comme le fait le site). Si ça échoue, le match est ignoré.
@@ -153,9 +157,14 @@ async function main() {
     body + "</section><!--APERCU-END-->";
 
   const ld = matches.slice(0, MAX_LD).map(m => ({
-    "@type": "SportsEvent", name: m.home + " - " + m.away, startDate: m.start, sport: "Football",
+    "@type": "SportsEvent", name: m.home + " - " + m.away, sport: "Football",
+    startDate: m.start,
+    endDate: new Date(new Date(m.start).getTime() + 2 * 36e5).toISOString(), // début + 2 h
     eventStatus: m.state === "off" ? "https://schema.org/EventPostponed" : "https://schema.org/EventScheduled",
-    location: { "@type": "Place", name: m.lg },
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: { "@type": "Place", name: m.venue || m.lg, address: m.place || "Non communiqué" },
+    organizer: { "@type": "Organization", name: m.lg },
+    image: [LOGO],
     homeTeam: { "@type": "SportsTeam", name: m.home }, awayTeam: { "@type": "SportsTeam", name: m.away },
     url: "https://www.footlivepro.com/"
   }));
