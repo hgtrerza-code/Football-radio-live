@@ -1,6 +1,6 @@
 {
  "date": "2026-11-02",
- "generated": "2026-11-02T10:55:47.551Z",
+ "generated": "2026-11-02T14:57:07.706Z",
  "extra": 61,
  "matches": [
   {
@@ -241,12 +241,12 @@
    "id": "401883144",
    "lg": "LaLiga 2",
    "start": "2026-11-02T13:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "90'+4'",
    "home": "Tenerife",
    "away": "FC Andorra",
-   "h": 0,
-   "a": 0,
+   "h": 2,
+   "a": 2,
    "venue": "Estadio Heliodoro Rodríguez López",
    "place": "Santa Cruz de Tenerife, Spain"
   },
