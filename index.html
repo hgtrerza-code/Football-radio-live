@@ -775,7 +775,7 @@ h1{will-change:opacity}
         const localDay = iso => new Date(iso).toLocaleDateString("sv-SE");
         const hhmm = iso => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
         const byDay = {};              // "YYYYMMDD" -> [matchs]
-        let tab = "today", tickerSig = "", lastErr = "", lastOk = 0;
+        let tab = "today", tickerSig = "", lastErr = "", lastOk = 0, liveN = null;   // liveN : compteur « en direct » figé, mis à jour seulement quand toutes les sources ont répondu
 
         // ===== Récupération + normalisation des données ESPN =====
         function leagueOf(ev, top) {
@@ -1076,7 +1076,7 @@ h1{will-change:opacity}
             await Promise.race([ex, new Promise(r => setTimeout(r, 4000))]);   // si les compléments sont déjà en cache : un seul affichage
             detectGoals();
             renderAll();
-            ex.then(() => { detectGoals(); renderAll(); });
+            ex.then(() => { liveN = all().filter(m => m.state === "in").length; detectGoals(); renderAll(); });
         }
         const LG_ALIAS = Object.create(null);   // nom ESPN de la compétition -> nom 365Scores (même compétition = même catégorie)
         let _allMemo = null, _allSig = "", _arrId = new WeakMap(), _arrN = 0, _keyMemo = new WeakMap();
@@ -1862,7 +1862,7 @@ h1{will-change:opacity}
             const t = localDay(new Date().toISOString());
             let list = all().filter(m => (lgSel.value === "all" || m.lg === lgSel.value) && (!window.compFilter || window.compFilter.test(m)) && (!q || (m.home + " " + m.away + " " + m.lg + " " + lgDisp(m.lg, [m])).toLowerCase().includes(q)));
             const lc = document.getElementById("live-count");
-            if (lc) { const n = all().filter(m => m.state === "in").length; if (lastOk) lc.textContent = n; else if (!lc.textContent || lc.textContent === "0") lc.textContent = "…"; }
+            if (lc) lc.textContent = liveN == null ? "…" : liveN;
             if (tab === "live") list = list.filter(m => m.state === "in").sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "fav") list = list.filter(m => window.isFavMatch && window.isFavMatch(m)).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "comp") { const rk = m => m.state === "in" ? 0 : m.state === "pre" ? 1 : 2; list = list.sort((a, b) => rk(a) - rk(b) || (rk(a) === 2 ? b.start.localeCompare(a.start) : a.start.localeCompare(b.start))); }
