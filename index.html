@@ -848,7 +848,8 @@ h1{will-change:opacity}
             const fixP = new Promise(r => setTimeout(r, 2500)).then(() => fixGenericLeagues(evs));
             evs.forEach(m => { m.lg = cleanLg(m.lg); });
             const lgBefore = evs.map(m => m.lg);
-            byDay[d] = evs.filter(m => !isBlockedMatch(m));
+            const carry = ((Date.now() - (extraT[d] || 0)) < 300000 ? (byDay[d] || []) : []).filter(p => p.tsdb && !evs.some(x => Math.abs(new Date(x.start) - new Date(p.start)) < 4 * 3600e3 && sameTeam(x.home, p.home) && sameTeam(x.away, p.away)));   // garde les matchs des sources complémentaires jusqu'à leur prochaine mise à jour (évite le « 0 match en direct » entre deux rafraîchissements)
+            byDay[d] = evs.concat(carry).filter(m => !isBlockedMatch(m));
             fixP.then(() => {
                 evs.forEach(m => { m.lg = cleanLg(m.lg); });
                 if (evs.some((m, i) => m.lg !== lgBefore[i])) { const cur = byDay[d] || [], have = new Set(cur); byDay[d] = cur.concat(evs.filter(m => !have.has(m))).filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } }   // fusion (et non remplacement) : on garde les matchs 365Scores/GitHub déjà ajoutés
@@ -951,7 +952,7 @@ h1{will-change:opacity}
         // ===== 365Scores (application Android, ou site web via PROXY_URL) =====
         // Les requêtes passent par le code natif de l'app (Native365) : aucun blocage CORS. Sur le site web, ce module n'est actif que si PROXY2_URL est renseigné (voir worker.js).
         const N365 = typeof window.Native365 !== "undefined" || !!CFG.PROXY2_URL;
-        let n365Status = "", n365Seq = 0;
+        let n365Status = "", n365Seq = 0; const extraT = {};
         const n365Cb = {}, n365Cache = {}, S365_LG = {};
         window.__n365 = (id, status, body) => { const c = n365Cb[id]; if (!c) return; delete n365Cb[id]; (status >= 200 && status < 300) ? c.res(body) : c.rej(new Error("HTTP " + status)); };
         function n365Get(url) {
@@ -984,7 +985,7 @@ h1{will-change:opacity}
             if (ck && Date.now() - ck.t < 90000) j = ck.j; else { j = JSON.parse(await n365Get(url)); n365Cache[d] = { t: Date.now(), j }; }   // pas plus d'une requête / 90 s par jour
             if (!Array.isArray(j.games)) throw new Error("format de réponse inattendu");
             const comps = new Map((j.competitions || []).map(c => [c.id, c])), ctry = new Map((j.countries || []).map(c => [c.id, c]));
-            const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0;
+            const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0; const put365 = o => { const ix = out.findIndex(x => x.id === o.id); if (ix >= 0) out[ix] = o; else out.push(o); };
             j.games.forEach(g => {
                 const hc = g.homeCompetitor || {}, ac = g.awayCompetitor || {}; if (!hc.name || !ac.name || !g.startTime) return;
                 const c = comps.get(g.competitionId) || {}, cname = String(g.competitionDisplayName || c.name || "Football");
@@ -1002,10 +1003,11 @@ h1{will-change:opacity}
                     else if (g.statusGroup === 3 || (g.gameTime > 0 && g.gameTime < 150) || /^(live|half|ht|\d+')/i.test(st)) state = "in";
                     else if (h != null && a != null && Date.now() - t0 > 3 * 3600e3) state = "post";
                 }
-                out.push({ id: "n" + g.id, tsdb: true, raw: { strStatus: st, strVenue: (g.venue && g.venue.name) || "", intRound: g.roundName || "", strCountry: cn }, slug: "tsdb", lg: key, lgl, start: g.startTime, state, off, label: off ? (st || "Reporté") : (state === "in" ? (g.gameTimeDisplay || st || "") : st), home: hc.name, away: ac.name, hl: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + hc.id, al: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + ac.id, h, a });
+                put365({ id: "n" + g.id, tsdb: true, raw: { strStatus: st, strVenue: (g.venue && g.venue.name) || "", intRound: g.roundName || "", strCountry: cn }, slug: "tsdb", lg: key, lgl, start: g.startTime, state, off, label: off ? (st || "Reporté") : (state === "in" ? (g.gameTimeDisplay || st || "") : st), home: hc.name, away: ac.name, hl: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + hc.id, al: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + ac.id, h, a });
                 added++;
             });
             byDay[d] = out.filter(m => !isBlockedMatch(m));
+            extraT[d] = Date.now();
             n365Status = "365Scores : " + j.games.length + " matchs lus (" + fixed + " recoupés avec ESPN, " + added + " ajoutés).";
             try { console.log(n365Status); } catch (e) { }
         }
