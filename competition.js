@@ -17,12 +17,25 @@
     try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
     finally { clearTimeout(t); }
   }
-  // Worker 1, puis Worker 2, puis ESPN directement. ok(j) décide si la réponse est exploitable.
-  async function espn(sl, what, qs, ok) {
+  // Requête « en course » : Worker 1 démarre tout de suite ; ESPN direct puis Worker 2 se lancent si le précédent tarde (1,5 s) ou échoue.
+  // La première réponse valide (ok(j)) gagne, les autres sont annulées. Renvoie null si tout échoue.
+  function espn(sl, what, qs, ok) {
     const direct = (what === "standings" ? "https://site.api.espn.com/apis/v2/sports/soccer/" : "https://site.api.espn.com/apis/site/v2/sports/soccer/") + sl + "/" + what + (qs || "");
-    const tries = [PROXY + "soccer/" + sl + "/" + what + (qs || ""), PROXY2 + "soccer/" + sl + "/" + what + (qs || ""), direct];
-    for (const u of tries) { try { const j = await fetchJSON(u, 7000); if (!ok || ok(j)) return j; } catch (e) { } }
-    return null;
+    const tries = [PROXY + "soccer/" + sl + "/" + what + (qs || ""), direct, PROXY2 + "soccer/" + sl + "/" + what + (qs || "")];
+    return new Promise(resolve => {
+      let done = false, started = 0, failed = 0; const ctls = [], timers = [];
+      const finish = (j, win) => { if (done) return; done = true; timers.forEach(clearTimeout); ctls.forEach((c, i) => { if (i !== win) try { c.abort(); } catch (e) { } }); resolve(j); };
+      const bad = () => { if (done) return; failed++; if (failed >= tries.length) finish(null, -1); else launch(); };
+      const launch = () => {
+        if (done || started >= tries.length) return;
+        const i = started++, c = new AbortController(); ctls[i] = c;
+        if (started < tries.length) timers.push(setTimeout(launch, 1500));
+        const to = setTimeout(() => c.abort(), 10000);
+        fetch(tries[i], { signal: c.signal }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+          .then(j => { clearTimeout(to); if (!ok || ok(j)) finish(j, i); else bad(); }, () => { clearTimeout(to); bad(); });
+      };
+      launch();
+    });
   }
 
   // ---------- Matchs ----------
@@ -46,11 +59,11 @@
     const uniq = list => { const seen = new Set(); return list.filter(e => e && e.id && !seen.has(e.id) && seen.add(e.id)); };
     const OFFS = [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7];
     // 1) la compétition jour par jour (même type de requête que la page d'accueil)
-    // UNE seule requête par compétition (plage de dates) au lieu de 11 : beaucoup plus rapide, et le Worker la garde 30 s en cache
-    const range = "?dates=" + day(-3) + "-" + day(7) + "&limit=1000";
     for (const sl of SLUGS) {
-      const j = await espn(sl, "scoreboard", range, x => (x.events || []).length);
-      if (j) { const out = uniq(j.events.map(normalize).filter(Boolean)); if (out.length) return out; }
+      const res = await Promise.all(OFFS.map(o => espn(sl, "scoreboard", "?dates=" + day(o) + "&limit=1000", null).catch(() => null)));
+      const evs = []; res.forEach(r => r && (r.events || []).forEach(e => evs.push(e)));
+      const out = uniq(evs.map(normalize).filter(Boolean));
+      if (out.length) return out;
     }
     // 2) comme la page d'accueil : tous les matchs du jour, filtrés sur cette compétition
     const wanted = new Set(SLUGS);
@@ -130,8 +143,8 @@
   const n365C = {};
   async function get365(d) {
     const dd = String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
-    const isToday = d.toDateString() === new Date().toDateString();
-    const c = n365C[dd]; if (c && Date.now() - c.t < (isToday ? 20000 : 600000)) return c.j;   // aujourd'hui : 20 s ; autres jours : 10 min
+    const nowD = new Date(), todayDD = String(nowD.getDate()).padStart(2, "0") + "/" + String(nowD.getMonth() + 1).padStart(2, "0") + "/" + nowD.getFullYear();
+    const c = n365C[dd]; if (c && Date.now() - c.t < (dd === todayDD ? 20000 : 90000)) return c.j;   // aujourd'hui : 20 s (direct) ; autres jours : 90 s
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
     const url = "https://webws.365scores.com/web/games/allscores/?appTypeId=5&langId=1&timezoneName=" + encodeURIComponent(tz) + "&userCountryId=-1&startDate=" + dd + "&endDate=" + dd + "&sports=1&showOdds=false";
     const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
@@ -144,8 +157,8 @@
   }
   async function load365() {
     if (!C365) return [];
-    const t = new Date(), res = await Promise.allSettled([-2, -1, 0, 1, 2, 3, 4, 5].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return get365(d); }));
-    const okRes = res.filter(r => r.status === "fulfilled").map(r => r.value);
+    const t = new Date(), res = await Promise.allSettled([-2, -1, 0, 1, 2, 3, 4, 5].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return o === 0 ? get365(d) : Promise.race([get365(d), new Promise(r => setTimeout(() => r(null), 3000))]); }));
+    const okRes = res.filter(r => r.status === "fulfilled" && r.value).map(r => r.value);
     if (!okRes.length) throw new Error("365Scores indisponible");
     const out = [], seen = new Set(), img = (k, id) => "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_" + k + ":default1.png/v2/" + k + "/" + id;
     okRes.forEach(j => {
@@ -202,15 +215,12 @@
     const nt = $("#net-txt"), nb = $("#net-badge");
     if (nt) { nt.textContent = lastErr ? "Erreur" : "Direct"; if (nb) nb.classList.toggle("bad", !!lastErr); }
   }
-  // Affichage instantané : dernières données connues (localStorage), rafraîchies ensuite en arrière-plan
-  const MK = "fl_mc_" + (B.slug || B.tsdb || "x");
-  function saveCache() { try { localStorage.setItem(MK, JSON.stringify({ t: Date.now(), d: matches })); } catch (e) { } }
-  try { const c = JSON.parse(localStorage.getItem(MK) || "null"); if (c && c.d && c.d.length && Date.now() - c.t < 6 * 3600e3) { matches = c.d; loaded = true; lastOk = c.t; } } catch (e) { }
-  let timer = 0;
+  let timer = 0, seq = 0;
   async function refresh() {
     clearTimeout(timer);
-    try { const r = TSDB_C ? await loadBotola() : await loadEspn(); if (r.length || !matches.length) matches = r; lastErr = ""; lastOk = Date.now(); saveCache(); }
-    catch (e) { lastErr = "Données indisponibles : " + e.message; }
+    const my = ++seq;
+    try { const m = TSDB_C ? await loadBotola() : await loadEspn(); if (my !== seq) return; if (m.length || !matches.length) { matches = m; lastOk = Date.now(); } lastErr = ""; }   // liste vide après un échec réseau : on garde les matchs déjà affichés (plus de page qui se vide entre deux cycles)
+    catch (e) { if (my !== seq) return; lastErr = "Données indisponibles : " + e.message; }
     loaded = true;
     if (tab === "m") renderMatches();
     const anyLive = matches.some(m => m.state === "in");
