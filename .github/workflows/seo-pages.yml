@@ -15,22 +15,35 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Générer les pages clubs et buteurs
-        run: python scripts/generate_seo_pages.py
+        run: |
+          ls -la index.html scripts/generate_seo_pages.py
+          python scripts/generate_seo_pages.py
+
       - name: Publier les changements
         run: |
           git config user.name  "footlive-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add clubs buteurs sitemap-seo.xml
+          for p in clubs buteurs sitemap-seo.xml; do
+            if [ -e "$p" ]; then git add -A -- "$p"; fi
+          done
           if git diff --cached --quiet; then
             echo "Rien à publier"
-          else
-            git commit -m "Mise à jour des pages clubs et buteurs"
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-            git push
+            exit 0
           fi
+          git commit -m "Mise à jour des pages clubs et buteurs"
+          for i in 1 2 3; do
+            if git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
