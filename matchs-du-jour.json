@@ -1,6 +1,6 @@
 {
  "date": "2026-11-02",
- "generated": "2026-11-02T02:47:53.951Z",
+ "generated": "2026-11-02T04:57:12.912Z",
  "extra": 61,
  "matches": [
   {
@@ -106,23 +106,23 @@
    "id": "761921",
    "lg": "MLS",
    "start": "2026-11-02T01:30Z",
-   "state": "in",
-   "label": "45'+9'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "LAFC",
    "away": "Minnesota United FC",
-   "h": 0,
-   "a": 2
+   "h": 1,
+   "a": 3
   },
   {
    "id": "761933",
    "lg": "MLS",
    "start": "2026-11-02T02:45Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "post",
+   "label": "90'+9'",
    "home": "Portland Timbers",
    "away": "Houston Dynamo FC",
-   "h": 0,
-   "a": 0
+   "h": 3,
+   "a": 1
   },
   {
    "id": "401841651",
@@ -172,12 +172,12 @@
    "id": "401876911",
    "lg": "Liga MX",
    "start": "2026-11-02T01:10Z",
-   "state": "in",
-   "label": "74'",
+   "state": "post",
+   "label": "90'+12'",
    "home": "Cruz Azul",
    "away": "León",
    "h": 2,
-   "a": 0
+   "a": 1
   },
   {
    "id": "401876703",
