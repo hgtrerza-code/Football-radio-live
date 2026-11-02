@@ -1894,7 +1894,7 @@ h1{will-change:opacity}
             const t = localDay(new Date().toISOString());
             let list = all().filter(m => (lgSel.value === "all" || m.lg === lgSel.value) && (!window.compFilter || window.compFilter.test(m)) && (!q || (m.home + " " + m.away + " " + m.lg + " " + lgDisp(m.lg, [m])).toLowerCase().includes(q)));
             const lc = document.getElementById("live-count");
-            if (lc) lc.textContent = liveN == null ? "…" : liveN;
+            if (lc) lc.textContent = liveN == null ? "…" : (window.compFilter ? all().filter(m => m.state === "in" && window.compFilter.test(m)).length : liveN);   // page de compétition : uniquement les matchs en direct de cette compétition
             if (tab === "live") list = list.filter(m => m.state === "in").sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "fav") list = list.filter(m => window.isFavMatch && window.isFavMatch(m)).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "comp") { const rk = m => m.state === "in" ? 0 : m.state === "pre" ? 1 : 2; list = list.sort((a, b) => rk(a) - rk(b) || (rk(a) === 2 ? b.start.localeCompare(a.start) : a.start.localeCompare(b.start))); }
@@ -2288,9 +2288,9 @@ h1{will-change:opacity}
     return sc;
   }
   function pickHeroes() {
-    const A = all().filter(m => !m.off), now = Date.now(), T = m => new Date(m.start).getTime(), MAX = 5;
+    const A = all().filter(m => !m.off && (!window.compFilter || window.compFilter.test(m))), now = Date.now(), T = m => new Date(m.start).getTime(), MAX = 5;   // page de compétition : uniquement cette compétition
     const live = A.filter(m => m.state === "in").sort((x, y) => (isMain10(y) - isMain10(x)) || heroScore(y) - heroScore(x));
-    const out = live.slice(0, MAX).map(m => ({ m, kind: "live", n: (typeof liveN === "number" && liveN > 0) ? liveN : live.length }));   // même compteur que le bouton « En direct » (évite les valeurs différentes)
+    const out = live.slice(0, MAX).map(m => ({ m, kind: "live", n: (!window.compFilter && typeof liveN === "number" && liveN > 0) ? liveN : live.length }));   // même compteur que le bouton « En direct » (évite les valeurs différentes)
     if (out.length < 3) {
       const nx = A.filter(m => m.state === "pre" && T(m) > now - 600000 && T(m) < now + 36 * 3600e3).sort((x, y) => heroPref(x, y) || x.start.localeCompare(y.start));
       nx.slice(0, 3 - out.length).forEach(m => out.push({ m, kind: "next" }));
