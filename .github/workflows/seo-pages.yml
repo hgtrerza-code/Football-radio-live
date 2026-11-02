@@ -1,0 +1,36 @@
+name: Pages SEO clubs et buteurs
+
+on:
+  schedule:
+    - cron: "35 */3 * * *"   # toutes les 3 heures
+  workflow_dispatch:          # lancement manuel possible
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seo-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Générer les pages clubs et buteurs
+        run: python scripts/generate_seo_pages.py
+      - name: Publier les changements
+        run: |
+          git config user.name  "footlive-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add clubs buteurs sitemap-seo.xml
+          if git diff --cached --quiet; then
+            echo "Rien à publier"
+          else
+            git commit -m "Mise à jour des pages clubs et buteurs"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push
+          fi
