@@ -996,11 +996,18 @@ h1{will-change:opacity}
             if (/^[a-z]{2}$/.test(code) && !C365_FR[code]) { try { fr = new Intl.DisplayNames(["fr"], { type: "region" }).of(code.toUpperCase()) || cn; } catch (e) { } }
             return { fr, code, emo: "" };
         }
+        const n365Url = d => { const dd = d.slice(6) + "/" + d.slice(4, 6) + "/" + d.slice(0, 4), tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; return "https://webws.365scores.com/web/games/allscores/?appTypeId=5&langId=1&timezoneName=" + encodeURIComponent(tz) + "&userCountryId=-1&startDate=" + dd + "&endDate=" + dd + "&sports=1&showOdds=false"; };
+        const n365TTL = d => d === ymd(new Date()) ? 20000 : 90000;   // aujourd'hui : données 365Scores rafraîchies à chaque cycle (30 s) ; autres jours : 90 s
+        const n365Fresh = d => { const ck = n365Cache[d]; return !!ck && Date.now() - ck.t < n365TTL(d); };
+        // Préchargement : 365Scores est interrogé EN MÊME TEMPS qu'ESPN (et non après), pour que le compteur soit juste dès le premier affichage
+        function prefetch365(d) {
+            if (n365Fresh(d)) return Promise.resolve();
+            return n365Get(n365Url(d)).then(t => { n365Cache[d] = { t: Date.now(), j: JSON.parse(t) }; }).catch(() => { });
+        }
         async function merge365(d) {
-            const dd = d.slice(6) + "/" + d.slice(4, 6) + "/" + d.slice(0, 4), tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-            const url = "https://webws.365scores.com/web/games/allscores/?appTypeId=5&langId=1&timezoneName=" + encodeURIComponent(tz) + "&userCountryId=-1&startDate=" + dd + "&endDate=" + dd + "&sports=1&showOdds=false";
+            const url = n365Url(d);
             const ck = n365Cache[d]; let j;
-            if (ck && Date.now() - ck.t < 90000) j = ck.j; else { j = JSON.parse(await n365Get(url)); n365Cache[d] = { t: Date.now(), j }; }   // pas plus d'une requête / 90 s par jour
+            if (n365Fresh(d)) j = ck.j; else { j = JSON.parse(await n365Get(url)); n365Cache[d] = { t: Date.now(), j }; }
             if (!Array.isArray(j.games)) throw new Error("format de réponse inattendu");
             const comps = new Map((j.competitions || []).map(c => [c.id, c])), ctry = new Map((j.countries || []).map(c => [c.id, c]));
             const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0; const put365 = o => { const ix = out.findIndex(x => x.id === o.id); if (ix >= 0) out[ix] = o; else out.push(o); };
@@ -1085,8 +1092,14 @@ h1{will-change:opacity}
             if (days.length > 1) loadTsdb().then(renderAll);
             // premier affichage dès que « aujourd'hui » est chargé (sans attendre les 5 autres jours)
             const todayK = ymd(new Date());
-            const res = await Promise.allSettled(days.map(d => loadDay(d).then(() => {
-                if (d === todayK) { lastErr = ""; lastOk = Date.now(); renderAll(); }   // compteur provisoire immédiat ; la valeur exacte arrive quand les sources complémentaires ont répondu
+            const pre = (N365 && days.includes(todayK)) ? prefetch365(todayK) : null;   // en parallèle d'ESPN
+            const res = await Promise.allSettled(days.map(d => loadDay(d).then(async () => {
+                if (d === todayK) {
+                    if (pre) { await Promise.race([pre, new Promise(r => setTimeout(r, 2500))]); if (n365Fresh(d)) { try { await merge365(d); } catch (e) { } } }   // fusion instantanée depuis le cache : plus de « 41 puis 45 »
+                    lastErr = ""; lastOk = Date.now();
+                    try { liveN = all().filter(m => m.state === "in").length; } catch (e) { }
+                    renderAll();
+                }   // compteur provisoire immédiat ; la valeur exacte arrive quand les sources complémentaires ont répondu
             })));
             const fail = res.find(r => r.status === "rejected");
             if (res.every(r => r.status === "rejected")) lastErr = fail.reason.message; else { lastErr = ""; lastOk = Date.now(); }
