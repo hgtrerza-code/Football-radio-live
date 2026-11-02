@@ -758,7 +758,7 @@ h1{will-change:opacity}
                 for (const u of tries) {
                     try {
                         // délai maximum de 6 s par essai : si un Worker est lent ou saturé, on passe tout de suite à la source suivante
-                        const ctl = new AbortController(), tmo = setTimeout(() => ctl.abort(), 6000);
+                        const ctl = new AbortController(), tmo = setTimeout(() => ctl.abort(), 4000);
                         const r = await rf(u, Object.assign({}, init, init && init.signal ? {} : { signal: ctl.signal })).finally(() => clearTimeout(tmo)), ct = r.headers.get("content-type") || "";
                         if (r.ok && (!m || !ct || /json/i.test(ct))) return r;
                         last = r;
@@ -1068,7 +1068,7 @@ h1{will-change:opacity}
             // premier affichage dès que « aujourd'hui » est chargé (sans attendre les 5 autres jours)
             const todayK = ymd(new Date());
             const res = await Promise.allSettled(days.map(d => loadDay(d).then(() => {
-                if (days.length > 1 && d === todayK) { lastErr = ""; lastOk = Date.now(); renderAll(); }
+                if (d === todayK) { lastErr = ""; lastOk = Date.now(); try { const n = all().filter(m => m.state === "in").length; liveN = liveN == null ? n : Math.max(liveN, n); } catch (e) { } renderAll(); }   // compteur provisoire immédiat ; la valeur exacte arrive quand les sources complémentaires ont répondu
             })));
             const fail = res.find(r => r.status === "rejected");
             if (res.every(r => r.status === "rejected")) lastErr = fail.reason.message; else { lastErr = ""; lastOk = Date.now(); }
@@ -2124,9 +2124,9 @@ h1{will-change:opacity}
         });
         // onglet masqué : on ralentit (1 rafraîchissement sur 4) au lieu de recharger toutes les 30 s pour rien
         let hidTick = 0;
-        setInterval(() => { if (document.hidden && ++hidTick % 4) return; refresh(allDays(0, 0)).then(refreshOpen); }, CFG.LIVE_REFRESH_MS);
+        setInterval(() => { if (document.hidden && ++hidTick % 4) return; refresh(allDays(0, 0), "light").then(refreshOpen); }, CFG.LIVE_REFRESH_MS);
         setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); }, CFG.OTHER_REFRESH_MS);
-        document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0)); });
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0), "light"); });
     </script>
 <script>
 (function(){
