@@ -1,6 +1,6 @@
 {
  "date": "2026-11-02",
- "generated": "2026-11-02T00:57:02.126Z",
+ "generated": "2026-11-02T02:47:53.951Z",
  "extra": 61,
  "matches": [
   {
@@ -95,23 +95,23 @@
    "id": "761932",
    "lg": "MLS",
    "start": "2026-11-02T00:00Z",
-   "state": "in",
-   "label": "31'",
+   "state": "post",
+   "label": "90'+7'",
    "home": "New England Revolution",
    "away": "Inter Miami CF",
-   "h": 0,
-   "a": 0
+   "h": 1,
+   "a": 2
   },
   {
    "id": "761921",
    "lg": "MLS",
    "start": "2026-11-02T01:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+9'",
    "home": "LAFC",
    "away": "Minnesota United FC",
    "h": 0,
-   "a": 0
+   "a": 2
   },
   {
    "id": "761933",
@@ -128,12 +128,12 @@
    "id": "401841651",
    "lg": "Liga argentine",
    "start": "2026-11-01T23:45Z",
-   "state": "in",
-   "label": "49'",
+   "state": "post",
+   "label": "90'+4'",
    "home": "Lanús",
    "away": "Gimnasia (Mendoza)",
    "h": 1,
-   "a": 0
+   "a": 1
   },
   {
    "id": "401841657",
@@ -172,11 +172,11 @@
    "id": "401876911",
    "lg": "Liga MX",
    "start": "2026-11-02T01:10Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "74'",
    "home": "Cruz Azul",
    "away": "León",
-   "h": 0,
+   "h": 2,
    "a": 0
   },
   {
