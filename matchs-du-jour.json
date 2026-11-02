@@ -1,6 +1,6 @@
 {
  "date": "2026-11-02",
- "generated": "2026-11-02T04:57:12.912Z",
+ "generated": "2026-11-02T10:55:47.551Z",
  "extra": 61,
  "matches": [
   {
@@ -12,7 +12,9 @@
    "home": "Newcastle United",
    "away": "Everton",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "St. James' Park",
+   "place": "Newcastle-upon-Tyne, England"
   },
   {
    "id": "401882824",
@@ -23,7 +25,9 @@
    "home": "Deportivo",
    "away": "Osasuna",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Riazor",
+   "place": "La Coruña, Spain"
   },
   {
    "id": "401874963",
@@ -34,7 +38,9 @@
    "home": "Sassuolo",
    "away": "Fiorentina",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Mapei Stadium",
+   "place": "Reggio Emilia, Italy"
   },
   {
    "id": "401874971",
@@ -45,7 +51,9 @@
    "home": "Atalanta",
    "away": "Parma",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "New Balance Arena",
+   "place": "Bergamo, Italy"
   },
   {
    "id": "401876419",
@@ -56,7 +64,9 @@
    "home": "Lorient",
    "away": "Brest",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Stade du Moustoir - Yves Allainmat",
+   "place": "Lorient, France"
   },
   {
    "id": "401885403",
@@ -67,7 +77,9 @@
    "home": "Benfica",
    "away": "Alverca",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Estádio da Luz",
+   "place": "Lisbon, Portugal"
   },
   {
    "id": "401885407",
@@ -78,7 +90,9 @@
    "home": "Gil Vicente",
    "away": "Vitória de Guimaraes",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Estádio Cidade de Barcelos",
+   "place": "Barcelos, Portugal"
   },
   {
    "id": "401888260",
@@ -89,7 +103,9 @@
    "home": "Genclerbirligi",
    "away": "Alanyaspor",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Eryaman Stadium",
+   "place": "Ankara, Türkiye"
   },
   {
    "id": "761932",
@@ -100,7 +116,9 @@
    "home": "New England Revolution",
    "away": "Inter Miami CF",
    "h": 1,
-   "a": 2
+   "a": 2,
+   "venue": "Gillette Stadium",
+   "place": "Foxborough, Massachusetts, USA"
   },
   {
    "id": "761921",
@@ -111,7 +129,9 @@
    "home": "LAFC",
    "away": "Minnesota United FC",
    "h": 1,
-   "a": 3
+   "a": 3,
+   "venue": "BMO Stadium",
+   "place": "Los Angeles, California, USA"
   },
   {
    "id": "761933",
@@ -122,7 +142,9 @@
    "home": "Portland Timbers",
    "away": "Houston Dynamo FC",
    "h": 3,
-   "a": 1
+   "a": 1,
+   "venue": "Providence Park",
+   "place": "Portland, Oregon, USA"
   },
   {
    "id": "401841651",
@@ -133,7 +155,9 @@
    "home": "Lanús",
    "away": "Gimnasia (Mendoza)",
    "h": 1,
-   "a": 1
+   "a": 1,
+   "venue": "Ciudad de Lanús",
+   "place": "Buenos Aires, Argentina"
   },
   {
    "id": "401841657",
@@ -144,7 +168,9 @@
    "home": "Defensa y Justicia",
    "away": "Independiente",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Norberto Tomaghello",
+   "place": "Buenos Aires, Argentina"
   },
   {
    "id": "401841649",
@@ -155,7 +181,9 @@
    "home": "Platense",
    "away": "Central Córdoba (Santiago del Estero)",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Ciudad de Vicente López",
+   "place": "Buenos Aires, Argentina"
   },
   {
    "id": "401876912",
@@ -166,7 +194,9 @@
    "home": "Santos",
    "away": "Necaxa",
    "h": 1,
-   "a": 0
+   "a": 0,
+   "venue": "Estadio Corona",
+   "place": "Torreón, Mexico"
   },
   {
    "id": "401876911",
@@ -177,7 +207,9 @@
    "home": "Cruz Azul",
    "away": "León",
    "h": 2,
-   "a": 1
+   "a": 1,
+   "venue": "Estadio Banorte",
+   "place": "Mexico City, Mexico"
   },
   {
    "id": "401876703",
@@ -188,7 +220,9 @@
    "home": "Red Star FC 93",
    "away": "AS Nancy Lorraine",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Stade Bauer",
+   "place": "Saint-Ouen, Paris, France"
   },
   {
    "id": "401876702",
@@ -199,7 +233,9 @@
    "home": "Stade de Reims",
    "away": "Sochaux",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Stade Auguste Delaune",
+   "place": "Reims, France"
   },
   {
    "id": "401883144",
@@ -210,7 +246,9 @@
    "home": "Tenerife",
    "away": "FC Andorra",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Estadio Heliodoro Rodríguez López",
+   "place": "Santa Cruz de Tenerife, Spain"
   },
   {
    "id": "401883146",
@@ -221,7 +259,9 @@
    "home": "Real Oviedo",
    "away": "Las Palmas",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Estadio Carlos Tartiere",
+   "place": "Oviedo, Spain"
   },
   {
    "id": "401883123",
@@ -232,7 +272,9 @@
    "home": "Real Valladolid",
    "away": "Leganés",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Estadio José Zorrilla",
+   "place": "Valladolid, Spain"
   },
   {
    "id": "401883147",
@@ -243,7 +285,9 @@
    "home": "Mallorca",
    "away": "Cádiz",
    "h": 0,
-   "a": 0
+   "a": 0,
+   "venue": "Estadi Mallorca Son Moix",
+   "place": "Palma de Mallorca, Spain"
   }
  ]
 }
