@@ -747,6 +747,23 @@ h1{will-change:opacity}
         // la page essaie PROXY2_URL puis ESPN directement. Les scores s'affichent donc même si un Worker est mal réglé.
         (function () {
             const rf = window.fetch.bind(window), norm = u => String(u || "").replace(/\/?$/, "/");
+            // Requête « en course » : la 1re source démarre tout de suite, les suivantes se lancent si elle tarde (1,5 s) ou échoue ; la première réponse valide gagne
+            const hedge = (tries, init) => new Promise((resolve, reject) => {
+                let done = false, started = 0, failed = 0; const ctls = [], timers = [];
+                const settle = (fn, v, win) => { if (done) return; done = true; timers.forEach(clearTimeout); ctls.forEach((c, i) => { if (i !== win) try { c.abort(); } catch (e) { } }); fn(v); };
+                const fail = v => { failed++; if (failed >= tries.length) settle(v && typeof v.ok === "boolean" ? resolve : reject, v, -1); else launch(); };
+                const launch = () => {
+                    if (done || started >= tries.length) return;
+                    const i = started++, ctl = new AbortController(); ctls[i] = ctl;
+                    const tm = setTimeout(() => ctl.abort(), 8000);
+                    if (started < tries.length) timers.push(setTimeout(launch, 1500));
+                    rf(tries[i], Object.assign({}, init, { signal: ctl.signal })).then(r => {
+                        clearTimeout(tm); const ct = r.headers.get("content-type") || "";
+                        if (r.ok && (!ct || /json/i.test(ct))) settle(resolve, r, i); else fail(r);
+                    }, e => { clearTimeout(tm); fail(e); });
+                };
+                launch();
+            });
             window.fetch = async function (input, init) {
                 const url = typeof input === "string" ? input : (input && input.url) || "";
                 if (!CFG.PROXY_URL || url.indexOf(norm(CFG.PROXY_URL)) !== 0) return rf(input, init);
@@ -754,6 +771,7 @@ h1{will-change:opacity}
                 const tries = [url];
                 if (CFG.PROXY2_URL) tries.push(norm(CFG.PROXY2_URL) + path);
                 if (m) tries.push((m[2] === "standings" ? "https://site.api.espn.com/apis/v2/sports/soccer/" : "https://site.api.espn.com/apis/site/v2/sports/soccer/") + m[1] + "/" + m[2] + (m[3] || ""));
+                if (m && !(init && init.signal)) return hedge(tries.length > 2 ? [tries[0], tries[2], tries[1]] : tries.slice(), init);   // ordre : Worker 1, ESPN direct, Worker 2
                 let last;
                 for (const u of tries) {
                     try {
@@ -2124,7 +2142,8 @@ h1{will-change:opacity}
         });
         // onglet masqué : on ralentit (1 rafraîchissement sur 4) au lieu de recharger toutes les 30 s pour rien
         let hidTick = 0;
-        setInterval(() => { if (document.hidden && ++hidTick % 4) return; refresh(allDays(0, 0), "light").then(refreshOpen); }, CFG.LIVE_REFRESH_MS);
+        let liveBusy = 0;
+        setInterval(() => { if (document.hidden && ++hidTick % 4) return; if (liveBusy && Date.now() - liveBusy < 25000) return; liveBusy = Date.now(); refresh(allDays(0, 0), "light").then(refreshOpen).catch(() => { }).finally(() => { liveBusy = 0; }); }, CFG.LIVE_REFRESH_MS);
         setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); }, CFG.OTHER_REFRESH_MS);
         document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0), "light"); });
     </script>
@@ -2544,7 +2563,7 @@ h1{will-change:opacity}
   (function hydrate() {
     const c = LS.get("fl_cache", null);
     if (!c || !c.t || Date.now() - c.t > 12 * 3600e3 || Object.keys(byDay).length) return;
-    Object.keys(c.d || {}).forEach(k => { byDay[k] = (c.d[k] || []).map(m => m.state === "in" ? Object.assign({}, m, { state: "post" }) : m); });
+    Object.keys(c.d || {}).forEach(k => { byDay[k] = (c.d[k] || []).map(m => m.state === "in" && Date.now() - c.t > 5 * 60e3 ? Object.assign({}, m, { state: "post" }) : m); });
     try { window.renderAll(); } catch (e) { }
   })();
 
