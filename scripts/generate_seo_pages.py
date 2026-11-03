@@ -19,6 +19,7 @@ import re
 import sys
 import time
 import unicodedata
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -27,7 +28,7 @@ BASE = "https://www.footlivepro.com"
 ROOT = os.environ.get("SEO_ROOT", ".")
 INDEX = os.path.join(ROOT, "index.html")
 PARIS = ZoneInfo("Europe/Paris")
-UA = "Mozilla/5.0 (compatible; FootLiveProBot/1.0; +https://www.footlivepro.com)"
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer"
 BYATH = ("https://site.web.api.espn.com/apis/common/v3/sports/soccer/{sl}/statistics/byathlete"
          "?region=us&lang=en&contentorigin=espn&isqualified=true&page={pg}&limit=50"
@@ -46,11 +47,20 @@ NATIONAL = re.compile(r"^(uefa|conmebol|caf|concacaf|afc|fifa)\.", re.I)
 
 # ----------------------------------------------------------------------------- utilitaires
 def fetch_json(url, tries=3):
+    headers = {"User-Agent": UA, "Accept": "application/json, text/plain, */*",
+               "Accept-Language": "en-US,en;q=0.9", "Referer": "https://www.espn.com/",
+               "Origin": "https://www.espn.com"}
     for i in range(tries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json"})
+            req = urllib.request.Request(url, headers=headers)
             with urllib.request.urlopen(req, timeout=25) as r:
                 return json.loads(r.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            # 403 / 404 : inutile de réessayer, on abandonne tout de suite cette URL
+            print("  ! échec", url[:110], "->", f"HTTP {e.code}", file=sys.stderr)
+            if e.code in (403, 404) or i == tries - 1:
+                return None
+            time.sleep(1.5 * (i + 1))
         except Exception as e:  # noqa
             if i == tries - 1:
                 print("  ! échec", url[:110], "->", str(e)[:60], file=sys.stderr)
