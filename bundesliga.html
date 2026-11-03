@@ -2668,5 +2668,35 @@ h1{will-change:opacity}
 </script>
 <script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
+<script>
+/* FootLive Pro : onglets Clubs, Buteurs et Women's Foot + logo cliquable sur les pages de compétition.
+ */
+(function () {
+  "use strict";
+  var ITEMS = {"clubs": "<a href=\"./#clubs\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z\"/><path d=\"M12 8l2.2 1.6-.8 2.6h-2.8l-.8-2.6z\"/></svg></span>Clubs</a>", "buteurs": "<a href=\"./#buteurs\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 18V8l3-3h12l3 3v10\"/><path d=\"M3 18h18M8 5v13M16 5v13M3 11h18\"/></svg></span>Buteurs</a>", "women": "<a href=\"./#women\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"9\" r=\"5\"/><path d=\"M12 14v7M9 18h6\"/></svg></span>Women's Foot</a>"};
+  function run() {
+    try {
+      var bar = document.querySelector("#tabbar .container");
+      if (bar && !bar.querySelector("[data-fl-x]")) {
+        var by = function (go) { return bar.querySelector('a[data-go="' + go + '"]'); };
+        var add = function (key, ref, before) {
+          var t = document.createElement("div"); t.innerHTML = ITEMS[key]; var a = t.firstChild; a.setAttribute("data-fl-x", key);
+          if (ref && before) bar.insertBefore(a, ref); else if (ref && ref.nextSibling) bar.insertBefore(a, ref.nextSibling); else bar.appendChild(a);
+        };
+        add("clubs", by("radio"), false);     // Scores, Radio, Clubs
+        add("buteurs", by("table"), false);   // Classements, Buteurs
+        add("women", by("news"), false);      // Actus, Women's Foot
+      }
+      var h = document.querySelector("header h1");
+      if (h && !h.querySelector("a.brand-link") && !h.closest("a")) {
+        var a = document.createElement("a"); a.className = "brand-link"; a.href = "./"; a.setAttribute("aria-label", "FootLive Pro : retour à l'accueil");
+        a.style.cssText = "display:contents;color:inherit;text-decoration:none;cursor:pointer";
+        while (h.firstChild) a.appendChild(h.firstChild); h.appendChild(a);
+      }
+    } catch (e) { }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run); else run();
+})();
+</script>
 </body>
 </html>
