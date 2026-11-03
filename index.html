@@ -951,8 +951,9 @@ h1{will-change:opacity}
         }
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
-        const goalCls = m => (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";
-        const goalBadge = m => (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
+        const goalOn = () => { try { return localStorage.getItem("fl_goal_alerts") !== "false"; } catch (e) { return true; } };
+        const goalCls = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";
+        const goalBadge = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
         function showGoal(m, team) {
             const box = document.getElementById("goal-toasts"), el = document.createElement("div");
             el.className = "goal-sonar";
@@ -2267,8 +2268,11 @@ h1{will-change:opacity}
     const btn = $("#goal-toggle");
     const paint = () => { btn.textContent = cfg.goals ? "🔔 Buts : activés" : "🔕 Buts : désactivés"; btn.classList.toggle("off", !cfg.goals); btn.setAttribute("aria-pressed", String(cfg.goals)); btn.title = cfg.goals ? "Désactiver les notifications de buts" : "Activer les notifications de buts"; };
     paint();
+    // Le choix est lu dans le stockage à chaque but : il s'applique à toutes les pages et à tous les onglets ouverts du site
+    window.goalAlertsOn = () => { cfg.goals = LS.get("fl_goal_alerts", true) !== false; return cfg.goals; };
+    window.addEventListener("storage", e => { if (e.key === "fl_goal_alerts") { window.goalAlertsOn(); paint(); if (!cfg.goals) { const b = document.getElementById("goal-toasts"); if (b) b.innerHTML = ""; } try { renderLive(); renderMatches(); } catch (x) { } } });
     btn.addEventListener("click", () => {
-      cfg.goals = !cfg.goals; LS.set("fl_goal_alerts", cfg.goals); paint();
+      cfg.goals = !cfg.goals; LS.set("fl_goal_alerts", cfg.goals); paint(); try { renderLive(); renderMatches(); } catch (x) { }
       if (!cfg.goals) { const b = document.getElementById("goal-toasts"); if (b) b.innerHTML = ""; }
       else if ("Notification" in window && Notification.permission === "default") { try { Notification.requestPermission().then(p => { cfg.notif = p === "granted"; }); } catch (e) { } }
       toast(cfg.goals ? "🔔 Notifications des buts activées" : "🔕 Notifications des buts désactivées");
@@ -2290,7 +2294,7 @@ h1{will-change:opacity}
   const whoTxt = w => "⚽ " + w.name + (w.num ? " · n°" + w.num : "") + (w.og ? " (csc)" : w.pen ? " (pen.)" : "") + (w.min ? " · " + w.min : "");
 
   window.showGoal = function (m, team) {
-    if (!cfg.goals) return;                                              // alertes désactivées
+    if (!window.goalAlertsOn()) return;                                  // alertes désactivées (toutes pages et onglets)
     if (window.compFilter && !window.compFilter.test(m)) return;         // page d'une compétition : uniquement les buts de cette compétition (accueil : tous les matchs)
     if (cfg.favOnly && !window.isFavMatch(m)) return;
     const box = document.getElementById("goal-toasts"), el = document.createElement("div");
