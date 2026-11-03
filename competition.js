@@ -17,25 +17,12 @@
     try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
     finally { clearTimeout(t); }
   }
-  // Requête « en course » : Worker 1 démarre tout de suite ; ESPN direct puis Worker 2 se lancent si le précédent tarde (1,5 s) ou échoue.
-  // La première réponse valide (ok(j)) gagne, les autres sont annulées. Renvoie null si tout échoue.
-  function espn(sl, what, qs, ok) {
+  // Worker 1, puis Worker 2, puis ESPN directement. ok(j) décide si la réponse est exploitable.
+  async function espn(sl, what, qs, ok) {
     const direct = (what === "standings" ? "https://site.api.espn.com/apis/v2/sports/soccer/" : "https://site.api.espn.com/apis/site/v2/sports/soccer/") + sl + "/" + what + (qs || "");
-    const tries = [PROXY + "soccer/" + sl + "/" + what + (qs || ""), direct, PROXY2 + "soccer/" + sl + "/" + what + (qs || "")];
-    return new Promise(resolve => {
-      let done = false, started = 0, failed = 0; const ctls = [], timers = [];
-      const finish = (j, win) => { if (done) return; done = true; timers.forEach(clearTimeout); ctls.forEach((c, i) => { if (i !== win) try { c.abort(); } catch (e) { } }); resolve(j); };
-      const bad = () => { if (done) return; failed++; if (failed >= tries.length) finish(null, -1); else launch(); };
-      const launch = () => {
-        if (done || started >= tries.length) return;
-        const i = started++, c = new AbortController(); ctls[i] = c;
-        if (started < tries.length) timers.push(setTimeout(launch, 1500));
-        const to = setTimeout(() => c.abort(), 10000);
-        fetch(tries[i], { signal: c.signal }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(j => { clearTimeout(to); if (!ok || ok(j)) finish(j, i); else bad(); }, () => { clearTimeout(to); bad(); });
-      };
-      launch();
-    });
+    const tries = [PROXY + "soccer/" + sl + "/" + what + (qs || ""), PROXY2 + "soccer/" + sl + "/" + what + (qs || ""), direct];
+    for (const u of tries) { try { const j = await fetchJSON(u); if (!ok || ok(j)) return j; } catch (e) { } }
+    return null;
   }
 
   // ---------- Matchs ----------
@@ -143,8 +130,7 @@
   const n365C = {};
   async function get365(d) {
     const dd = String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
-    const nowD = new Date(), todayDD = String(nowD.getDate()).padStart(2, "0") + "/" + String(nowD.getMonth() + 1).padStart(2, "0") + "/" + nowD.getFullYear();
-    const c = n365C[dd]; if (c && Date.now() - c.t < (dd === todayDD ? 20000 : 90000)) return c.j;   // aujourd'hui : 20 s (direct) ; autres jours : 90 s
+    const c = n365C[dd]; if (c && Date.now() - c.t < 90000) return c.j;
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
     const url = "https://webws.365scores.com/web/games/allscores/?appTypeId=5&langId=1&timezoneName=" + encodeURIComponent(tz) + "&userCountryId=-1&startDate=" + dd + "&endDate=" + dd + "&sports=1&showOdds=false";
     const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 9000);
@@ -157,8 +143,8 @@
   }
   async function load365() {
     if (!C365) return [];
-    const t = new Date(), res = await Promise.allSettled([-2, -1, 0, 1, 2, 3, 4, 5].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return o === 0 ? get365(d) : Promise.race([get365(d), new Promise(r => setTimeout(() => r(null), 3000))]); }));
-    const okRes = res.filter(r => r.status === "fulfilled" && r.value).map(r => r.value);
+    const t = new Date(), res = await Promise.allSettled([-2, -1, 0, 1, 2, 3, 4, 5].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return get365(d); }));
+    const okRes = res.filter(r => r.status === "fulfilled").map(r => r.value);
     if (!okRes.length) throw new Error("365Scores indisponible");
     const out = [], seen = new Set(), img = (k, id) => "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_" + k + ":default1.png/v2/" + k + "/" + id;
     okRes.forEach(j => {
@@ -215,12 +201,11 @@
     const nt = $("#net-txt"), nb = $("#net-badge");
     if (nt) { nt.textContent = lastErr ? "Erreur" : "Direct"; if (nb) nb.classList.toggle("bad", !!lastErr); }
   }
-  let timer = 0, seq = 0;
+  let timer = 0;
   async function refresh() {
     clearTimeout(timer);
-    const my = ++seq;
-    try { const m = TSDB_C ? await loadBotola() : await loadEspn(); if (my !== seq) return; if (m.length || !matches.length) { matches = m; lastOk = Date.now(); } lastErr = ""; }   // liste vide après un échec réseau : on garde les matchs déjà affichés (plus de page qui se vide entre deux cycles)
-    catch (e) { if (my !== seq) return; lastErr = "Données indisponibles : " + e.message; }
+    try { matches = TSDB_C ? await loadBotola() : await loadEspn(); lastErr = ""; lastOk = Date.now(); }
+    catch (e) { lastErr = "Données indisponibles : " + e.message; }
     loaded = true;
     if (tab === "m") renderMatches();
     const anyLive = matches.some(m => m.state === "in");
@@ -411,4 +396,32 @@
       if (u && /^https?:/i.test(u)) { img.classList.add("lt"); img.src = u; st["botola-pro"] = u; try { localStorage.setItem("fl_cl", JSON.stringify(st)); } catch (e) { } }
     }).catch(function () { });
   } catch (e) { }
+})();
+
+/* Barre d'onglets du site (Scores, Radio, Clubs, Classements, Buteurs, Actus, Women's Foot), identique à l'accueil */
+(function () {
+  try {
+    if (document.getElementById("tabbar")) return;
+    var css = "#tabbar{border-top:1px solid var(--border);background:rgba(7,11,22,.6)}#tabbar .container{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-top:0;padding-bottom:0}#tabbar .container::-webkit-scrollbar{display:none}#tabbar a{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;padding:11px 16px;color:var(--text-muted);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:3px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s,background .2s}#tabbar a span{font-size:1.05rem;line-height:1}#tabbar a:hover{color:var(--text-main);background:rgba(255,255,255,.04)}#tabbar .svgi{width:1em;height:1em;vertical-align:-.15em}@media(max-width:600px){#tabbar a{padding:10px 13px;font-size:.82rem}}";
+    function add() {
+      if (document.getElementById("tabbar")) return;
+      var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+      var tmp = document.createElement("div"); tmp.innerHTML = "<nav id=\"tabbar\" aria-label=\"Navigation du site\"><div class=\"container\"><a href=\"index.html\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z\"/><path d=\"M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9\"/></svg></span>Scores</a><a href=\"index.html#radio\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"8\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M7 8l10-5\"/><circle cx=\"15\" cy=\"14\" r=\"3\"/><path d=\"M6 12h3M6 15h3\"/></svg></span>Radio</a><a href=\"index.html#clubs\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z\"/><path d=\"M12 8l2.2 1.6-.8 2.6h-2.8l-.8-2.6z\"/></svg></span>Clubs</a><a href=\"index.html#table\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 4h8v6a4 4 0 0 1-8 0z\"/><path d=\"M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3\"/><path d=\"M12 14v4M8 20h8\"/></svg></span>Classements</a><a href=\"index.html#buteurs\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 18V8l3-3h12l3 3v10\"/><path d=\"M3 18h18M8 5v13M16 5v13M3 11h18\"/></svg></span>Buteurs</a><a href=\"index.html#news\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M7 9h10M7 13h10M7 17h6\"/></svg></span>Actus</a><a href=\"index.html#women\"><span><svg class=\"svgi\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"9\" r=\"5\"/><path d=\"M12 14v7M9 18h6\"/></svg></span>Women's Foot</a></div></nav>";
+      var nav = tmp.firstChild, h = document.querySelector("header"), cb = document.getElementById("compbar");
+      if (h) h.appendChild(nav); else if (cb && cb.parentNode) cb.parentNode.insertBefore(nav, cb); else document.body.insertBefore(nav, document.body.firstChild);
+    }
+    if (document.body) add(); else document.addEventListener("DOMContentLoaded", add);
+  } catch (e) { }
+})();
+
+/* Logo + nom « FootLive Pro » : retour à la page d'accueil */
+(function () {
+  function add() {
+    try {
+      var h = document.querySelector("header h1"); if (!h || h.querySelector("a.brand-link") || h.closest("a")) return;
+      var a = document.createElement("a"); a.className = "brand-link"; a.href = "index.html"; a.setAttribute("aria-label", "FootLive Pro : retour à l'accueil"); a.style.cssText = "display:contents;color:inherit;text-decoration:none;cursor:pointer";
+      while (h.firstChild) a.appendChild(h.firstChild); h.appendChild(a);
+    } catch (e) { }
+  }
+  if (document.body) add(); else document.addEventListener("DOMContentLoaded", add);
 })();

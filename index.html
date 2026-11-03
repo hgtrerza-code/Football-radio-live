@@ -2680,14 +2680,15 @@ h1{will-change:opacity}
   const cbBase = () => CFG.PROXY_URL ? CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/all/scoreboard" : CFG.ESPN;
   const cbSC = q => cbJ(cbBase() + "?" + q).catch(() => cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?" + q));
   const cbToday = () => { const o = {}; new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()).forEach(x => o[x.type] = x.value); return o.year + "-" + o.month + "-" + o.day; };
-  const cbEXC = /women|\(w\)|\(f\)|\bu-?\d\d\b| ii$|reserves|femin|femen|femmin|frauen|damen|dames|ladies|\bw$/i;
+  const cbEXC = /women|\(w\)|\(f\)|\bu-?\d\d\b| ii$|reserves|femin|femen|femmin|frauen|damen|dames|ladies|lyonnes|\bw$/i;
   const cbWSLUG = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies/i;
   function cbParse(j, re, out) {
     (j.events || []).forEach(ev => {
       const c = (ev.competitions && ev.competitions[0]) || {}, cp = c.competitors || [];
       const h = cp.find(x => x.homeAway === "home") || cp[0], a = cp.find(x => x.homeAway === "away") || cp[1]; if (!h || !a) return;
       const hn = h.team.displayName || h.team.name, an = a.team.displayName || a.team.name, nh = cbNorm(hn), na = cbNorm(an);
-      const isH = re.test(nh) && !cbEXC.test(nh), isA = re.test(na) && !cbEXC.test(na); if (!isH && !isA) return;
+      if (cbEXC.test(nh) || cbEXC.test(na)) return;
+      const isH = re.test(nh), isA = re.test(na); if (!isH && !isA) return;
       const lid = ((ev.uid || "").match(/l:(\d+)/) || [])[1], top = (j.leagues || []).find(l => String(l.id) === lid);
       if (cbWSLUG.test((top && top.slug) || (ev.league && ev.league.slug) || "") || cbEXC.test(String((top && top.name) || (ev.league && ev.league.name) || "")) ) return;
       let lg = String((ev.league && ev.league.name) || (c.league && c.league.name) || (top && top.name) || "").replace(/\u200b.*$/, "");
@@ -2697,6 +2698,13 @@ h1{will-change:opacity}
     });
   }
   const cbCache = {};
+  // Un même match ne doit apparaître qu'une fois par jour (ESPN le liste parfois sous plusieurs compétitions)
+  function cbDedupe(list) {
+    const rank = m => (m.state === "in" ? 3 : m.state === "post" ? 2 : 1) * 10 + (CB_NAT.test(m.slug || "") || /friendl|cup|copa|coupe|pokal|supercup/i.test(m.slug || "") ? 0 : 5);
+    const day = m => new Date(m.start).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" }), best = {};
+    list.forEach(m => { const k = day(m) + "|" + [cbNorm(m.home), cbNorm(m.away)].sort().join("|"); if (!best[k] || rank(m) > rank(best[k])) best[k] = m; });
+    return Object.values(best);
+  }
   async function cbLoad(slug) {
     const k = cbCache[slug]; if (k && Date.now() - k.t < 120000) return k.v;
     const re = new RegExp(clubOf(slug)[5], "i"), b = new Date(cbToday() + "T12:00:00Z"), f = new Date(b), t = new Date(b);
@@ -2707,7 +2715,7 @@ h1{will-change:opacity}
       const reqs = []; for (let i = -3; i <= 7; i++) { const d = new Date(b); d.setUTCDate(d.getUTCDate() + i); reqs.push(cbSC("dates=" + cbYmd(d) + "&limit=1000").then(j => cbParse(j, re, found)).catch(() => { })); }
       await Promise.all(reqs);
     }
-    const v = Object.values(found); cbCache[slug] = { t: Date.now(), v }; return v;
+    const v = cbDedupe(Object.values(found)); cbCache[slug] = { t: Date.now(), v }; return v;
   }
   const cbDF = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "short", day: "numeric", month: "short" });
   const cbDL = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" });
@@ -2939,28 +2947,57 @@ h1{will-change:opacity}
     return rows;
   }
 
-  // ----- Photos des joueurs : ESPN, puis TheSportsDB, puis Wikipédia -----
+  // ----- Photos des joueurs : ESPN, puis TheSportsDB, Wikipédia (en/fr/es/de), Wikidata -----
   const plBusy = {};
-  async function plLookup(n) {
-    try {
-      const j = await fetchJSON("https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=" + encodeURIComponent(n), 7000);
-      const pl = (j.player || []).find(x => /soccer|football/i.test(x.strSport || "") && (x.strCutout || x.strThumb || x.strRender));
-      if (pl) return btHttps(pl.strCutout || pl.strThumb || pl.strRender);
-    } catch (e) { }
+  const plNorm = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s'-]/g, " ").replace(/\s+/g, " ").trim();
+  const plFoot = /footbal|soccer|fu[sß]ball|futbol|fútbol|calcio|joueu|jogador|midfield|forward|striker|goalkeeper|defender|winger/i;
+  async function plTSDB(n) {
+    const j = await fetchJSON("https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=" + encodeURIComponent(n), 7000);
+    const pl = (j.player || []).find(x => /soccer|football/i.test(x.strSport || "") && (x.strCutout || x.strThumb || x.strRender));
+    return pl ? btHttps(pl.strCutout || pl.strThumb || pl.strRender) : "";
+  }
+  async function plWiki(lang, n) {
+    const last = plNorm(n).toLowerCase().split(" ").pop();
+    const j = await fetchJSON("https://" + lang + ".wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=4&gsrsearch=" + encodeURIComponent(n + " footballer") + "&prop=pageimages%7Cdescription&piprop=thumbnail&pithumbsize=240", 7000);
+    const pages = Object.values((j.query || {}).pages || {}).sort((x, y) => (x.index || 0) - (y.index || 0));
+    const pg = pages.find(x => x.thumbnail && plNorm(x.title).toLowerCase().indexOf(last) >= 0 && plFoot.test(x.description || ""));
+    return pg ? btHttps(pg.thumbnail.source) : "";
+  }
+  async function plSummary(n) {
     for (const t of [n, n + " (footballer)"]) {
       try {
         const j = await fetchJSON("https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(t.replace(/ /g, "_")), 7000);
-        if (j.thumbnail && j.thumbnail.source && /footbal|soccer/i.test((j.description || "") + " " + (j.extract || "").slice(0, 300))) return btHttps(j.thumbnail.source);
+        if (j.thumbnail && j.thumbnail.source && plFoot.test((j.description || "") + " " + (j.extract || "").slice(0, 300))) return btHttps(j.thumbnail.source);
       } catch (e) { }
     }
+    return "";
+  }
+  async function plWikidata(n) {
+    const j = await fetchJSON("https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&origin=*&language=en&limit=3&search=" + encodeURIComponent(n), 7000);
+    for (const e of (j.search || [])) {
+      if (!plFoot.test(e.description || "")) continue;
+      const d = await fetchJSON("https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&origin=*&property=P18&entity=" + e.id, 7000);
+      const f = (((d.claims || {}).P18 || [])[0] || {}).mainsnak; const v = f && f.datavalue && f.datavalue.value;
+      if (v) return "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(v) + "?width=240";
+    }
+    return "";
+  }
+  async function plLookup(n) {
+    const nn = plNorm(n), jobs = [() => plTSDB(n)];
+    if (nn && nn !== n) jobs.push(() => plTSDB(nn));
+    jobs.push(() => plSummary(nn || n), () => plWiki("en", nn || n), () => plWiki("fr", nn || n), () => plWiki("es", nn || n), () => plWiki("de", nn || n), () => plWikidata(nn || n));
+    for (const f of jobs) { try { const u = await f(); if (u) return u; } catch (e) { } }
     return "";
   }
   window.plFix = async function (img) {
     if (img.dataset.pf) { img.remove(); return; } img.dataset.pf = "1";
     const n = img.dataset.n; if (!n) { img.remove(); return; }
-    let c = {}; try { c = JSON.parse(localStorage.getItem("fl_ph") || "{}") || {}; } catch (e) { }
-    let u = c[n];
-    if (!u) { u = await (plBusy[n] = plBusy[n] || plLookup(n)); delete plBusy[n]; if (u) { c[n] = u; try { localStorage.setItem("fl_ph", JSON.stringify(c)); } catch (e) { } } }
+    let c = {}; try { c = JSON.parse(localStorage.getItem("fl_ph2") || "{}") || {}; } catch (e) { }
+    let e = c[n], u = e && e.u;
+    if (!e || (!e.u && Date.now() - e.t > 7 * 864e5)) {
+      u = await (plBusy[n] = plBusy[n] || plLookup(n)); delete plBusy[n];
+      c[n] = { u: u || "", t: Date.now() }; try { localStorage.setItem("fl_ph2", JSON.stringify(c)); } catch (x) { }
+    }
     if (u && img.isConnected) img.src = u; else img.remove();
   };
   const plImg = (n, u, sz) => '<img src="' + esc(u || "data:,") + '" data-n="' + esc(n) + '" alt="" width="' + sz + '" height="' + sz + '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="plFix(this)">';
@@ -3003,7 +3040,7 @@ h1{will-change:opacity}
   ];
   const wFind = k => WL.find(l => l[0] === k);
   const wLbl = l => ((l[1] && typeof codeEmoji === "function" && codeEmoji(l[1])) || "⚽") + " " + l[2];
-  $("main").insertAdjacentHTML("beforeend", '<div id="women-view" hidden><div class="sec-title">⚽ Women\'s Foot <small>football féminin : scores, classements, buteuses et actus (mis à jour tous les 2 jours)</small></div>' +
+  $("main").insertAdjacentHTML("beforeend", '<div id="women-view" hidden><div class="sec-title">⚽ Women\'s Foot <small>football féminin : scores, classements, buteuses et actus (mis à jour une fois par jour)</small></div>' +
     '<div class="cb-chips" id="w-chips">' + WL.map(l => '<a href="#women-' + esc(l[0]) + '" data-wk="' + esc(l[0]) + '">' + esc(wLbl(l)) + "</a>").join("") + '</div>' +
     '<div class="toolbar"><select class="region-select" id="w-league" aria-label="Choisir une compétition féminine">' + WL.map(l => '<option value="' + esc(l[0]) + '">' + esc(wLbl(l)) + "</option>").join("") + '</select></div>' +
     '<div class="sec-title" id="w-t1">📅 Matchs <small>heure de Paris</small></div><div id="w-up"></div>' +
@@ -3011,7 +3048,7 @@ h1{will-change:opacity}
     '<div class="sec-title">🏆 Classement</div><div id="w-tb" class="standings"></div>' +
     '<div class="sec-title">⚽ Meilleures buteuses</div><div id="w-sc"></div>' +
     '<div class="sec-title">📰 Actus</div><div id="w-nw" class="news-grid"></div>' +
-    '<p class="note">Données ESPN, actualisées tous les 2 jours. Toutes les compétitions affichées ici sont féminines.</p></div>');
+    '<p class="note">Données ESPN, actualisées une fois par jour. Toutes les compétitions affichées ici sont féminines.</p></div>');
   const wApi = (sl, kind, q) => { const d = "https://site.api.espn.com/apis/" + (kind === "standings" ? "v2" : "site/v2") + "/sports/soccer/" + sl + "/" + kind + (q ? "?" + q : ""); const nc = d + (q ? "&" : "?") + "_=" + Math.floor(Date.now() / 30000); return fetch(nc, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch(() => CFG.PROXY_URL ? cbJ(CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + sl + "/" + kind + (q ? "?" + q : "")) : cbJ(d)); };
   function wParse(j) {
     const out = [];
@@ -3030,9 +3067,9 @@ h1{will-change:opacity}
     return '<div class="m-row' + (live ? " live" : "") + '" style="cursor:default"><div class="m-date">' + when + '</div><div class="m-home"><strong>' + esc(m.home) + "</strong>" + cbLg(m.hl) + '</div><div class="m-score' + (m.state === "pre" ? " next" : "") + '">' + mid + '</div><div class="m-away">' + cbLg(m.al) + "<strong>" + esc(m.away) + "</strong></div></div>";
   }
   let wCur = null;
-  const W_TTL = 2 * 24 * 3600e3;   // les données Women's Foot ne sont rechargées que tous les 2 jours
-  const wGet = k => { try { const c = JSON.parse(localStorage.getItem("fl_w_" + k) || "null"); return c && Date.now() - c.t < W_TTL ? c.v : null; } catch (e) { return null; } };
-  const wSet = (k, v) => { try { localStorage.setItem("fl_w_" + k, JSON.stringify({ t: Date.now(), v })); } catch (e) { } };
+  const W_TTL = 24 * 3600e3;   // les données Women's Foot ne sont rechargées qu'une fois par jour
+  const wGet = k => { try { const c = JSON.parse(localStorage.getItem("fl_w2_" + k) || "null"); return c && Date.now() - c.t < W_TTL ? c.v : null; } catch (e) { return null; } };
+  const wSet = (k, v) => { try { localStorage.setItem("fl_w2_" + k, JSON.stringify({ t: Date.now(), v })); } catch (e) { } };
   let wList = {};
   function wPaint() {
     const list = Object.values(wList);
@@ -3200,6 +3237,41 @@ h1{will-change:opacity}
   const h0 = location.hash.slice(1); if ((PAGES[h0] || /^club-/.test(h0) || /^buteurs-/.test(h0) || /^women-/.test(h0)) && h0 !== "scores") showPage(h0, true);
 })();
 
+
+// Logo + nom « FootLive Pro » en haut : retour à la page d'accueil
+(function () {
+  var h = document.querySelector("header h1"); if (!h || h.querySelector("a.brand-link")) return;
+  var comp = !!(document.body.dataset.slug || document.body.dataset.comp);
+  var a = document.createElement("a"); a.className = "brand-link"; a.href = comp ? "index.html" : "./"; a.setAttribute("aria-label", "FootLive Pro : retour à l'accueil"); a.style.cssText = "display:contents;color:inherit;text-decoration:none;cursor:pointer";
+  while (h.firstChild) a.appendChild(h.firstChild); h.appendChild(a);
+  if (!comp) a.addEventListener("click", function (e) { e.preventDefault(); if (window.showPage) window.showPage("scores"); window.scrollTo({ top: 0 }); });
+})();
+
+// Aperçu SEO des matchs : si l'instantané intégré à la page date d'un autre jour, il est reconstruit avec les matchs du jour
+(function () {
+  var pd = function (d) { return new Date(d).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" }); };
+  var fD = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long", year: "numeric" }), fT = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" });
+  function build() {
+    var sec = document.getElementById("apercu-matchs"); if (!sec) return true;
+    var t = sec.querySelector("time[datetime]"), today = pd(Date.now()); if (t && pd(t.getAttribute("datetime")) === today) return true;
+    var ms = all().filter(function (m) { return !m.off && m.start && pd(m.start) === today; }); if (!ms.length) return false;
+    var lgn = function (m) { return String(m.lg || "Football").split(String.fromCharCode(8203))[0]; };
+    ms.sort(function (x, y) { return (lgTier(lgn(x)) - lgTier(lgn(y))) || lgn(x).localeCompare(lgn(y)) || (new Date(x.start) - new Date(y.start)); });
+    var shown = ms.slice(0, 80), groups = [], cur = null;
+    shown.forEach(function (m) { var n = lgn(m); if (!cur || cur.n !== n) groups.push(cur = { n: n, a: [] }); cur.a.push(m); });
+    var st = function (m) { return m.state === "in" ? "en direct" + (m.label ? ", " + m.label : "") : m.state === "post" ? "terminé" : "à venir"; };
+    var html = "<h2>Matchs de football du jour : " + esc(fD.format(new Date())) + '</h2><p class="ap-upd">Aperçu mis à jour à ' + fT.format(new Date()) + " (heure de Paris). Les scores en direct s’actualisent dans l’application ci-dessus.</p>" +
+      groups.map(function (g) { return "<h3>" + esc(g.n) + "</h3><ul>" + g.a.map(function (m) { return '<li><time datetime="' + esc(new Date(m.start).toISOString().slice(0, 16)) + 'Z">' + fT.format(new Date(m.start)) + "</time> — " + esc(m.home) + (m.state === "pre" || m.h == null ? " – " : " " + m.h + "–" + m.a + " ") + esc(m.away) + " <small>(" + esc(st(m)) + ")</small></li>"; }).join("") + "</ul>"; }).join("") +
+      (ms.length > shown.length ? "<p>… et " + (ms.length - shown.length) + " autres matchs à retrouver dans l’application ci-dessus.</p>" : "");
+    sec.innerHTML = html;
+    try {
+      var ld = [].slice.call(document.querySelectorAll('script[type="application/ld+json"]')).find(function (e) { return /"SportsEvent"/.test(e.textContent); });
+      if (ld) ld.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": shown.slice(0, 20).map(function (m) { return { "@type": "SportsEvent", "name": m.home + " - " + m.away, "startDate": new Date(m.start).toISOString().slice(0, 16) + "Z", "sport": "Football", "eventStatus": "https://schema.org/EventScheduled", "location": { "@type": "Place", "name": lgn(m) }, "homeTeam": { "@type": "SportsTeam", "name": m.home }, "awayTeam": { "@type": "SportsTeam", "name": m.away }, "url": "https://www.footlivepro.com/" }; }) });
+    } catch (e) { }
+    return true;
+  }
+  var n = 0, iv = setInterval(function () { var ok = false; try { ok = build(); } catch (e) { } if (ok || ++n > 40) clearInterval(iv); }, 3000);
+})();
 
 // Logos des 10 compétitions (barre du haut) : logo ESPN, sinon logo trouvé dans les matchs chargés, sinon rien
 (function(){
