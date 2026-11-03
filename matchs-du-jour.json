@@ -1,17 +1,17 @@
 {
  "date": "2026-11-03",
- "generated": "2026-11-03T16:52:38.381Z",
+ "generated": "2026-11-03T18:47:36.182Z",
  "extra": 54,
  "matches": [
   {
    "id": "401915311",
    "lg": "Ligue des champions",
    "start": "2026-11-03T17:45Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+3'",
    "home": "Galatasaray",
    "away": "VfB Stuttgart",
-   "h": 0,
+   "h": 2,
    "a": 0,
    "venue": "RAMS Park",
    "place": "Istanbul, Türkiye"
@@ -20,8 +20,8 @@
    "id": "401915310",
    "lg": "Ligue des champions",
    "start": "2026-11-03T17:45Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'",
    "home": "Shakhtar Donetsk",
    "away": "Sporting CP",
    "h": 0,
