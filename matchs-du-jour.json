@@ -1,6 +1,6 @@
 {
  "date": "2026-11-03",
- "generated": "2026-11-03T02:47:46.932Z",
+ "generated": "2026-11-03T16:52:38.381Z",
  "extra": 54,
  "matches": [
   {
@@ -293,7 +293,7 @@
    "id": "401928514",
    "lg": "Coupe du Roi",
    "start": "2026-11-03T18:00Z",
-   "state": "pre",
+   "state": "off",
    "label": "0'",
    "home": "Anaitasuna",
    "away": "Alavés",
@@ -306,7 +306,7 @@
    "id": "401928516",
    "lg": "Coupe du Roi",
    "start": "2026-11-03T18:00Z",
-   "state": "pre",
+   "state": "off",
    "label": "0'",
    "home": "CD Pamplona",
    "away": "Eibar",
