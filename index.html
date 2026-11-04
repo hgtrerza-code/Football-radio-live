@@ -638,6 +638,12 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 #apercu-matchs li{padding:.15rem 0}
 #apercu-matchs time{color:var(--accent);font-weight:600;margin-right:.25rem}
 #apercu-matchs .ap-upd{font-size:.75rem}
+#apercu-matchs{position:relative;max-height:220px;overflow:hidden;cursor:pointer;margin-top:1rem;padding:.6rem 0 0}
+#apercu-matchs::before{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(transparent,var(--bg-dark,#0a0f1e));pointer-events:none}
+#apercu-matchs::after{content:"▼ Afficher tout";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:.75rem;font-weight:700;color:var(--accent)}
+#apercu-matchs.open{max-height:none;overflow:visible}
+#apercu-matchs.open::before{display:none}
+#apercu-matchs.open::after{content:"▲ Réduire";position:static;display:block;padding:.6rem 0 0}
 </style>
 <style id="perf-css">
 /* Perf : animations composées (transform/opacity) au lieu de box-shadow/width/height/filter */
@@ -2299,7 +2305,7 @@ h1{will-change:opacity}
     const ty = ((e.type && e.type.text) || "") + " " + (e.text || "");
     return { name: ath.displayName || ath.fullName || "", num, og: /own goal/i.test(ty), pen: /penalty/i.test(ty), min: (e.clock && e.clock.displayValue) || "" };
   }
-  const whoTxt = w => "⚽ " + w.name + (w.num ? " · n°" + w.num : "") + (w.og ? " (csc)" : w.pen ? " (pen.)" : "") + (w.min ? " · " + w.min : "");
+  const whoTxt = w => "⚽ " + w.name + (w.num ? " · n°" + w.num : "") + (w.og ? " (csc)" : w.pen ? " (pen.)" : "");
 
   window.showGoal = function (m, team) {
     if (!window.goalAlertsOn()) return;                                  // alertes désactivées (toutes pages et onglets)
@@ -3395,6 +3401,7 @@ h1{will-change:opacity}
   if (!comp) a.addEventListener("click", function (e) { e.preventDefault(); if (window.showPage) window.showPage("scores"); window.scrollTo({ top: 0 }); });
 })();
 
+document.addEventListener("click", function (e) { var s = e.target.closest && e.target.closest("#apercu-matchs"); if (s && !e.target.closest("a")) s.classList.toggle("open"); });
 // Aperçu SEO des matchs : si l'instantané intégré à la page date d'un autre jour, il est reconstruit avec les matchs du jour
 (function () {
   var pd = function (d) { return new Date(d).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" }); };
