@@ -1,6 +1,6 @@
 {
  "date": "2026-11-04",
- "generated": "2026-11-04T22:09:58.678Z",
+ "generated": "2026-11-04T22:46:05.807Z",
  "extra": 68,
  "matches": [
   {
@@ -163,8 +163,8 @@
    "id": "401841306",
    "lg": "Brasileirão",
    "start": "2026-11-04T22:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "15'",
    "home": "Athletico-PR",
    "away": "Vasco da Gama",
    "h": 0,
@@ -176,8 +176,8 @@
    "id": "401841307",
    "lg": "Brasileirão",
    "start": "2026-11-04T22:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "10'",
    "home": "Flamengo",
    "away": "Grêmio",
    "h": 0,
