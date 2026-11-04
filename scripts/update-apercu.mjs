@@ -32,6 +32,15 @@ const FR = [
 const GENERIC = /^(?:the )?(?:first|second|third|fourth|fifth|sixth|seventh|1st|2nd|3rd|4th|5th|6th|preliminary|qualifying|group|knockout|round|quarter|semi|final|play-?offs?|league phase|matchday|regular season|stage|phase)\b/i;
 const OTHER = "Football — autres compétitions";
 
+// Adresse de la compétition (champ "url" demandé par Google pour l'organisateur d'un événement) : sa page si elle existe, sinon l'accueil
+const SITE_URL = "https://www.footlivepro.com/";
+const ORG_PAGES = [
+  [/^Ligue des champions$/i, "ligue-des-champions"], [/^Ligue Europa$/i, "europa-league"], [/^Ligue Conférence$/i, "conference-league"],
+  [/^Premier League$/i, "premier-league"], [/^LaLiga$/i, "laliga"], [/^Serie A$/i, "serie-a"], [/^Bundesliga$/i, "bundesliga"],
+  [/^Ligue 1$/i, "ligue-1"], [/^Liga Portugal$/i, "liga-portugal"], [/botola/i, "botola-pro"]
+];
+const orgUrl = name => { const h = ORG_PAGES.find(([re]) => re.test(String(name || "").trim())); return SITE_URL + (h ? h[1] + ".html" : ""); };
+
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const dayOf = d => new Date(d).toLocaleDateString("sv-SE", { timeZone: TZ });
 const hhmm = iso => new Date(iso).toLocaleTimeString("fr-FR", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
@@ -163,7 +172,7 @@ async function main() {
     eventStatus: m.state === "off" ? "https://schema.org/EventPostponed" : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     location: { "@type": "Place", name: m.venue || m.lg, address: m.place || "Non communiqué" },
-    organizer: { "@type": "Organization", name: m.lg },
+    organizer: { "@type": "Organization", name: m.lg, url: orgUrl(m.lg) },
     image: [LOGO],
     homeTeam: { "@type": "SportsTeam", name: m.home }, awayTeam: { "@type": "SportsTeam", name: m.away },
     url: "https://www.footlivepro.com/"

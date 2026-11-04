@@ -44,7 +44,13 @@ CSS = ("#apercu-matchs{margin:1.5rem 0 0;padding:1rem 0;border-top:1px solid var
        "#apercu-matchs .ap-upd{font-size:.75rem}"
        "#apercu-matchs .ap-tbl{overflow-x:auto}#apercu-matchs table{border-collapse:collapse;width:100%;max-width:560px;font-size:.8rem}"
        "#apercu-matchs th,#apercu-matchs td{padding:.2rem .45rem;text-align:center;border-bottom:1px solid var(--border)}"
-       "#apercu-matchs td:nth-child(2),#apercu-matchs th:nth-child(2){text-align:left}")
+       "#apercu-matchs td:nth-child(2),#apercu-matchs th:nth-child(2){text-align:left}"
+       # Bloc replié (220 px) : un clic le déplie ; le texte reste dans la page pour Google
+       "#apercu-matchs{position:relative;max-height:220px;overflow:hidden;cursor:pointer;margin-top:1rem;padding:.6rem 0 0}"
+       "#apercu-matchs::before{content:\"\";position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(transparent,var(--bg-dark,#0a0f1e));pointer-events:none}"
+       "#apercu-matchs::after{content:\"▼ Afficher tout\";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:.75rem;font-weight:700;color:var(--accent)}"
+       "#apercu-matchs.open{max-height:none;overflow:visible}#apercu-matchs.open::before{display:none}"
+       "#apercu-matchs.open::after{content:\"▲ Réduire\";position:static;display:block;padding:.6rem 0 0}")
 
 esc = lambda s: html.escape(str(s), quote=True)
 
@@ -229,7 +235,7 @@ def ld_block(evs, page_url):
         "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
         "location": {"@type": "Place", "name": m.get("venue") or m["league"],
                      "address": m.get("place") or "Non communiqué"},
-        "organizer": {"@type": "Organization", "name": m["league"]},
+        "organizer": {"@type": "Organization", "name": m["league"], "url": page_url},
         "image": [LOGO],
         "homeTeam": {"@type": "SportsTeam", "name": m["home"]},
         "awayTeam": {"@type": "SportsTeam", "name": m["away"]}, "url": page_url,
