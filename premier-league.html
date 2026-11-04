@@ -1911,7 +1911,7 @@ h1{will-change:opacity}
             radPaint();
         }
         function updateTicker() {
-            const item = h => `<span class="ticker-item">${h}</span>`, items = [], A = all(), t = localDay(new Date().toISOString());
+            const item = h => `<span class="ticker-item">${h}</span>`, items = [], A = all().filter(m => !window.compFilter || window.compFilter.test(m)), t = localDay(new Date().toISOString());   // page de compétition : le bandeau n'affiche que cette compétition
             const sc = m => `<span class="t-score">${m.h ?? 0} - ${m.a ?? 0}</span>`;
             A.filter(m => m.state === "in").sort((a, b) => mp(a) - mp(b)).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-live">● ${esc(m.label)}</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
             A.filter(m => m.state === "post").sort((a, b) => (isMain10(b) - isMain10(a)) || b.start.localeCompare(a.start)).slice(0, 15).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-comp">Terminé</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
@@ -2696,7 +2696,7 @@ h1{will-change:opacity}
     document.title = a.textContent.trim() + " : scores, résultats et classement | FootLive Pro";
     tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
     const lf = $("#league-filter"); if (lf) lf.value = "all"; const si = $("#search"); if (si) si.value = "";
-    compChip(); buildDays(); renderMatches(true); window.scrollTo({ top: 0 });
+    compChip(); buildDays(); renderMatches(true); try { updateTicker(); } catch (e) { } window.scrollTo({ top: 0 });
     return true;
   }
   $("#compbar").addEventListener("click", e => {
