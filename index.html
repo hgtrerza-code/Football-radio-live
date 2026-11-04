@@ -343,7 +343,9 @@
         .rB.playing .pb::before { content: "■"; }
         .rB .pb.radio-btn:hover { transform: scale(1.08); background: #16a34a; }
         #radio-mini { position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; background: rgba(20,28,43,.97); border-top: 2px solid var(--accent); padding: 10px 16px; display: none; align-items: center; gap: 12px; backdrop-filter: blur(10px); }
-        #radio-mini.on { display: flex; }
+        #radio-mini.on { display: flex !important; z-index: 1500 !important; }
+        body.radio-on { padding-bottom: calc(76px + var(--sab, 0px)); }
+        body.radio-on #fab-top { bottom: calc(150px + var(--sab, 0px)); }
         #radio-mini .in { flex: 1; min-width: 0; }
         #radio-mini b { font-size: .85rem; }
         #radio-mini small { display: block; color: var(--text-muted); font-size: .7rem; }
@@ -2023,12 +2025,16 @@ h1{will-change:opacity}
         }
         function radMini() {
             const el = document.getElementById("radio-mini"); if (!el) return;
-            const on = RAD.want && RAD.name; el.classList.toggle("on", !!on); if (!on) return;
+            const on = RAD.want && RAD.name; el.classList.toggle("on", !!on); document.body.classList.toggle("radio-on", !!on); if (!on) return;
             const m = rmeta(RAD.name), st = { playing: "🔊 En lecture", connecting: "⏳ Connexion…", blocked: "👆 Touchez l'écran pour reprendre", error: "⚠️ Flux indisponible" }[RAD.state] || "⏳ Connexion…";
             const h = `<div class="rav" style="background:linear-gradient(135deg,${m[3]})">${esc(m[0])}</div><div class="in"><b>${esc(RAD.name)}</b><small><span class="rlive">LIVE</span> ${st}</small></div><button class="radio-btn" id="rm-stop">■ Arrêter</button>`;
             if (el.dataset.h !== h) { el.innerHTML = h; el.dataset.h = h; }
         }
         document.addEventListener("click", e => { if (e.target.closest("#rm-stop")) radStop(); });
+        // Le lecteur du bas reste visible sur toutes les pages tant que la radio joue (retour arrière, onglet réactivé, changement de page)
+        window.addEventListener("pageshow", () => { try { radMini(); } catch (e) { } });
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) { try { radMini(); } catch (e) { } } });
+        setInterval(() => { try { radMini(); } catch (e) { } }, 1500);
         function showPage(p) {
             const radio = p === "radio";
             document.getElementById("scores-view").hidden = radio;
@@ -3263,6 +3269,7 @@ h1{will-change:opacity}
     document.title = (p === "women" ? "Women's Foot" + (wk ? " : " + wFind(wk)[2] : "") + " : scores et classements" : p === "clubs" && club ? clubOf(club)[1] + " : prochain match et résultats" : p === "buteurs" ? "Meilleurs buteurs" + (bt ? " " + btFind(bt)[2] : "") + " : classement" : PAGE_TITLES[p]) + " | FootLive Pro";
     if (!fromHistory) { try { history.pushState(null, "", p === "scores" ? location.pathname + location.search : "#" + (p === "clubs" && club ? "club-" + club : p === "buteurs" && bt ? "buteurs-" + bt : p === "women" && wk ? "women-" + wk : p)); } catch (e) { } }
     window.scrollTo({ top: 0 });
+    try { radMini(); } catch (e) { }   // le lecteur radio du bas reste visible sur tous les onglets
   };
   $("#tabbar").addEventListener("click", e => { const a = e.target.closest("a[data-go]"); if (!a) return; e.preventDefault(); showPage(a.dataset.go); });
   window.addEventListener("popstate", () => showPage(location.hash.slice(1) || "scores", true));
