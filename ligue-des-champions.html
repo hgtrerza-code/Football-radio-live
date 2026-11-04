@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#070b16">
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="/favicon-192x192.png?v=2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="Suivez la Ligue des champions UEFA en direct : scores, résultats, prochains matchs et classement de la phase de ligue, avec les stats de chaque match.">
@@ -13,11 +13,10 @@
     <link rel="canonical" href="https://www.footlivepro.com/ligue-des-champions.html">
     <link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/ligue-des-champions.html">
     <link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/ligue-des-champions.html">
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
-    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=2">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png?v=2">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png?v=2">
+    <link rel="icon" href="/favicon.ico?v=2">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FootLive Pro">
     <meta property="og:locale" content="fr_FR">
@@ -906,8 +905,9 @@ h1{will-change:opacity}
         }
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
-        const goalCls = m => (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";
-        const goalBadge = m => (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
+        const goalOn = () => { try { return localStorage.getItem("fl_goal_alerts") !== "false"; } catch (e) { return true; } };
+        const goalCls = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";
+        const goalBadge = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
         function showGoal(m, team) {
             const box = document.getElementById("goal-toasts"), el = document.createElement("div");
             el.className = "goal-sonar";
@@ -2193,7 +2193,7 @@ h1{will-change:opacity}
 
   // ---------- Thème fixe (sombre) & options par défaut ----------
   document.documentElement.dataset.theme = "dark";
-  const cfg = { sound: true, notif: false, favOnly: false };
+  const cfg = { sound: true, notif: false, favOnly: false, goals: LS.get("fl_goal_alerts", true) !== false };
   let ac;
   function beep() {
     try {
@@ -2207,24 +2207,71 @@ h1{will-change:opacity}
 
   // ---------- En-tête ----------
   $(".header-content").insertAdjacentHTML("beforeend",
-    '<div class="header-actions"><span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>' +
+    '<div class="header-actions"><button type="button" id="goal-toggle" class="goal-toggle" aria-pressed="true"></button><span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>' +
     '</div>');
   document.body.insertAdjacentHTML("beforeend",
     '<div id="offline-bar" hidden>📡 Hors connexion — affichage des dernières données enregistrées</div>' +
     '<button id="fab-top" aria-label="Remonter">↑</button>');
 
 
-  // ---------- Alertes de but : son, vibration, notification ----------
-  const baseShowGoal = window.showGoal;
+  // ---------- Alertes de but : son, vibration, notification (avec buteur + numéro) ----------
+  (function () {
+    const css = document.createElement("style");
+    css.textContent = ".goal-toggle{background:var(--bg-card,#111827);border:1px solid var(--accent,#22c55e);color:inherit;border-radius:20px;padding:4px 10px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap}.goal-toggle.off{opacity:.7;border-color:#64748b}.sn-who{display:block;color:var(--accent,#22c55e);font-weight:800;font-size:.78rem;margin-top:2px}";
+    document.head.appendChild(css);
+    const btn = $("#goal-toggle");
+    const paint = () => { btn.textContent = cfg.goals ? "🔔 Buts : activés" : "🔕 Buts : désactivés"; btn.classList.toggle("off", !cfg.goals); btn.setAttribute("aria-pressed", String(cfg.goals)); btn.title = cfg.goals ? "Désactiver les notifications de buts" : "Activer les notifications de buts"; };
+    paint();
+    // Le choix est lu dans le stockage à chaque but : il s'applique à toutes les pages et à tous les onglets ouverts du site
+    window.goalAlertsOn = () => { cfg.goals = LS.get("fl_goal_alerts", true) !== false; return cfg.goals; };
+    window.addEventListener("storage", e => { if (e.key === "fl_goal_alerts") { window.goalAlertsOn(); paint(); if (!cfg.goals) { const b = document.getElementById("goal-toasts"); if (b) b.innerHTML = ""; } try { renderLive(); renderMatches(); } catch (x) { } } });
+    btn.addEventListener("click", () => {
+      cfg.goals = !cfg.goals; LS.set("fl_goal_alerts", cfg.goals); paint(); try { renderLive(); renderMatches(); } catch (x) { }
+      if (!cfg.goals) { const b = document.getElementById("goal-toasts"); if (b) b.innerHTML = ""; }
+      else if ("Notification" in window && Notification.permission === "default") { try { Notification.requestPermission().then(p => { cfg.notif = p === "granted"; }); } catch (e) { } }
+      toast(cfg.goals ? "🔔 Notifications des buts activées" : "🔕 Notifications des buts désactivées");
+    });
+  })();
+
+  // Récupère le buteur (nom + numéro de maillot) du dernier but via le résumé du match
+  async function goalWho(m) {
+    const r = await fetch(summaryUrl(m)); if (!r.ok) throw new Error("HTTP " + r.status);
+    const s = await r.json();
+    const goals = (s.keyEvents || []).filter(e => { const ty = (e.type && e.type.text) || ""; return (e.scoringPlay || /goal/i.test(ty)) && !/disallow|no goal|cancel|shootout/i.test(ty + " " + (e.text || "")); });
+    if (goals.length < (m.h ?? 0) + (m.a ?? 0)) return null;   // le but n'est pas encore dans les données : on réessaiera
+    const e = goals[goals.length - 1], ath = ((e.participants || [])[0] || {}).athlete; if (!ath) return null;
+    let num = ath.jersey || "";
+    (s.rosters || []).forEach(ro => (ro.roster || []).forEach(p => { if (p.athlete && String(p.athlete.id) === String(ath.id) && p.jersey) num = p.jersey; }));
+    const ty = ((e.type && e.type.text) || "") + " " + (e.text || "");
+    return { name: ath.displayName || ath.fullName || "", num, og: /own goal/i.test(ty), pen: /penalty/i.test(ty), min: (e.clock && e.clock.displayValue) || "" };
+  }
+  const whoTxt = w => "⚽ " + w.name + (w.num ? " · n°" + w.num : "") + (w.og ? " (csc)" : w.pen ? " (pen.)" : "") + (w.min ? " · " + w.min : "");
+
   window.showGoal = function (m, team) {
+    if (!window.goalAlertsOn()) return;                                  // alertes désactivées (toutes pages et onglets)
+    if (window.compFilter && !window.compFilter.test(m)) return;         // page d'une compétition : uniquement les buts de cette compétition (accueil : tous les matchs)
     if (cfg.favOnly && !window.isFavMatch(m)) return;
-    baseShowGoal(m, team);
+    const box = document.getElementById("goal-toasts"), el = document.createElement("div");
+    el.className = "goal-sonar";
+    el.innerHTML = `<div class="sn-ball"><i></i><i></i>⚽</div><div class="sn-text">BUT ! ${esc(m.home)} ${m.h ?? 0}-${m.a ?? 0} ${esc(m.away)}<small>${esc(team)} · ${esc(m.label)}</small><span class="sn-who" hidden></span></div>`;
+    let timer; const close = () => { el.classList.add("out"); setTimeout(() => el.remove(), 400); };
+    const arm = ms => { clearTimeout(timer); timer = setTimeout(close, ms); };
+    el.onclick = close; box.appendChild(el); arm(8000);
+    while (box.children.length > 4) box.firstChild.remove();
     if (cfg.sound) beep();
     try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) { }
-    try {
+    const title = "⚽ BUT ! " + m.home + " " + (m.h ?? 0) + "-" + (m.a ?? 0) + " " + m.away;
+    const osNotif = w => { try {
       if (cfg.notif && document.hidden && "Notification" in window && Notification.permission === "granted")
-        new Notification("⚽ BUT ! " + m.home + " " + (m.h ?? 0) + "-" + (m.a ?? 0) + " " + m.away, { body: team + " · " + (m.label || ""), icon: "icon-192.png", tag: "goal-" + m.id });
-    } catch (e) { }
+        new Notification(title, { body: (w ? whoTxt(w) + "\n" : "") + team + " · " + (m.label || ""), icon: "icon-192.png", tag: "goal-" + m.id + "-" + (m.h ?? 0) + "-" + (m.a ?? 0) });
+    } catch (e) { } };
+    osNotif(null);
+    if (m.tsdb) return;   // pas de détail buteur pour les sources complémentaires
+    [4000, 15000, 35000].reduce((p, d) => p.then(done => done ? true : new Promise(r => setTimeout(r, d)).then(() => goalWho(m)).then(w => {
+      if (!w || !w.name) return false;
+      const sw = el.querySelector(".sn-who"); if (sw) { sw.textContent = whoTxt(w); sw.hidden = false; }
+      arm(8000); osNotif(w); return true;
+    }).catch(() => false)), Promise.resolve(false));
   };
 
   // ---------- Favoris ----------
@@ -2602,6 +2649,20 @@ h1{will-change:opacity}
     "europa-league": /^(uefa )?europa league$/i,
     "conference-league": /^(uefa )?(europa )?conference league$/i
   };
+  // Filtre strict : Ligue des champions, Europa League, Conference League et Premier League ne gardent que la compétition elle-même
+  // (ni autre coupe d'Europe, ni D2 / Premier League 2 / coupes, ni féminines, ni jeunes)
+  const COMP_STRICT = { "ligue-des-champions": 1, "europa-league": 1, "conference-league": 1, "premier-league": 1 };
+  const COMP_ESPN = { "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "premier-league": "eng.1" };
+  const COMP_TEAM_W = /\b(women|femen[ií]|femin|féminin|frauen|damen|ladies)\b|\((?:w|f)\)|\sW$|\bU-?\d{2}\b|\bII$/i;
+  const COMP_SLUG_W = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies|\.2$|\.3$|\.cup|\.fa|\.league_cup|\.u\d/i;
+  function compStrict(slug, m, raw) {
+    if (!COMP_STRICT[slug]) return true;
+    if (COMP_TEAM_W.test(String(m.home || "")) || COMP_TEAM_W.test(String(m.away || ""))) return false;
+    const sl = String(m.fslug || (m.slug && m.slug !== "all" && m.slug !== "tsdb" ? m.slug : "") || "");
+    if (sl && (sl !== COMP_ESPN[slug] || COMP_SLUG_W.test(sl))) return false;
+    const nm = String(raw || "").replace(/\s*·\s*compétition\s+\d+\s*$/i, "").trim();
+    return COMP_MAIN[slug].test(nm) || COMP_MAIN[slug].test(cleanLg(nm));
+  }
   function compChip() {
     let el = $("#comp-chip");
     if (!window.compFilter) { if (el) el.remove(); $$("#compbar a.on").forEach(a => a.classList.remove("on")); return; }
@@ -2612,7 +2673,7 @@ h1{will-change:opacity}
     const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");
     if (!img || !img.dataset.lgre || !COMP_CTRY[slug]) return false;   // inconnu : navigation normale
     const re = new RegExp(img.dataset.lgre, "i"), ctry = COMP_CTRY[slug] + " · ";
-    window.compFilter = { name: a.textContent.trim(), main: raw => !!COMP_MAIN[slug] && COMP_MAIN[slug].test(String(raw || "").split(String.fromCharCode(8203))[0]), test: m => { const raw = String(m.lg).replace(/​.*$/, ""); return re.test(raw) && !COMP_EXCL.test(raw) && lgDisp(m.lg, [m]).indexOf(ctry) === 0; } };
+    window.compFilter = { name: a.textContent.trim(), main: raw => !!COMP_MAIN[slug] && COMP_MAIN[slug].test(String(raw || "").split(String.fromCharCode(8203))[0]), test: m => { const raw = String(m.lg).replace(/​.*$/, ""); return re.test(raw) && !COMP_EXCL.test(raw) && lgDisp(m.lg, [m]).indexOf(ctry) === 0 && compStrict(slug, m, raw); } };
     $$("#compbar a").forEach(x => x.classList.toggle("on", x === a));
     showPage("scores");
     tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
