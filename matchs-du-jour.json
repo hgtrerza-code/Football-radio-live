@@ -1,18 +1,18 @@
 {
  "date": "2026-11-04",
- "generated": "2026-11-04T16:53:50.147Z",
+ "generated": "2026-11-04T18:53:26.247Z",
  "extra": 68,
  "matches": [
   {
    "id": "401915383",
    "lg": "Ligue des champions",
    "start": "2026-11-04T17:45Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "49'",
    "home": "AEK Athens",
    "away": "Real Madrid",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 1,
    "venue": "OPAP Arena",
    "place": "Athens, Greece"
   },
@@ -20,12 +20,12 @@
    "id": "401915382",
    "lg": "Ligue des champions",
    "start": "2026-11-04T17:45Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "48'",
    "home": "Fenerbahce",
    "away": "Liverpool",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 1,
    "venue": "Şükrü Saracoğlu Stadium",
    "place": "Istanbul, Türkiye"
   },
@@ -124,8 +124,8 @@
    "id": "401915551",
    "lg": "Ligue Europa",
    "start": "2026-11-04T15:30Z",
-   "state": "in",
-   "label": "65'",
+   "state": "post",
+   "label": "90'+4'",
    "home": "Stade Rennais",
    "away": "Olympiacos",
    "h": 0,
@@ -305,7 +305,7 @@
   {
    "id": "401933098",
    "lg": "Coupe de France",
-   "start": "2026-11-04T17:00Z",
+   "start": "2026-11-04T19:00Z",
    "state": "pre",
    "label": "0'",
    "home": "Sporting Club Baie-Mahault",
@@ -313,7 +313,7 @@
    "h": 0,
    "a": 0,
    "venue": "Stade Omnisports Fiesque Duchesne",
-   "place": "France"
+   "place": "Guadalupe, France"
   }
  ]
 }
