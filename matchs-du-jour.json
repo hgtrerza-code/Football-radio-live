@@ -1,6 +1,6 @@
 {
  "date": "2026-11-04",
- "generated": "2026-11-04T14:55:38.424Z",
+ "generated": "2026-11-04T16:53:50.147Z",
  "extra": 68,
  "matches": [
   {
@@ -124,8 +124,8 @@
    "id": "401915551",
    "lg": "Ligue Europa",
    "start": "2026-11-04T15:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "65'",
    "home": "Stade Rennais",
    "away": "Olympiacos",
    "h": 0,
