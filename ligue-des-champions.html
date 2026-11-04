@@ -2673,7 +2673,7 @@ h1{will-change:opacity}
     let el = $("#comp-chip");
     if (!window.compFilter) { if (el) el.remove(); $$("#compbar a.on").forEach(a => a.classList.remove("on")); return; }
     if (!el) { el = document.createElement("div"); el.id = "comp-chip"; el.className = "toolbar"; $("#matches").before(el); }
-    el.innerHTML = (document.documentElement.dataset.comp ? '<span class="btn-action btn-accent">' + esc(window.compFilter.name) + '</span>' : '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>') + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
+    el.innerHTML = (document.documentElement.dataset.comp ? '<a class="btn-action btn-accent" href="index.html" style="text-decoration:none">✕ ' + esc(window.compFilter.name) + '</a>' : '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>') + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
   }
   function applyComp(a) {
     const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");

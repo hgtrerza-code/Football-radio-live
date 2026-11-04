@@ -2667,7 +2667,7 @@ h1{will-change:opacity}
     let el = $("#comp-chip");
     if (!window.compFilter) { if (el) el.remove(); $$("#compbar a.on").forEach(a => a.classList.remove("on")); return; }
     if (!el) { el = document.createElement("div"); el.id = "comp-chip"; el.className = "toolbar"; $("#matches").before(el); }
-    el.innerHTML = '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>' + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
+    el.innerHTML = (document.documentElement.dataset.comp ? '<a class="btn-action btn-accent" href="index.html" style="text-decoration:none">✕ ' + esc(window.compFilter.name) + '</a>' : '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>') + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
   }
   function applyComp(a) {
     const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");
@@ -2688,7 +2688,7 @@ h1{will-change:opacity}
   // Page de compétition (ex. ligue-1.html) : même page que l'accueil, filtrée sur la compétition
   const cpSlug = document.documentElement.dataset.comp;
   if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) { const t0 = document.title; applyComp(ca); document.title = t0; } }
-  ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter) { window.compFilter = null; compChip(); } }, true));
+  ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter && !cpSlug) { window.compFilter = null; compChip(); } }, true));   // page de compétition : le filtre reste actif
   document.addEventListener("click", e => {
     if (!e.target.closest("#comp-clear")) return;
     window.compFilter = null; compChip();
