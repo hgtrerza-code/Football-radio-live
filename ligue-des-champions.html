@@ -2655,9 +2655,15 @@ h1{will-change:opacity}
   const COMP_ESPN = { "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "premier-league": "eng.1" };
   const COMP_TEAM_W = /\b(women|femen[ií]|femin|féminin|frauen|damen|ladies)\b|\((?:w|f)\)|\sW$|\bU-?\d{2}\b|\bII$/i;
   const COMP_SLUG_W = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies|\.2$|\.3$|\.cup|\.fa|\.league_cup|\.u\d/i;
+  // Équipes de la Ligue des champions 2026-27 (les 36 de la phase de ligue : tous les tours suivants en sont issus).
+  // À METTRE À JOUR à chaque nouvelle saison.
+  const CL_NORM = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ø/g, "o").replace(/[^a-z0-9]/g, "");
+  const CL_TEAMS = [/^(psg|parissaint|parissg|parisstg)/, /^(fc)?barcelona$|^barca$/, /^astonvilla$/, /^liverpool$/, /^realmadrid$/, /^sporting(cp|clube|lisbon|lisboa)?$/, /^(real)?betis$|^realbetis/, /^bayern/, /^arsenal$/, /stuttgart/, /^como(1907)?$/, /^(manchestercity|mancity)$/, /^club(brugge|bruges)|^brugge/, /^(inter|internazionale|intermilan|intermilano)$/, /^lask/, /dortmund|^bvb$/, /^(manchesterunited|manunited|manutd)$/, /^galatasaray/, /^(asroma|roma)$/, /shakhtar|shakhtyor|shahktar/, /^psv/, /^(atleticomadrid|atlmadrid|atletico)$/, /^bodo/, /^napoli$|^sscnapoli$/, /^sabah/, /^(rc)?lens$/, /^aekathen/, /leipzig/, /^villarreal/, /^feyenoord/, /^fenerbah/, /^slavia(prague|praha)?$/, /^viking/, /^(losc)?lille/, /^(fc)?porto$/, /^slovan(bratislava)?$/];
+  const isClTeam = n => { const k = CL_NORM(n).replace(/^(fc|rc|as|ac|sc|cf)(?=[a-z]{4})/, m => /^(fc|rc)$/.test(m) ? "" : m); return CL_TEAMS.some(r => r.test(CL_NORM(n)) || r.test(k)); };
   function compStrict(slug, m, raw) {
     if (!COMP_STRICT[slug]) return true;
     if (COMP_TEAM_W.test(String(m.home || "")) || COMP_TEAM_W.test(String(m.away || ""))) return false;
+    if (slug === "ligue-des-champions" && !(isClTeam(m.home) && isClTeam(m.away))) return false;   // Ligue des champions : les 2 équipes doivent faire partie des 36 équipes de la phase de ligue (écarte tout match d'Europa / Conference League, quelle que soit son étiquette)
     const sl = String(m.fslug || (m.slug && m.slug !== "all" && m.slug !== "tsdb" ? m.slug : "") || "");
     if (sl && (sl !== COMP_ESPN[slug] || COMP_SLUG_W.test(sl))) return false;
     const nm = String(raw || "").replace(/\s*·\s*compétition\s+\d+\s*$/i, "").trim();
@@ -2667,7 +2673,7 @@ h1{will-change:opacity}
     let el = $("#comp-chip");
     if (!window.compFilter) { if (el) el.remove(); $$("#compbar a.on").forEach(a => a.classList.remove("on")); return; }
     if (!el) { el = document.createElement("div"); el.id = "comp-chip"; el.className = "toolbar"; $("#matches").before(el); }
-    el.innerHTML = '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>' + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
+    el.innerHTML = (document.documentElement.dataset.comp ? '<span class="btn-action btn-accent">' + esc(window.compFilter.name) + '</span>' : '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>') + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
   }
   function applyComp(a) {
     const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");
@@ -2688,7 +2694,7 @@ h1{will-change:opacity}
   // Page de compétition (ex. ligue-1.html) : même page que l'accueil, filtrée sur la compétition
   const cpSlug = document.documentElement.dataset.comp;
   if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) { const t0 = document.title; applyComp(ca); document.title = t0; } }
-  ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter) { window.compFilter = null; compChip(); } }, true));
+  ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter && !cpSlug) { window.compFilter = null; compChip(); } }, true));   // page de compétition : le filtre reste actif
   document.addEventListener("click", e => {
     if (!e.target.closest("#comp-clear")) return;
     window.compFilter = null; compChip();
