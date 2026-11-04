@@ -710,8 +710,10 @@ h1{will-change:opacity}
         <div class="sec-title">📻 Foot Radio <small>écoutez les radios en direct, classées par type de compétition</small></div>
         <p class="note">La lecture continue même si vous revenez à la page des scores. Si un flux est bloqué, utilisez le lien « ↗ » pour ouvrir le site de la radio.</p>
         <div id="radio-groups"></div>
-        <div id="radio-mini"></div>
     </div>
+
+    <!-- Lecteur radio : hors de #radio-view pour rester visible sur tous les onglets -->
+    <div id="radio-mini" role="region" aria-label="Lecteur radio"></div>
 
     </main>
     <section class="container" aria-label="Présentation de Ligue des champions" style="margin:2rem auto 1rem;padding:1rem 16px;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">
@@ -1980,6 +1982,7 @@ h1{will-change:opacity}
         }
         function radMini() {
             const el = document.getElementById("radio-mini"); if (!el) return;
+            if (el.parentElement !== document.body) document.body.appendChild(el);   // jamais dans une vue masquée
             const on = RAD.want && RAD.name; el.classList.toggle("on", !!on); document.body.classList.toggle("radio-on", !!on); if (!on) return;
             const m = rmeta(RAD.name), st = { playing: "🔊 En lecture", connecting: "⏳ Connexion…", blocked: "👆 Touchez l'écran pour reprendre", error: "⚠️ Flux indisponible" }[RAD.state] || "⏳ Connexion…";
             const h = `<div class="rav" style="background:linear-gradient(135deg,${m[3]})">${esc(m[0])}</div><div class="in"><b>${esc(RAD.name)}</b><small><span class="rlive">LIVE</span> ${st}</small></div><button class="radio-btn" id="rm-stop">■ Arrêter</button>`;
@@ -2251,7 +2254,7 @@ h1{will-change:opacity}
     const ty = ((e.type && e.type.text) || "") + " " + (e.text || "");
     return { name: ath.displayName || ath.fullName || "", num, og: /own goal/i.test(ty), pen: /penalty/i.test(ty), min: (e.clock && e.clock.displayValue) || "" };
   }
-  const whoTxt = w => "⚽ " + w.name + (w.num ? " · n°" + w.num : "") + (w.og ? " (csc)" : w.pen ? " (pen.)" : "") + (w.min ? " · " + w.min : "");
+  const whoTxt = w => "⚽ " + w.name + (w.num ? " · n°" + w.num : "") + (w.og ? " (csc)" : w.pen ? " (pen.)" : "");
 
   window.showGoal = function (m, team) {
     if (!window.goalAlertsOn()) return;                                  // alertes désactivées (toutes pages et onglets)
@@ -2682,13 +2685,17 @@ h1{will-change:opacity}
     if (!el) { el = document.createElement("div"); el.id = "comp-chip"; el.className = "toolbar"; $("#matches").before(el); }
     el.innerHTML = (document.documentElement.dataset.comp ? '<a class="btn-action btn-accent" href="index.html" style="text-decoration:none">✕ ' + esc(window.compFilter.name) + '</a>' : '<button class="btn-action btn-accent" id="comp-clear" type="button">✕ ' + esc(window.compFilter.name) + '</button>') + (RAD.want ? '<span class="note" style="align-self:center">🔊 Radio maintenue — touchez ✕ pour revenir à tous les matchs</span>' : '');
   }
-  function applyComp(a) {
+  function applyComp(a, fromHist) {
     const img = a.querySelector(".cl"), slug = (a.getAttribute("href") || "").replace(".html", "");
     if (!img || !img.dataset.lgre || !COMP_CTRY[slug]) return false;   // inconnu : navigation normale
     const re = new RegExp(img.dataset.lgre, "i"), ctry = COMP_CTRY[slug] + " · ";
     window.compFilter = { name: a.textContent.trim(), main: raw => !!COMP_MAIN[slug] && COMP_MAIN[slug].test(String(raw || "").split(String.fromCharCode(8203))[0]), test: m => { const raw = String(m.lg).replace(/​.*$/, ""); return re.test(raw) && !COMP_EXCL.test(raw) && lgDisp(m.lg, [m]).indexOf(ctry) === 0 && compStrict(slug, m, raw); } };
     $$("#compbar a").forEach(x => x.classList.toggle("on", x === a));
-    showPage("scores");
+    // L'adresse suit la compétition (sans recharger la page, donc la radio continue) ; "fromHist" = retour/avance du navigateur
+    const curSl = location.pathname.split("/").pop().replace(/\.html$/, "");
+    if (!fromHist && curSl !== slug) { try { history.pushState(null, "", slug + ".html" + location.search); } catch (e) { } }
+    showPage("scores", true);
+    document.title = a.textContent.trim() + " : scores, résultats et classement | FootLive Pro";
     tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
     const lf = $("#league-filter"); if (lf) lf.value = "all"; const si = $("#search"); if (si) si.value = "";
     compChip(); buildDays(); renderMatches(true); window.scrollTo({ top: 0 });
@@ -2707,6 +2714,13 @@ h1{will-change:opacity}
     window.compFilter = null; compChip();
     const b = $('#filters button[data-tab="today"]'); if (b) b.click();
   });
+  // Bouton précédent/suivant : l'écran suit l'adresse (autre compétition) sans recharger, donc sans couper la radio
+  window.addEventListener("popstate", () => {
+    const sl = location.pathname.split("/").pop().replace(/\.html$/, ""), ca = sl && sl !== "index" ? $('#compbar a[href="' + sl + '.html"]') : null;
+    if (ca) applyComp(ca, true); else if (!location.hash) location.reload();
+  });
+  // Bloc SEO « Aperçu » replié : un clic le déplie ou le replie (le texte reste dans la page pour Google)
+  document.addEventListener("click", e => { const s = e.target.closest && e.target.closest("#apercu-matchs"); if (s && !e.target.closest("a")) s.classList.toggle("open"); });
   const h0 = location.hash.slice(1); if (PAGES[h0] && h0 !== "scores") showPage(h0, true);
 })();
 
