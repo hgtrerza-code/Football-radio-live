@@ -2666,8 +2666,15 @@ h1{will-change:opacity}
   const COMP_ESPN = { "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "premier-league": "eng.1" };
   const COMP_TEAM_W = /\b(women|femen[ií]|femin|féminin|frauen|damen|ladies)\b|\((?:w|f)\)|\sW$|\bU-?\d{2}\b|\bII$/i;
   const COMP_SLUG_W = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies|\.2$|\.3$|\.cup|\.fa|\.league_cup|\.u\d/i;
+  // Conference League : les 2 équipes doivent faire partie des 36 clubs de la phase de ligue 2026/27 (écarte tout match d'une autre compétition, quelle que soit son étiquette).
+  // À METTRE À JOUR à chaque nouvelle saison.
+  const EU_STOP = new Set(["fc", "afc", "ac", "as", "sc", "sk", "nk", "gnk", "kks", "rc", "rcd", "ud", "cd", "sl", "ssc", "ss", "fk", "ks", "bk", "vv", "kaa", "bc", "cs", "kf", "tsg", "vfb", "sv", "cf", "ca", "club"]);
+  const EU_NORM = s => String(s || "").toLowerCase().replace(/ø/g, "o").replace(/æ/g, "ae").replace(/ß/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/[^a-z0-9]+/).filter(t => t && !EU_STOP.has(t) && !/^\d{4}$/.test(t)).join("");
+  const ECL_TEAMS = [/^atalanta/, /^(sporting)?braga$/, /^ajax(amsterdam)?$/, /^freiburg$/, /^monaco$/, /copenhagen|kobenhavn|kopenhagen/, /midtjylland/, /redstar|crvenazvezda/, /^gent$/, /panathinaikos/, /^pafos$/, /^brighton/, /^lugano$/, /^getafe$/, /^kups/, /^twente/, /lincolnredimps|^lincoln$/, /^borac/, /sinttruid|sttruid|stvv/, /^brann$/, /^hearts$|midlothian/, /^kairat/, /^trabzonspor$/, /^universitateacraiova$|^craiova$/, /^riga$/, /hajduk/, /jablonec/, /nordsj/, /^aarhus|^agf/, /escaldes/, /^thun$/, /^cskasofia$/, /kaunozalgiris/, /^mjallby/, /^iberia/, /^egnatia/];
+  const isEuTeam = n => { const k = EU_NORM(n); return ECL_TEAMS.some(r => r.test(k)); };
   function compStrict(slug, m, raw) {
     if (!COMP_STRICT[slug]) return true;
+    if (slug === "conference-league" && !(isEuTeam(m.home) && isEuTeam(m.away))) return false;   // uniquement des clubs de la phase de ligue
     if (COMP_TEAM_W.test(String(m.home || "")) || COMP_TEAM_W.test(String(m.away || ""))) return false;
     const sl = String(m.fslug || (m.slug && m.slug !== "all" && m.slug !== "tsdb" ? m.slug : "") || "");
     if (sl && (sl !== COMP_ESPN[slug] || COMP_SLUG_W.test(sl))) return false;

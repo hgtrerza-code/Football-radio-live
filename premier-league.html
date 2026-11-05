@@ -2666,8 +2666,14 @@ h1{will-change:opacity}
   const COMP_ESPN = { "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "premier-league": "eng.1" };
   const COMP_TEAM_W = /\b(women|femen[ií]|femin|féminin|frauen|damen|ladies)\b|\((?:w|f)\)|\sW$|\bU-?\d{2}\b|\bII$/i;
   const COMP_SLUG_W = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies|\.2$|\.3$|\.cup|\.fa|\.league_cup|\.u\d/i;
+  // Premier League : les 2 équipes doivent être des clubs de Premier League (écarte tout match d'une autre compétition ou d'un autre pays,
+  // quelle que soit son étiquette, comme pour la Ligue des champions). À METTRE À JOUR à chaque nouvelle saison (promus / relégués).
+  const PL_NORM = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+  const PL_TEAMS = [/^arsenal$/, /^(manchestercity|mancity)$/, /^brighton/, /^chelsea$/, /^liverpool$/, /^brentford$/, /^everton$/, /^bournemouth$/, /^(tottenham|spurs)/, /^astonvilla$/, /^hull(city)?$/, /^leeds(united)?$/, /^newcastle(united)?$/, /^ipswich(town)?$/, /^fulham$/, /^coventry(city)?$/, /^(manchesterunited|manunited|manutd)$/, /^crystalpalace$|^palace$/, /^(nottingham|nottm)?forest$/, /^sunderland$/];
+  const isPlTeam = n => { const k = PL_NORM(n).replace(/^(afc|fc)(?=[a-z]{4})/, "").replace(/(?<=[a-z]{4})fc$/, ""); return PL_TEAMS.some(r => r.test(k)); };
   function compStrict(slug, m, raw) {
     if (!COMP_STRICT[slug]) return true;
+    if (slug === "premier-league" && !(isPlTeam(m.home) && isPlTeam(m.away))) return false;   // Premier League : uniquement des clubs de Premier League
     if (COMP_TEAM_W.test(String(m.home || "")) || COMP_TEAM_W.test(String(m.away || ""))) return false;
     const sl = String(m.fslug || (m.slug && m.slug !== "all" && m.slug !== "tsdb" ? m.slug : "") || "");
     if (sl && (sl !== COMP_ESPN[slug] || COMP_SLUG_W.test(sl))) return false;
