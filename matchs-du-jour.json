@@ -1,6 +1,6 @@
 {
  "date": "2026-11-05",
- "generated": "2026-11-05T00:57:23.644Z",
+ "generated": "2026-11-05T02:52:55.481Z",
  "extra": 97,
  "matches": [
   {
@@ -319,8 +319,8 @@
    "id": "401841305",
    "lg": "Brasileirão",
    "start": "2026-11-05T00:30Z",
-   "state": "in",
-   "label": "27'",
+   "state": "post",
+   "label": "90'+4'",
    "home": "Botafogo",
    "away": "Atlético-MG",
    "h": 1,
@@ -332,8 +332,8 @@
    "id": "401841298",
    "lg": "Brasileirão",
    "start": "2026-11-05T00:30Z",
-   "state": "in",
-   "label": "26'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "São Paulo",
    "away": "Corinthians",
    "h": 0,
