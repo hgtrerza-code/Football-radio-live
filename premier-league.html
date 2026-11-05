@@ -855,6 +855,7 @@ h1{will-change:opacity}
             return base + "?dates=" + d + "&limit=1000";
         }
         async function loadDay(d) {
+            if (document.documentElement.dataset.comp === "premier-league") { if (!byDay[d]) byDay[d] = []; return; }   // page Premier League : 365Scores uniquement (ESPN non interrogé)
             let r;
             try { r = await fetch(endpoint(d)); } catch (e) { throw new Error("Connexion impossible aux scores (" + (CFG.PROXY_URL ? "vérifiez PROXY_URL" : "ESPN") + ") : " + e.message); }
             if (!r.ok) throw new Error("Le serveur de scores a répondu " + r.status + (CFG.PROXY_URL ? " (vérifiez PROXY_URL)" : ""));
@@ -880,7 +881,7 @@ h1{will-change:opacity}
         const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("délai dépassé")), ms))]);
         async function extras(d, light) {
             if (N365) { try { await withTimeout(merge365(d), 9000); } catch (e) { n365Status = "365Scores : " + e.message; } }
-            if (!light) try { await withTimeout(mergeGH(d), 9000); } catch (e) { ghStatus = "GitHub : " + e.message; }
+            if (!light && !(document.documentElement.dataset.comp === "premier-league")) try { await withTimeout(mergeGH(d), 9000); } catch (e) { ghStatus = "GitHub : " + e.message; }
         }
         // Noms génériques ("First Round", "Group Stage"…) : on retrouve le vrai nom de la compétition pour ne pas mélanger deux coupes différentes
         const GENERIC_LG = /^(?:the )?(?:first|second|third|fourth|fifth|sixth|seventh|1st|2nd|3rd|4th|5th|6th|preliminary|qualifying|group|knockout|round|quarter|semi|final|play-?offs?|league phase|matchday|regular season|stage|phase)\b/i;
@@ -948,6 +949,7 @@ h1{will-change:opacity}
             return { id: "ts" + e.idEvent, tsdb: true, raw: e, slug: "tsdb", lg: e.strLeague || "Football", lgl: e.strLeagueBadge || "", start: iso, state, off, label: off ? (st || "Reporté") : (st || ""), home: e.strHomeTeam, away: e.strAwayTeam, hl: e.strHomeTeamBadge, al: e.strAwayTeamBadge, h, a };
         }
         async function loadTsdb() {
+            if (document.documentElement.dataset.comp === "premier-league") return;   // page Premier League : 365Scores uniquement
             try {
                 if (!tsIds) {
                     tsIds = [];
@@ -2769,7 +2771,7 @@ h1{will-change:opacity}
         const el = Date.now() - doneAt;
         if ((el >= 3000 && Date.now() - stable >= 1500) || el >= 8000) paintFirst(); else setTimeout(tick, 400);
       };
-      tick();
+      if (cpSlug === "premier-league") paintFirst(); else tick();   // 365Scores seul : pas de noms à corriger, on affiche tout de suite
     })();
   }
   if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) { const t0 = document.title; applyComp(ca); document.title = t0; } if (!COMP_STRICT[cpSlug]) hydrate(); }
