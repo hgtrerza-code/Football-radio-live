@@ -757,6 +757,7 @@ h1{will-change:opacity}
 .tv-badge span{display:flex;flex-direction:column;line-height:1.15}.tv-badge small{font-size:.6rem;font-weight:600;color:var(--text-muted)}
 @media(max-width:600px){.tv-row{flex-wrap:wrap}.tv-ch{flex-direction:row;width:100%;justify-content:flex-start;padding-left:76px}}
 </style>
+<style id="tv-wrap">.tv-ch{flex-flow:row wrap;justify-content:flex-end;max-width:62%}@media(max-width:600px){.tv-ch{max-width:none;justify-content:flex-start}}</style>
 </head>
 <body>
 <script>try{if(sessionStorage.getItem("fl_splash"))document.documentElement.classList.add("nosplash");else sessionStorage.setItem("fl_splash","1")}catch(e){}</script><div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
@@ -2534,34 +2535,31 @@ h1{will-change:opacity}
       return { k, label, sub: c.sub, ini: c.ini, col: c.col };
     });
   }
-  // ---------- Chaînes TV : source Kooora (via un proxy Cloudflare Worker, voir kooora-worker/) ----------
-  const KOOORA_TV_URL = "";   // ← colle ici l'adresse du Worker, ex. "https://kooora-tv.ton-compte.workers.dev/tv" (vide = anciennes chaînes)
-  const KR_COMP = [/دوري ابطال اوروبا/, /الدوري الانجليزي الممتاز/, /الدوري الاسباني/, /الدوري الايطالي/, /الدوري الالماني/, /الدوري الفرنسي/, /الدوري الاوروبي/, /المؤتمر الاوروبي/, /الدوري البرتغالي/, /الدوري المغربي/];   // même ordre que MAIN10
-  const krN = s => String(s || "").replace(/[\u064B-\u065F\u0670]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").trim();
-  const krCache = {};
-  function krBuild(list) {   // groupe par (compétition, heure) ; les chaînes ne sont retenues que si elles sont identiques pour tout le groupe
-    const G = new Map();
-    list.forEach(e => {
-      const i = KR_COMP.findIndex(r => r.test(krN(e.comp))), t = String(e.time || "").match(/^(\d{1,2}):(\d{2})$/); if (i < 0 || !t) return;
-      const k = i + "|" + (+t[1] * 60 + +t[2]), g = G.get(k) || { sigs: new Set(), ch: [] };
-      g.sigs.add((e.channels || []).map(c => c.name).sort().join("|")); if ((e.channels || []).length) g.ch = e.channels; G.set(k, g);
-    });
-    G.forEach(g => { g.ok = g.sigs.size === 1 && g.ch.length > 0; });
-    return G;
+  // ---------- Chaînes TV : source TheSportsDB (programme TV par date, directement depuis le navigateur, sans proxy) ----------
+  const TSDB_TV_URL = "https://www.thesportsdb.com/api/v1/json/3/eventstv.php";
+  const TV_CTRY = { Spain: "Espagne", Italy: "Italie", France: "France", England: "Angleterre", "United Kingdom": "Royaume-Uni", Germany: "Allemagne", Portugal: "Portugal", Netherlands: "Pays-Bas", Belgium: "Belgique", Switzerland: "Suisse", Austria: "Autriche", Greece: "Grèce", Turkey: "Turquie", Europe: "Europe" };   // pays dont on affiche les chaînes (Espagne et Italie d'abord, puis l'Europe), toutes ensemble
+  const tvKey = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|afc|sc|ac|as|ssc|cd|ud|rc|fk|sk|the)\b/g, " ").replace(/[^a-z0-9]/g, "");
+  const tvSame = (a, b) => { a = tvKey(a); b = tvKey(b); return !!a && !!b && (a === b || (Math.min(a.length, b.length) >= 4 && (a.includes(b) || b.includes(a)))); };
+  const tvTeams = e => { if (e.strHomeTeam && e.strAwayTeam) return [e.strHomeTeam, e.strAwayTeam]; const x = String(e.strEvent || "").split(/\s+vs\.?\s+|\s+v\s+|\s+-\s+/i); return x.length === 2 ? x : null; };
+  const tvCache = {};
+  function tvLoad(day) {
+    if (day in tvCache) return; tvCache[day] = null;
+    fetch(TSDB_TV_URL + "?d=" + day + "&s=Soccer").then(r => r.ok ? r.json() : Promise.reject()).then(j => { tvCache[day] = (j && j.tvevents) || []; renderTVIfOpen(); }).catch(() => { tvCache[day] = false; });
   }
-  function krLoad(day) {
-    if (!KOOORA_TV_URL || day in krCache) return; krCache[day] = null;
-    fetch(KOOORA_TV_URL + (KOOORA_TV_URL.includes("?") ? "&" : "?") + "date=" + day).then(r => r.ok ? r.json() : Promise.reject()).then(j => { krCache[day] = krBuild(j.matches || []); renderTVIfOpen(); }).catch(() => { krCache[day] = false; });
+  function tvChannelsT(m, G) {   // toutes les chaînes annoncées pour ce match dans ces pays ; null = rien trouvé
+    if (!G || !G.length) return null;
+    const ev = G.filter(e => { const t = tvTeams(e); return t && tvSame(t[0], m.home) && tvSame(t[1], m.away); }), out = [], seen = new Set();
+    for (const c of Object.keys(TV_CTRY)) {
+      ev.filter(e => e.strCountry === c && e.strChannel).flatMap(e => String(e.strChannel).split(",")).map(n => n.trim()).filter(Boolean).forEach(n => {
+        const k = tvKey(n); if (seen.has(k)) return; seen.add(k);
+        out.push({ k: n, label: n, sub: TV_CTRY[c], ini: (n[0] || "?").toUpperCase(), col: "hsl(" + hue(n) + ",55%,38%)" });
+      });
+    }
+    return out.length ? out.slice(0, 12) : null;
   }
-  const krMin = (m, off) => { const d = new Date(m.start); return ((d.getUTCHours() * 60 + d.getUTCMinutes() + off) % 1440 + 1440) % 1440; };
-  function krOffset(G, L) {   // Kooora affiche l'heure dans son fuseau : on retient le décalage qui fait coïncider le plus de matchs
-    let best = null, sc = 0;
-    for (let off = -720; off <= 840; off += 30) { const n = L.filter(m => G.has(mp(m) + "|" + krMin(m, off))).length; if (n > sc) { sc = n; best = off; } }
-    return best;
-  }
-  function tvChannelsK(m, G, off) {
-    const g = G.get(mp(m) + "|" + krMin(m, off)); if (!g || !g.ok) return null;
-    return g.ch.map(c => ({ k: c.name, label: c.name, sub: "Kooora", ini: (c.name.trim()[0] || "?").toUpperCase(), col: "hsl(" + hue(c.name) + ",55%,38%)" }));
+  function tvAllChannels(m, G) {   // chaînes habituelles d'abord (comme avant), puis celles annoncées par la source, sans doublon
+    const base = tvChannels(m), extra = tvChannelsT(m, G) || [];
+    return base.concat(extra.filter(x => !base.some(b => tvSame(b.label, x.label))));
   }
   let tvDay = "";
   function tvDays() {
@@ -2573,20 +2571,20 @@ h1{will-change:opacity}
     strip.innerHTML = days.map(d => '<button type="button" data-day="' + d.k + '" class="' + (d.k === tvDay ? "on" : "") + (d.o === 0 ? " today" : "") + '"><small>' + d.lb + '</small><b>' + d.n + '</b></button>').join("");
     const now = Date.now();
     const L = all().filter(m => tvMain(m) && !m.off && new Date(m.start).toLocaleDateString("sv-SE") === tvDay).sort((a, b) => a.start.localeCompare(b.start) || mp(a) - mp(b));
-    krLoad(tvDay); const KG = krCache[tvDay] || null, KO = KG ? krOffset(KG, L) : null;
+    tvLoad(tvDay); const KG = tvCache[tvDay] || null;
     if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match important ce jour-là." : "Chargement du programme…") + '</div>'; return; }
     const crest = (l, n) => l ? '<img src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="22" height="22" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     box.innerHTML = L.map(m => {
       const live = m.state === "in", done = m.state === "post";
       const mid = m.state === "pre" ? '<span class="tv-vs">vs</span>' : '<span class="tv-sc' + (live ? " live" : "") + '">' + (m.h ?? 0) + ' - ' + (m.a ?? 0) + '</span>';
-      const chs = ((KO !== null && tvChannelsK(m, KG, KO)) || tvChannels(m)).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
+      const chs = tvAllChannels(m, KG).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
       return '<div class="tv-row' + (live ? " live" : "") + (done ? " done" : "") + '"><div class="tv-time">' + esc(hhmm(m.start)) + (live ? '<small class="tv-live">● ' + esc(m.label || "DIRECT") + '</small>' : done ? '<small>Terminé</small>' : '') + '</div>' +
         '<div class="tv-body"><div class="tv-lg">' + lgIcon([m]) + '<span>' + esc(lgDisp(m.lg, [m])) + '</span></div><div class="tv-teams"><div class="tv-tm">' + crest(m.hl, m.home) + '<span>' + esc(m.home) + '</span></div>' + mid + '<div class="tv-tm r"><span>' + esc(m.away) + '</span>' + crest(m.al, m.away) + '</div></div></div>' +
         '<div class="tv-ch">' + chs + '</div></div>';
     }).join("");
   }
   const TV_FAQ = [
-    ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Dans la région MENA, ils sont affichés sur beIN SPORTS ; la Botola Pro est affichée avec Arryadia, chaîne gratuite. Vérifiez toujours la grille de la chaîne le jour du match."],
+    ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Le programme affiche d’abord beIN SPORTS, Arryadia (Botola Pro) et Sport TV (Liga Portugal), puis les autres chaînes annoncées par la source pour l’Espagne (Movistar…), l’Italie et le reste de l’Europe, quand elles sont disponibles. Vérifiez toujours la grille de la chaîne le jour du match."],
     ["Quel est le numéro de la chaîne beIN SPORTS pour un match ?", "Le numéro exact (beIN SPORTS 1, 2, 3…) est annoncé par la chaîne le jour du match. Il s’affiche dans le programme quand la source le fournit."],
     ["À quelle heure commencent les matchs ?", "Les horaires sont affichés à l’heure de votre appareil et mis à jour automatiquement."]
   ];

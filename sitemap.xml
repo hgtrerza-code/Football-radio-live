@@ -71,6 +71,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.footlivepro.com/programme-tv.html</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.footlivepro.com/football-feminin.html</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
