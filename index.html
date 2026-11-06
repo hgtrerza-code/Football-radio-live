@@ -1961,8 +1961,9 @@ h1{will-change:opacity}
         const _tvMemo = Object.create(null);
         function tvMain(m) {
             const k = m.lg; if (k in _tvMemo) return _tvMemo[k];
+            const raw = String(k || "").split(String.fromCharCode(8203))[0].trim();
             const i = mp(m); let ok = false;
-            if (i < 99) {
+            if (i < 99 && !/women|feminin|f\u00e9minin|femenin|\bu-?\d{2}\b|youth|juniors?|reserve|\bb team\b|\bii\b|\b2\b|sabseg|segunda|serie b|ligue 2|amateur|cup|copa|coupe|pokal|coppa|super|qualif|friendl/i.test(raw)) {
                 if (!MAIN10[i][2]) ok = true;
                 else {
                     let d = ""; try { d = lgDisp(m.lg, [m]); } catch (e) { }
@@ -2546,16 +2547,16 @@ h1{will-change:opacity}
     if (day in tvCache) return; tvCache[day] = null;
     fetch(TSDB_TV_URL + "?d=" + day + "&s=Soccer").then(r => r.ok ? r.json() : Promise.reject()).then(j => { tvCache[day] = (j && j.tvevents) || []; renderTVIfOpen(); }).catch(() => { tvCache[day] = false; });
   }
-  function tvChannelsT(m, G) {   // toutes les chaînes annoncées pour ce match dans ces pays ; null = rien trouvé
+  function tvChannelsT(m, G) {   // toutes les chaînes annoncées pour ce match, tous pays confondus (Espagne, Italie, France, Europe… d'abord) ; null = rien trouvé
     if (!G || !G.length) return null;
-    const ev = G.filter(e => { const t = tvTeams(e); return t && tvSame(t[0], m.home) && tvSame(t[1], m.away); }), out = [], seen = new Set();
-    for (const c of Object.keys(TV_CTRY)) {
-      ev.filter(e => e.strCountry === c && e.strChannel).flatMap(e => String(e.strChannel).split(",")).map(n => n.trim()).filter(Boolean).forEach(n => {
-        const k = tvKey(n); if (seen.has(k)) return; seen.add(k);
-        out.push({ k: n, label: n, sub: TV_CTRY[c], ini: (n[0] || "?").toUpperCase(), col: "hsl(" + hue(n) + ",55%,38%)" });
-      });
-    }
-    return out.length ? out.slice(0, 12) : null;
+    const ev = G.filter(e => { const t = tvTeams(e); return t && e.strChannel && tvSame(t[0], m.home) && tvSame(t[1], m.away); }), out = [], seen = new Set(), order = Object.keys(TV_CTRY);
+    const rank = c => { const i = order.indexOf(c); return i < 0 ? 99 : i; };
+    ev.sort((x, y) => rank(x.strCountry) - rank(y.strCountry) || String(x.strCountry).localeCompare(String(y.strCountry)));
+    ev.forEach(e => String(e.strChannel).split(",").map(n => n.trim()).filter(Boolean).forEach(n => {
+      const k = tvKey(n); if (seen.has(k)) return; seen.add(k);
+      out.push({ k: n, label: n, sub: TV_CTRY[e.strCountry] || e.strCountry || "", ini: (n[0] || "?").toUpperCase(), col: "hsl(" + hue(n) + ",55%,38%)" });
+    }));
+    return out.length ? out : null;
   }
   function tvAllChannels(m, G) {   // chaînes habituelles d'abord (comme avant), puis celles annoncées par la source, sans doublon
     const base = tvChannels(m), extra = tvChannelsT(m, G) || [];
@@ -2584,7 +2585,7 @@ h1{will-change:opacity}
     }).join("");
   }
   const TV_FAQ = [
-    ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Le programme affiche d’abord beIN SPORTS, Arryadia (Botola Pro) et Sport TV (Liga Portugal), puis les autres chaînes annoncées par la source pour l’Espagne (Movistar…), l’Italie et le reste de l’Europe, quand elles sont disponibles. Vérifiez toujours la grille de la chaîne le jour du match."],
+    ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Le programme ne montre que les matchs des 10 compétitions de la barre (Ligue des champions, Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Europa League, Conference League, Liga Portugal, Botola Pro). Pour chaque match, il affiche ensemble beIN SPORTS, Arryadia ou Sport TV selon la compétition, puis toutes les autres chaînes annoncées par la source (Espagne, Italie, France, Europe…), quand elles sont disponibles. Vérifiez toujours la grille de la chaîne le jour du match."],
     ["Quel est le numéro de la chaîne beIN SPORTS pour un match ?", "Le numéro exact (beIN SPORTS 1, 2, 3…) est annoncé par la chaîne le jour du match. Il s’affiche dans le programme quand la source le fournit."],
     ["À quelle heure commencent les matchs ?", "Les horaires sont affichés à l’heure de votre appareil et mis à jour automatiquement."]
   ];
