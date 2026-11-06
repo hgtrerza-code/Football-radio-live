@@ -794,6 +794,16 @@ h1{will-change:opacity}
 .tv-badge{font-size:.72rem;padding:3px 10px 3px 3px}
 .tv-badge i{width:22px;height:22px;font-size:.7rem}
 }</style>
+<style id="tv-mobile">
+@media(max-width:600px){
+.tv-teams{flex-direction:column;align-items:stretch;gap:4px}
+.tv-tm,.tv-tm.r{justify-content:flex-start;text-align:left;font-size:.92rem;gap:8px}
+.tv-tm.r{flex-direction:row-reverse;justify-content:flex-end}
+.tv-tm span:not(.m-ph){white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:normal;word-break:normal;hyphens:none}
+.tv-tm img,.tv-tm .m-ph{width:24px;height:24px}
+.tv-teams>.tv-vs,.tv-teams>.tv-sc{align-self:flex-start;margin-left:32px;font-size:.72rem}
+}
+</style>
 <script>
 /* Consentement publicité : les scripts pub ne se chargent qu'après acceptation */
 (function(){try{window.__ads=localStorage.getItem('fl_consent')==='yes';}catch(e){window.__ads=false;}
