@@ -1,7 +1,7 @@
 {
  "date": "2026-11-06",
- "generated": "2026-11-06T02:50:39.033Z",
- "extra": 74,
+ "generated": "2026-11-06T07:08:34.095Z",
+ "extra": 75,
  "matches": [
   {
    "id": "401879242",
@@ -28,19 +28,6 @@
    "a": 0,
    "venue": "Ramón Sánchez Pizjuán Stadium",
    "place": "Sevilla, Spain"
-  },
-  {
-   "id": "401874815",
-   "lg": "Serie A",
-   "start": "2026-11-06T19:45Z",
-   "state": "pre",
-   "label": "0'",
-   "home": "Venezia",
-   "away": "Udinese",
-   "h": 0,
-   "a": 0,
-   "venue": "Stadio Pier Luigi Penzo",
-   "place": "Venezia, Italy"
   },
   {
    "id": "401884739",
