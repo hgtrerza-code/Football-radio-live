@@ -760,6 +760,24 @@ h1{will-change:opacity}
 #tv-days button{flex:1 0 48px;padding:5px 0;border-radius:12px}
 #tv-days button small{font-size:.62rem}
 #tv-days button b{font-size:.95rem}
+/* Option A : carte compacte (2 chaînes visibles, le reste derrière « + N chaînes ») */
+.tv-card .tv-ch{gap:6px;align-items:center;padding:2px .75rem 10px}
+.tv-badge{padding:2px 10px 2px 2px;gap:6px;font-size:.74rem;font-weight:700;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14)}
+.tv-badge i{width:20px;height:20px;font-size:.62rem}
+.tv-badge span{flex-direction:row;align-items:baseline;gap:5px}
+.tv-badge small{font-size:.66rem;font-weight:500}
+.tv-more-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:999px;padding:3px 11px;font:700 .72rem Inter,sans-serif;cursor:pointer;white-space:nowrap}
+.tv-more-btn:hover,.tv-more-btn[aria-expanded="true"]{color:var(--text-main);border-color:var(--accent)}
+.tv-more{flex:1 0 100%;display:flex;flex-flow:row wrap;gap:6px}
+.tv-more[hidden]{display:none}
+@media (max-width:600px){
+  .tv-card .m-row{padding:.55rem .75rem;gap:4px 10px;font-size:.88rem}
+  .tv-card .m-home,.tv-card .m-away{font-size:.88rem;gap:7px}
+  .tv-card .m-home .m-logo,.tv-card .m-away .m-logo,.tv-card .m-home .m-ph,.tv-card .m-away .m-ph{width:20px;height:20px}
+  .tv-card .m-score .s1,.tv-card .m-score .s2{font-size:.95rem;min-width:34px;padding:2px 8px}
+  .tv-card .tv-h{font-size:1rem}
+  .tv-card{margin-bottom:8px}
+}
 </style>
 <script>
 /* Consentement publicité : les scripts pub ne se chargent qu'après acceptation */
@@ -2715,6 +2733,13 @@ body{overflow-x:clip}
   const tvLogoUrl = c => c.logo || koBrandLogo[tvBrand(c.label)] || tvLogo(c.label);   // kooora d'abord, sinon fichier local /logos/
   const tvLogo = label => { const x = TV_LOGOS.find(l => l[0].test(String(label || ""))); return x ? "logos/" + x[1] + ".png" : ""; };
   let tvDay = "";
+  const tvOpen = new Set();   // matchs dont la liste complète des chaînes est dépliée (conservé entre deux rafraîchissements)
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".tv-more-btn"); if (!b) return;
+    const id = b.dataset.id, on = !tvOpen.has(id); on ? tvOpen.add(id) : tvOpen.delete(id);
+    const box = b.parentElement.querySelector(".tv-more"); if (box) box.hidden = !on;
+    b.textContent = on ? "Réduire" : "+ " + b.dataset.n + " chaînes"; b.setAttribute("aria-expanded", on);
+  });
   function tvDays() {
     const t = new Date(); return [0, 1, 2, 3, 4, 5, 6].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return { k: d.toLocaleDateString("sv-SE"), lb: o === 0 ? "AUJ." : o === 1 ? "DEM." : d.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "").toUpperCase(), n: d.getDate(), o }; });
   }
@@ -2741,7 +2766,10 @@ body{overflow-x:clip}
       const live = m.state === "in", done = m.state === "post";
       const mid = m.state === "pre" ? "vs" : (m.h ?? 0) + " - " + (m.a ?? 0);
       const when = live ? '<span class="m-live">● ' + esc(m.label || "DIRECT") + '</span>' : '<b class="tv-h">' + esc(hhmm(m.start)) + '</b>' + (done ? ' <small>Terminé</small>' : '');
-      const chs = tvAllChannels(m, KG).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
+      const badge = c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + (c.sub ? '<small>' + esc(c.sub) + '</small>' : '') + '</span></span>';
+      const chl = tvAllChannels(m, KG), TV_VIS = 2, isOpen = tvOpen.has(m.id);
+      const chs = chl.slice(0, TV_VIS).map(badge).join("") +
+        (chl.length > TV_VIS ? '<button type="button" class="tv-more-btn" data-id="' + esc(m.id) + '" data-n="' + (chl.length - TV_VIS) + '" aria-expanded="' + isOpen + '">' + (isOpen ? "Réduire" : "+ " + (chl.length - TV_VIS) + " chaînes") + '</button><div class="tv-more"' + (isOpen ? "" : " hidden") + '>' + chl.slice(TV_VIS).map(badge).join("") + '</div>' : "");
       const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
       return '<div class="tv-card' + (done ? " done" : "") + '"><div class="m-row' + (live ? " live" : "") + '"><div class="m-date">' + when + '</div><div class="m-home">' + esc(m.home) + crest(m.hl, m.home) + '</div><div class="m-score' + (m.state === "pre" ? " next" : "") + '">' + mid + '</div><div class="m-away">' + crest(m.al, m.away) + esc(m.away) + '</div></div>' + (chs ? '<div class="tv-ch">' + chs + '</div>' : '') + dbg + '</div>';
     };
