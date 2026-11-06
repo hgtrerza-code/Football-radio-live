@@ -628,7 +628,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 @media (max-width:600px){
   .m-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;padding:.6rem .55rem;font-size:.8rem}
   .m-date{grid-column:1/-1}
-  .m-home,.m-away{display:flex;align-items:center;gap:5px;min-width:0;line-height:1.25;overflow-wrap:anywhere}
+  .m-home,.m-away{display:flex;align-items:center;gap:5px;min-width:0;line-height:1.25;overflow-wrap:break-word}
   .m-home{justify-content:flex-end;text-align:right}
   .m-away{justify-content:flex-start;text-align:left}
   .m-home .m-logo,.m-away .m-logo{flex:0 0 auto;width:20px;height:20px;margin:0}
@@ -778,17 +778,16 @@ if(!window.__ads)document.documentElement.className+=' ads-off';})();
 #cookie-banner button.cb-yes{background:#22c55e;border-color:#22c55e;color:#06210f}
 </style>
 <style id="names-fix">
-/* Noms d'équipes lisibles sur mobile : étoile et logo plus compacts, texte qui s'adapte à l'écran, coupure seulement entre les mots */
+/* Mobile : une équipe par ligne (nom complet, police normale), score à droite — plus de nom coupé */
 body{overflow-x:clip}
 @media (max-width:600px){
-  .m-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:4px;padding:.6rem .45rem}
-  .m-home,.m-away{gap:4px;font-size:clamp(.68rem,3.3vw,.84rem);line-height:1.2;overflow-wrap:anywhere;word-break:normal;hyphens:none}
-  .m-row .fav-star{flex:0 0 auto;font-size:.78rem;padding:0;margin:0}
-  .m-home .m-logo,.m-away .m-logo,.m-home .m-ph,.m-away .m-ph{width:18px;height:18px;flex:0 0 auto;margin:0}
-  .m-score{min-width:46px;font-size:.88rem;padding:3px 5px}
-}
-@media (max-width:380px){
-  .m-row .fav-star{display:none}
+  .m-row,.m-wrap .m-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"d d" "h s" "a s";gap:6px 10px;padding:.7rem .8rem;font-size:.95rem;align-items:center}
+  .m-date{grid-area:d;display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;font-size:.78rem}
+  .m-home{grid-area:h}.m-away{grid-area:a}
+  .m-score{grid-area:s;align-self:center;min-width:60px;font-size:1.1rem;padding:6px 10px}
+  .m-home,.m-away{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:8px;min-width:0;font-size:.95rem;font-weight:600;line-height:1.25;overflow-wrap:break-word;word-break:normal;hyphens:none}
+  .m-home .m-logo,.m-away .m-logo,.m-home .m-ph,.m-away .m-ph{order:-1;width:22px;height:22px;flex:0 0 auto;margin:0}
+  .m-row .fav-star{order:1;margin-left:auto;font-size:1rem;padding:2px 4px;flex:0 0 auto}
 }
 </style>
 </head>
