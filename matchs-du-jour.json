@@ -1,6 +1,6 @@
 {
  "date": "2026-11-06",
- "generated": "2026-11-06T00:58:20.710Z",
+ "generated": "2026-11-06T02:50:39.033Z",
  "extra": 74,
  "matches": [
   {
@@ -124,12 +124,12 @@
    "id": "401841303",
    "lg": "Brasileirão",
    "start": "2026-11-06T00:30Z",
-   "state": "in",
-   "label": "28'",
+   "state": "post",
+   "label": "90'+8'",
    "home": "Cruzeiro",
    "away": "Bahia",
-   "h": 0,
-   "a": 0,
+   "h": 3,
+   "a": 2,
    "venue": "Estadio Mineirão",
    "place": "Belo Horizonte, Brazil"
   },
