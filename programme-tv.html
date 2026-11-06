@@ -2553,7 +2553,7 @@ body{overflow-x:clip}
   }
   // ---------- Programme TV : matchs importants + chaîne qui diffuse ----------
   // Chaîne principale par compétition (index = MAIN10) : source beIN SPORTS MENA, Arryadia pour la Botola Pro
-  const TV_BY_LG = { 0: ["bein"], 1: ["bein"], 2: ["bein"], 3: ["bein"], 4: ["bein"], 5: ["bein"], 6: ["bein"], 7: ["bein"], 8: ["sporttv"], 9: ["arryadia"] };
+  const TV_BY_LG = { 9: ["arryadia"] };   // seule chaîne fixe : Arryadia (Botola Pro) ; les autres viennent des sources
   const TV_CH = { bein: { name: "beIN SPORTS", ini: "b", col: "#7b2cbf", sub: "MENA" }, arryadia: { name: "Arryadia", ini: "A", col: "#16803c", sub: "Maroc · gratuit" }, sporttv: { name: "Sport TV", ini: "S", col: "#e11d48", sub: "Portugal" } };
   function tvChannels(m) {
     const keys = TV_BY_LG[mp(m)] || [], src = Array.isArray(m.tv) ? m.tv.join(" | ") : "";
@@ -2576,24 +2576,13 @@ body{overflow-x:clip}
   }
   // Marques : couleur du rond (initiale) pour les chaînes les plus connues
   const TV_BRAND = [[/movistar/i, "#019df4"], [/dazn/i, "#3a3a3a"], [/sky/i, "#0b5fb4"], [/canal/i, "#111111"], [/tnt/i, "#e4002b"], [/espn/i, "#c8102e"], [/supersport/i, "#e30613"], [/paramount|cbs/i, "#0064ff"], [/peacock|nbc/i, "#6b3fa0"], [/prime|amazon/i, "#00a8e1"], [/ligue 1/i, "#1a237e"], [/sport ?tv/i, "#e11d48"], [/arryadia|al kass|alkass|ssc|abu dhabi|dubai/i, "#16803c"], [/eurosport/i, "#0a6cff"], [/viaplay/i, "#6a1bff"], [/sportsnet|tsn/i, "#d6001c"], [/fox/i, "#0a3d91"], [/globo|sportv/i, "#00a651"], [/telemundo|univision/i, "#005bbb"]];
-  // Chaînes habituelles par compétition (indice MAIN10), affichées avec « Habituel » seulement si la source ne les annonce pas
-  const TV_USUAL = {
-    0: [["Movistar Liga de Campeones", "Espagne"], ["Canal+", "France"], ["Sky Sport", "Italie"], ["TNT Sports", "Royaume-Uni"], ["Paramount+", "États-Unis"]],
-    1: [["Sky Sports", "Royaume-Uni"], ["TNT Sports", "Royaume-Uni"], ["Peacock", "États-Unis"]],
-    2: [["Movistar LaLiga", "Espagne"], ["DAZN LaLiga", "Espagne"], ["ESPN+", "États-Unis"]],
-    3: [["DAZN", "Italie"], ["Sky Sport", "Italie"], ["Paramount+", "États-Unis"]],
-    4: [["Sky Sport", "Allemagne"], ["DAZN", "Allemagne"]],
-    5: [["Ligue 1+", "France"], ["beIN SPORTS", "France"]],
-    6: [["Movistar Plus+", "Espagne"], ["TNT Sports", "Royaume-Uni"], ["Paramount+", "États-Unis"]],
-    7: [["Movistar Plus+", "Espagne"], ["TNT Sports", "Royaume-Uni"], ["Paramount+", "États-Unis"]]
-  };
   function tvNorm(raw, sub) {   // nom propre + sous-titre + couleur ; beIN : numéro (1, 2, 3…), MAX, XTRA lus dans toutes les écritures (« beIN Sports MENA 2 », « beIN SPORTS HD1 »…)
     let n = String(raw || "").replace(/\s+/g, " ").trim(), s = sub || "";
     if (/bein/i.test(n)) {
       const num = (n.match(/\d/) || [])[0];
       const label = "beIN SPORTS" + (/\bmax\b/i.test(n) ? " MAX" : "") + (/\bxtra\b/i.test(n) ? " XTRA" : "") + (/news/i.test(n) ? " NEWS" : "") + (num ? " " + num : "");
       if (/mena|arab|middle/i.test(n)) s = "MENA"; else if (/fran/i.test(n)) s = "France"; else if (/turk|türk/i.test(n)) s = "Turquie"; else if (/\b(usa|us)\b/i.test(n)) s = "États-Unis";
-      return { k: label, label, sub: s || "MENA", ini: "b", col: "#7b2cbf", bein: true };
+      return { k: label, label, sub: s, ini: "b", col: "#7b2cbf", bein: true };
     }
     n = n.replace(/^movistar\s*(\+|plus\+?)\s*/i, "Movistar ").trim();
     const b = TV_BRAND.find(x => x[0].test(n));
@@ -2610,25 +2599,16 @@ body{overflow-x:clip}
     }));
     return out.length ? out : null;
   }
-  function tvAllChannels(m, G) {   // chaîne principale (avec son numéro), puis celles de 365Scores (m.tv) et TheSportsDB, puis les chaînes habituelles de la compétition, sans doublon
-    const out = tvChannels(m).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col, main: true }));
-    const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, /bein/i.test(n) ? "MENA" : "Diffusion"));
+  function tvAllChannels(m, G) {   // uniquement les chaînes réellement annoncées (365Scores m.tv et TheSportsDB) ; Arryadia pour la Botola Pro ; aucune chaîne « par défaut » ni supposée
+    const out = tvChannels(m).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col }));
+    const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, "Diffusion"));
     own.concat(tvChannelsT(m, G) || []).forEach(x => {
       if (!tvKey(x.label)) return;
-      if (x.bein && x.sub === "MENA") {   // la beIN principale prend le numéro annoncé (beIN SPORTS 2…)
-        const mi = out.findIndex(o => o.main && o.k === "bein");
-        if (mi >= 0 && !/\d/.test(out[mi].label) && /\d/.test(x.label)) { out[mi].label = x.label; out[mi].sub = "MENA"; return; }
-      }
       if (out.some(o => tvSig(o) === tvSig(x))) return;
       const dI = out.findIndex(o => o.sub === "Diffusion" && tvKey(o.label) === tvKey(x.label));
       if (dI >= 0 && x.sub !== "Diffusion") { out[dI].sub = x.sub; return; }   // même chaîne : on garde le pays annoncé
       if (x.sub === "Diffusion" && out.some(o => tvKey(o.label) === tvKey(x.label))) return;
       out.push(x);
-    });
-    out.forEach(o => { if (o.main && o.k === "bein" && !/\d/.test(o.label)) o.sub = "MENA · n° non annoncé"; });
-    (TV_USUAL[mp(m)] || []).forEach(([n, c]) => {
-      const x = tvNorm(n, "Habituel · " + c);
-      if (!out.some(o => tvKey(o.label) === tvKey(x.label) && (o.sub === c || o.sub.indexOf(c) >= 0))) out.push(x);
     });
     return out;
   }
