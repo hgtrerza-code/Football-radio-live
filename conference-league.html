@@ -665,7 +665,26 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 /* Titre : le scintillement néon n'anime plus que l'opacité sur sa propre couche */
 h1{will-change:opacity}
 </style>
-<style id="apercu-css">#apercu-matchs{margin:1.5rem 0 0;padding:1rem 0;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem;line-height:1.6}#apercu-matchs h2{font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.25rem}#apercu-matchs h3{font-size:.9rem;font-weight:600;color:var(--text-main);margin:.9rem 0 .25rem}#apercu-matchs ul{list-style:none;padding:0}#apercu-matchs li{padding:.15rem 0}#apercu-matchs time{color:var(--accent);font-weight:600;margin-right:.25rem}#apercu-matchs .ap-upd{font-size:.75rem}#apercu-matchs .ap-tbl{overflow-x:auto}#apercu-matchs table{border-collapse:collapse;width:100%;max-width:560px;font-size:.8rem}#apercu-matchs th,#apercu-matchs td{padding:.2rem .45rem;text-align:center;border-bottom:1px solid var(--border)}#apercu-matchs td:nth-child(2),#apercu-matchs th:nth-child(2){text-align:left}#apercu-matchs{position:relative;max-height:220px;overflow:hidden;cursor:pointer;margin-top:1rem;padding:.6rem 0 0}#apercu-matchs::before{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(transparent,var(--bg-dark,#0a0f1e));pointer-events:none}#apercu-matchs::after{content:"▼ Afficher tout";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:.75rem;font-weight:700;color:var(--accent)}#apercu-matchs.open{max-height:none;overflow:visible}#apercu-matchs.open::before{display:none}#apercu-matchs.open::after{content:"▲ Réduire";position:static;display:block;padding:.6rem 0 0}</style></head>
+<style id="apercu-css">#apercu-matchs{margin:1.5rem 0 0;padding:1rem 0;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem;line-height:1.6}#apercu-matchs h2{font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.25rem}#apercu-matchs h3{font-size:.9rem;font-weight:600;color:var(--text-main);margin:.9rem 0 .25rem}#apercu-matchs ul{list-style:none;padding:0}#apercu-matchs li{padding:.15rem 0}#apercu-matchs time{color:var(--accent);font-weight:600;margin-right:.25rem}#apercu-matchs .ap-upd{font-size:.75rem}#apercu-matchs .ap-tbl{overflow-x:auto}#apercu-matchs table{border-collapse:collapse;width:100%;max-width:560px;font-size:.8rem}#apercu-matchs th,#apercu-matchs td{padding:.2rem .45rem;text-align:center;border-bottom:1px solid var(--border)}#apercu-matchs td:nth-child(2),#apercu-matchs th:nth-child(2){text-align:left}#apercu-matchs{position:relative;max-height:220px;overflow:hidden;cursor:pointer;margin-top:1rem;padding:.6rem 0 0}#apercu-matchs::before{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(transparent,var(--bg-dark,#0a0f1e));pointer-events:none}#apercu-matchs::after{content:"▼ Afficher tout";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:.75rem;font-weight:700;color:var(--accent)}#apercu-matchs.open{max-height:none;overflow:visible}#apercu-matchs.open::before{display:none}#apercu-matchs.open::after{content:"▲ Réduire";position:static;display:block;padding:.6rem 0 0}</style><style id="names-fix">
+/* Mobile : une équipe par ligne (nom complet, police normale), score à droite — plus de nom coupé */
+body{overflow-x:clip}
+@media (max-width:600px){
+  .m-row,.m-wrap .m-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"d d" "h h1" "a a1";gap:6px 10px;padding:.7rem .8rem;font-size:.95rem;align-items:center}
+  .m-date{grid-area:d;display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;font-size:.78rem}
+  .m-home{grid-area:h}.m-away{grid-area:a}
+  .m-score{display:contents}
+  .m-score .sep,.m-score .vs{display:none}
+  .m-score .s1,.m-score .s2{align-self:center;justify-self:end;min-width:38px;text-align:center;font-weight:800;font-size:1.1rem;line-height:1.2;padding:4px 9px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:var(--accent)}
+  .m-score .s1{grid-area:h1}.m-score .s2{grid-area:a1}
+  .m-score .lbl{grid-row:2/4;grid-column:2;align-self:center;font-size:.75rem;font-weight:700;color:var(--text-muted);text-align:center}
+  .m-row.live .m-score .s1,.m-row.live .m-score .s2{box-shadow:0 0 0 1px rgba(46,229,157,.25),0 0 12px rgba(46,229,157,.18)}
+  .goal-now .m-score .s1,.goal-now .m-score .s2{animation:goal-pop .6s ease-in-out infinite alternate}
+  .m-home,.m-away{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:8px;min-width:0;font-size:.95rem;font-weight:600;line-height:1.25;overflow-wrap:break-word;word-break:normal;hyphens:none}
+  .m-home .m-logo,.m-away .m-logo,.m-home .m-ph,.m-away .m-ph{order:-1;width:22px;height:22px;flex:0 0 auto;margin:0}
+  .m-row .fav-star{order:1;margin-left:auto;font-size:1rem;padding:2px 4px;flex:0 0 auto}
+}
+</style>
+</head>
 <body>
 <script>try{if(sessionStorage.getItem("fl_splash"))document.documentElement.classList.add("nosplash");else sessionStorage.setItem("fl_splash","1")}catch(e){}</script><div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
 <div id="goal-toasts" aria-live="polite"></div>
@@ -733,7 +752,7 @@ h1{will-change:opacity}
         </div>
     </section>
 
-    <footer><div class="container"><nav class="legal-links" aria-label="Informations légales"><a href="mentions-legales.html">Mentions légales</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></nav><p>FootLive Pro © 2026 — <span id="updated"></span></p></div></footer>
+    <footer><div class="container"><nav class="legal-links" aria-label="Informations légales"><a href="a-propos.html">À propos</a><a href="mentions-legales.html">Mentions légales</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></nav><p>FootLive Pro © 2026 — <span id="updated"></span></p></div></footer>
 
     <script>
         // ===== CONFIGURATION =====
@@ -1132,7 +1151,7 @@ h1{will-change:opacity}
             const rk = m => m.gh ? 3 : !m.tsdb ? 0 : /^n/.test(String(m.id)) ? 1 : 2;   // priorité : ESPN > 365Scores > TheSportsDB > GitHub
             const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away), th: _tok(m.home), ta: _tok(m.away) }; _keyMemo.set(m, v); } return v; };
             const same = (x, y) => !!x && !!y && (x === y || x.includes(y) || y.includes(x));
-            const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.includes(w));
+            const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.some(v => w === v || (Math.min(w.length, v.length) >= 6 && (w.startsWith(v) || v.startsWith(w)))));   // « Hamburger SV » / « Hamburg SV » : un mot qui commence par l'autre (6 lettres mini)
             const s = ents.flatMap(e => e[1]).filter(m => !isBlockedMatch(m)).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
             const keep = [], idx = new Map(), ids = new Map();
             const addIdx = (km, i) => { km.th.concat(km.ta, [km.h, km.a]).forEach(w => { if (!w) return; let l = idx.get(w); if (!l) { l = []; idx.set(w, l); } l.push(i); }); };
@@ -2825,5 +2844,26 @@ h1{will-change:opacity}
 </script>
 <script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
+<script>
+/* Mobile : le score est affiché en face de chaque équipe (sépare « 1 - 0 » en deux valeurs, sans changer l'affichage sur ordinateur) */
+(function(){
+  var re=/^\s*(\d+)\s*-\s*(\d+)\s*$/;
+  function mk(c,t){var e=document.createElement('span');e.className=c;e.textContent=t;return e;}
+  function split(el){
+    if(el.dataset.sp)return; el.dataset.sp='1';
+    var t=el.textContent,m=re.exec(t); el.textContent='';
+    if(m){el.appendChild(mk('s1',m[1]));el.appendChild(mk('sep',' - '));el.appendChild(mk('s2',m[2]));}
+    else{t=t.trim();el.appendChild(mk(t.toLowerCase()==='vs'?'vs':'lbl',t));}
+  }
+  function scan(n){
+    if(n.nodeType!==1)return;
+    if(n.classList.contains('m-score'))split(n);
+    var l=n.querySelectorAll?n.querySelectorAll('.m-score:not([data-sp])'):[];
+    for(var i=0;i<l.length;i++)split(l[i]);
+  }
+  new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++)scan(a[j]);}}).observe(document.body,{childList:true,subtree:true});
+  scan(document.body);
+})();
+</script>
 </body>
 </html>
