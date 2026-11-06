@@ -644,6 +644,12 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 #apercu-matchs.open{max-height:none;overflow:visible}
 #apercu-matchs.open::before{display:none}
 #apercu-matchs.open::after{content:"▲ Réduire";position:static;display:block;padding:.6rem 0 0}
+#tv-seo{position:relative;max-height:220px;overflow:hidden;cursor:pointer}
+#tv-seo::before{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(transparent,var(--bg-dark,#0a0f1e));pointer-events:none}
+#tv-seo::after{content:"▼ Afficher tout";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:.75rem;font-weight:700;color:var(--accent)}
+#tv-seo.open{max-height:none;overflow:visible}
+#tv-seo.open::before{display:none}
+#tv-seo.open::after{content:"▲ Réduire";position:static;display:block;padding:.6rem 0 0}
 </style>
 <style id="perf-css">
 /* Perf : animations composées (transform/opacity) au lieu de box-shadow/width/height/filter */
@@ -737,7 +743,9 @@ h1{will-change:opacity}
 .tv-time{flex:0 0 64px;font-weight:800;font-size:1.1rem;color:var(--accent);display:flex;flex-direction:column;line-height:1.2}
 .tv-time small{font-size:.65rem;font-weight:700;color:var(--text-muted)}.tv-time .tv-live{color:var(--live-red)}
 .tv-body{flex:1;min-width:0}
-.tv-lg{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-lg{display:flex;align-items:center;gap:6px;font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-lg span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tv-lg .lg-logo{width:16px;height:16px;flex:0 0 auto;object-fit:contain;margin:0}
 .tv-teams{display:flex;align-items:center;gap:10px}
 .tv-tm{flex:1;display:flex;align-items:center;gap:8px;min-width:0;font-weight:700;font-size:.9rem}.tv-tm.r{justify-content:flex-end;text-align:right}
 .tv-tm span:not(.m-ph){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2526,6 +2534,35 @@ h1{will-change:opacity}
       return { k, label, sub: c.sub, ini: c.ini, col: c.col };
     });
   }
+  // ---------- Chaînes TV : source Kooora (via un proxy Cloudflare Worker, voir kooora-worker/) ----------
+  const KOOORA_TV_URL = "";   // ← colle ici l'adresse du Worker, ex. "https://kooora-tv.ton-compte.workers.dev/tv" (vide = anciennes chaînes)
+  const KR_COMP = [/دوري ابطال اوروبا/, /الدوري الانجليزي الممتاز/, /الدوري الاسباني/, /الدوري الايطالي/, /الدوري الالماني/, /الدوري الفرنسي/, /الدوري الاوروبي/, /المؤتمر الاوروبي/, /الدوري البرتغالي/, /الدوري المغربي/];   // même ordre que MAIN10
+  const krN = s => String(s || "").replace(/[\u064B-\u065F\u0670]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").trim();
+  const krCache = {};
+  function krBuild(list) {   // groupe par (compétition, heure) ; les chaînes ne sont retenues que si elles sont identiques pour tout le groupe
+    const G = new Map();
+    list.forEach(e => {
+      const i = KR_COMP.findIndex(r => r.test(krN(e.comp))), t = String(e.time || "").match(/^(\d{1,2}):(\d{2})$/); if (i < 0 || !t) return;
+      const k = i + "|" + (+t[1] * 60 + +t[2]), g = G.get(k) || { sigs: new Set(), ch: [] };
+      g.sigs.add((e.channels || []).map(c => c.name).sort().join("|")); if ((e.channels || []).length) g.ch = e.channels; G.set(k, g);
+    });
+    G.forEach(g => { g.ok = g.sigs.size === 1 && g.ch.length > 0; });
+    return G;
+  }
+  function krLoad(day) {
+    if (!KOOORA_TV_URL || day in krCache) return; krCache[day] = null;
+    fetch(KOOORA_TV_URL + (KOOORA_TV_URL.includes("?") ? "&" : "?") + "date=" + day).then(r => r.ok ? r.json() : Promise.reject()).then(j => { krCache[day] = krBuild(j.matches || []); renderTVIfOpen(); }).catch(() => { krCache[day] = false; });
+  }
+  const krMin = (m, off) => { const d = new Date(m.start); return ((d.getUTCHours() * 60 + d.getUTCMinutes() + off) % 1440 + 1440) % 1440; };
+  function krOffset(G, L) {   // Kooora affiche l'heure dans son fuseau : on retient le décalage qui fait coïncider le plus de matchs
+    let best = null, sc = 0;
+    for (let off = -720; off <= 840; off += 30) { const n = L.filter(m => G.has(mp(m) + "|" + krMin(m, off))).length; if (n > sc) { sc = n; best = off; } }
+    return best;
+  }
+  function tvChannelsK(m, G, off) {
+    const g = G.get(mp(m) + "|" + krMin(m, off)); if (!g || !g.ok) return null;
+    return g.ch.map(c => ({ k: c.name, label: c.name, sub: "Kooora", ini: (c.name.trim()[0] || "?").toUpperCase(), col: "hsl(" + hue(c.name) + ",55%,38%)" }));
+  }
   let tvDay = "";
   function tvDays() {
     const t = new Date(); return [0, 1, 2, 3, 4, 5, 6].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return { k: d.toLocaleDateString("sv-SE"), lb: o === 0 ? "AUJ." : o === 1 ? "DEM." : d.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "").toUpperCase(), n: d.getDate(), o }; });
@@ -2536,14 +2573,15 @@ h1{will-change:opacity}
     strip.innerHTML = days.map(d => '<button type="button" data-day="' + d.k + '" class="' + (d.k === tvDay ? "on" : "") + (d.o === 0 ? " today" : "") + '"><small>' + d.lb + '</small><b>' + d.n + '</b></button>').join("");
     const now = Date.now();
     const L = all().filter(m => tvMain(m) && !m.off && new Date(m.start).toLocaleDateString("sv-SE") === tvDay).sort((a, b) => a.start.localeCompare(b.start) || mp(a) - mp(b));
+    krLoad(tvDay); const KG = krCache[tvDay] || null, KO = KG ? krOffset(KG, L) : null;
     if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match important ce jour-là." : "Chargement du programme…") + '</div>'; return; }
     const crest = (l, n) => l ? '<img src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="22" height="22" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     box.innerHTML = L.map(m => {
       const live = m.state === "in", done = m.state === "post";
       const mid = m.state === "pre" ? '<span class="tv-vs">vs</span>' : '<span class="tv-sc' + (live ? " live" : "") + '">' + (m.h ?? 0) + ' - ' + (m.a ?? 0) + '</span>';
-      const chs = tvChannels(m).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
+      const chs = ((KO !== null && tvChannelsK(m, KG, KO)) || tvChannels(m)).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
       return '<div class="tv-row' + (live ? " live" : "") + (done ? " done" : "") + '"><div class="tv-time">' + esc(hhmm(m.start)) + (live ? '<small class="tv-live">● ' + esc(m.label || "DIRECT") + '</small>' : done ? '<small>Terminé</small>' : '') + '</div>' +
-        '<div class="tv-body"><div class="tv-lg">' + esc(lgDisp(m.lg, [m])) + '</div><div class="tv-teams"><div class="tv-tm">' + crest(m.hl, m.home) + '<span>' + esc(m.home) + '</span></div>' + mid + '<div class="tv-tm r"><span>' + esc(m.away) + '</span>' + crest(m.al, m.away) + '</div></div></div>' +
+        '<div class="tv-body"><div class="tv-lg">' + lgIcon([m]) + '<span>' + esc(lgDisp(m.lg, [m])) + '</span></div><div class="tv-teams"><div class="tv-tm">' + crest(m.hl, m.home) + '<span>' + esc(m.home) + '</span></div>' + mid + '<div class="tv-tm r"><span>' + esc(m.away) + '</span>' + crest(m.al, m.away) + '</div></div></div>' +
         '<div class="tv-ch">' + chs + '</div></div>';
     }).join("");
   }
@@ -3561,7 +3599,7 @@ h1{will-change:opacity}
   if (!comp) a.addEventListener("click", function (e) { e.preventDefault(); if (window.showPage) window.showPage("scores"); window.scrollTo({ top: 0 }); });
 })();
 
-document.addEventListener("click", function (e) { var s = e.target.closest && e.target.closest("#apercu-matchs"); if (s && !e.target.closest("a")) s.classList.toggle("open"); });
+document.addEventListener("click", function (e) { var s = e.target.closest && e.target.closest("#apercu-matchs,#tv-seo"); if (s && !e.target.closest("a")) s.classList.toggle("open"); });
 // Aperçu SEO des matchs : si l'instantané intégré à la page date d'un autre jour, il est reconstruit avec les matchs du jour
 (function () {
   var pd = function (d) { return new Date(d).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" }); };
