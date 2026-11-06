@@ -56,6 +56,11 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); line-height: 1.5; min-height: 100vh; }
         .container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
 
+        /* ===== Publicités (hauteurs réservées = pas de CLS) ===== */
+        .ad-slot { display:flex; flex-direction:column; align-items:center; justify-content:center; margin:14px auto; max-width:100%; overflow:hidden; }
+        .ad-slot small { font-size:.62rem; color:var(--text-muted); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; opacity:.7; }
+        .ad-320 { min-height:70px; } .ad-300 { min-height:270px; } .ad-native { min-height:120px; }
+
         header { background: linear-gradient(90deg, #0a0f1e 0%, #1a2332 100%); border-bottom: 1px solid var(--border); padding: 1rem 0; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
         .header-content { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
         h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; line-height: 1.1; color: #dcfce7; text-shadow: 0 0 6px #22c55e, 0 0 16px #22c55e, 0 0 34px #22c55e; animation: neon-flicker 3s infinite; }
@@ -791,6 +796,18 @@ h1{will-change:opacity}
     </header>
     <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
+    <div class="container"><div class="ad-slot ad-320" aria-label="Publicité"><small>Publicité</small>
+<script>
+  atOptions = {
+    'key' : '724d608874c57ab226af0bb850e5a691',
+    'format' : 'iframe',
+    'height' : 50,
+    'width' : 320,
+    'params' : {}
+  };
+</script>
+<script src="https://czernik.org/22/724d608874c57ab226af0bb850e5a691"></script>
+    </div></div>
     <main class="container">
     <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
     <div id="scores-view">
@@ -834,6 +851,18 @@ h1{will-change:opacity}
     <div id="radio-mini" role="region" aria-label="Lecteur radio"></div>
 
     </main>
+    <div class="container"><div class="ad-slot ad-300" aria-label="Publicité"><small>Publicité</small>
+<script>
+  atOptions = {
+    'key' : '979f5cfaa63c2ae055449968d13984a3',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://czernik.org/22/979f5cfaa63c2ae055449968d13984a3"></script>
+    </div></div>
     <section class="container" aria-label="Présentation de FootLive Pro" style="margin:2rem auto 1rem;padding:1rem 16px;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">
         <h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">FootLive Pro : scores de football en direct, classements, actualités et radios sport</h2>
         <p>FootLive Pro est un site gratuit pour suivre le football du monde entier en temps réel. Retrouvez les scores en direct, les résultats et le programme des matchs de la Ligue 1, de la Premier League, de LaLiga, de la Serie A, de la Bundesliga, de la Ligue des champions, de la Ligue Europa et de nombreux autres championnats.</p>
@@ -853,6 +882,10 @@ h1{will-change:opacity}
         </div>
     </section>
 
+    <div class="container"><div class="ad-slot ad-native" aria-label="Publicité"><small>Publicité</small>
+<script async="async" data-cfasync="false" src="https://czernik.org/21/fdd3f8d852953abee4729d4218340f73"></script>
+<div id="container-fdd3f8d852953abee4729d4218340f73"></div>
+    </div></div>
     <footer><div class="container"><nav class="legal-links" aria-label="Informations légales"><a href="mentions-legales.html">Mentions légales</a><a href="confidentialite.html">Confidentialité</a><a href="contact.html">Contact</a></nav><p>FootLive Pro © 2026 — <span id="updated"></span></p></div></footer>
 
     <script>
@@ -3680,5 +3713,6 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
 </script>
 <script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
+<script data-cfasync="false" src="https://czernik.org/14/6067f5f267c416da7bb596e2d95852ac"></script>
 </body>
 </html>
