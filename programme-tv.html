@@ -2603,7 +2603,7 @@ body{overflow-x:clip}
   }
   function tvAllChannels(m, G) {   // uniquement les chaînes réellement annoncées (365Scores m.tv et TheSportsDB) ; Arryadia pour la Botola Pro ; aucune chaîne « par défaut » ni supposée
     const ko = koFind(m);   // kooora : liste complète et fiable des chaînes ; null = indisponible → chaînes fixes (beIN PL/LaLiga/Ligue 1, Arryadia)
-    const out = (ko ? [] : tvChannels(m)).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col }));
+    const out = ((ko && ko.length) ? [] : tvChannels(m)).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col }));
     (ko || []).forEach(n => { const x = tvNorm(n, ""); if (tvKey(x.label) && !out.some(o => tvSig(o) === tvSig(x))) out.push(x); });
     const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, "Diffusion"));
     own.concat(tvChannelsT(m, G) || []).forEach(x => {
@@ -2701,7 +2701,8 @@ body{overflow-x:clip}
       const mid = m.state === "pre" ? "vs" : (m.h ?? 0) + " - " + (m.a ?? 0);
       const when = live ? '<span class="m-live">● ' + esc(m.label || "DIRECT") + '</span>' : '<b class="tv-h">' + esc(hhmm(m.start)) + '</b>' + (done ? ' <small>Terminé</small>' : '');
       const chs = tvAllChannels(m, KG).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
-      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="m-row' + (live ? " live" : "") + '"><div class="m-date">' + when + '</div><div class="m-home">' + esc(m.home) + crest(m.hl, m.home) + '</div><div class="m-score' + (m.state === "pre" ? " next" : "") + '">' + mid + '</div><div class="m-away">' + crest(m.al, m.away) + esc(m.away) + '</div></div>' + (chs ? '<div class="tv-ch">' + chs + '</div>' : '') + '</div>';
+      const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
+      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="m-row' + (live ? " live" : "") + '"><div class="m-date">' + when + '</div><div class="m-home">' + esc(m.home) + crest(m.hl, m.home) + '</div><div class="m-score' + (m.state === "pre" ? " next" : "") + '">' + mid + '</div><div class="m-away">' + crest(m.al, m.away) + esc(m.away) + '</div></div>' + (chs ? '<div class="tv-ch">' + chs + '</div>' : '') + dbg + '</div>';
     };
     box.innerHTML = grouped(L, rowFn, false, true);
   }
@@ -3776,7 +3777,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
   } catch (e) { }
 })();
 </script>
-<script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
+<script>(function(){try{var V="2026-11-06b";if(localStorage.getItem("fl_swv")===V)return;localStorage.setItem("fl_swv",V);var p=[];if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n)}))}));Promise.all(p).then(function(){location.reload()})}catch(e){}})();</script><script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
 <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Choix des cookies publicitaires" hidden>
 <div class="cb-in"><p>FootLive Pro est gratuit grâce à la publicité. Nos partenaires publicitaires peuvent utiliser des cookies pour afficher des annonces. Acceptez-vous ? Vous pouvez changer d’avis à tout moment via « Gérer les cookies » en bas de page. <a href="confidentialite.html">En savoir plus</a></p>
