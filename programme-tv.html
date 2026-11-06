@@ -2565,7 +2565,7 @@ body{overflow-x:clip}
   }
   // ---------- Chaînes TV : source TheSportsDB (programme TV par date, directement depuis le navigateur, sans proxy) ----------
   const TSDB_TV_URL = "https://www.thesportsdb.com/api/v1/json/3/eventstv.php";
-  const TV_CTRY = { Spain: "Espagne", Italy: "Italie", France: "France", England: "Angleterre", "United Kingdom": "Royaume-Uni", Germany: "Allemagne", Portugal: "Portugal", Netherlands: "Pays-Bas", Belgium: "Belgique", Switzerland: "Suisse", Austria: "Autriche", Greece: "Grèce", Turkey: "Turquie", Europe: "Europe" };   // pays dont on affiche les chaînes (Espagne et Italie d'abord, puis l'Europe), toutes ensemble
+  const TV_CTRY = { "Middle East": "MENA", MENA: "MENA", Arabia: "MENA", Morocco: "Maroc", Algeria: "Algérie", Tunisia: "Tunisie", Egypt: "Égypte", "Saudi Arabia": "Arabie saoudite", "United Arab Emirates": "Émirats", Qatar: "Qatar", Spain: "Espagne", Italy: "Italie", France: "France", England: "Angleterre", "United Kingdom": "Royaume-Uni", Germany: "Allemagne", Portugal: "Portugal", Netherlands: "Pays-Bas", Belgium: "Belgique", Switzerland: "Suisse", Austria: "Autriche", Greece: "Grèce", Turkey: "Turquie", Europe: "Europe", "United States": "États-Unis", USA: "États-Unis", Canada: "Canada", Brazil: "Brésil", Mexico: "Mexique", Argentina: "Argentine", Colombia: "Colombie", Australia: "Australie", India: "Inde", Nigeria: "Nigéria", "South Africa": "Afrique du Sud", Poland: "Pologne", Sweden: "Suède", Norway: "Norvège", Denmark: "Danemark", Ireland: "Irlande", Israel: "Israël", Africa: "Afrique" };   // pays dont on affiche les chaînes : MENA/Maghreb d'abord, puis Espagne, Italie, Europe… toutes ensemble
   const tvKey = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|afc|sc|ac|as|ssc|cd|ud|rc|fk|sk|the)\b/g, " ").replace(/[^a-z0-9]/g, "");
   const tvSame = (a, b) => { a = tvKey(a); b = tvKey(b); return !!a && !!b && (a === b || (Math.min(a.length, b.length) >= 4 && (a.includes(b) || b.includes(a)))); };
   const tvTeams = e => { if (e.strHomeTeam && e.strAwayTeam) return [e.strHomeTeam, e.strAwayTeam]; const x = String(e.strEvent || "").split(/\s+vs\.?\s+|\s+v\s+|\s+-\s+/i); return x.length === 2 ? x : null; };
@@ -2574,26 +2574,61 @@ body{overflow-x:clip}
     if (day in tvCache) return; tvCache[day] = null;
     fetch(TSDB_TV_URL + "?d=" + day + "&s=Soccer").then(r => r.ok ? r.json() : Promise.reject()).then(j => { tvCache[day] = (j && j.tvevents) || []; renderTVIfOpen(); }).catch(() => { tvCache[day] = false; });
   }
-  function tvChannelsT(m, G) {   // toutes les chaînes annoncées pour ce match, tous pays confondus (Espagne, Italie, France, Europe… d'abord) ; null = rien trouvé
+  // Marques : couleur du rond (initiale) pour les chaînes les plus connues
+  const TV_BRAND = [[/movistar/i, "#019df4"], [/dazn/i, "#3a3a3a"], [/sky/i, "#0b5fb4"], [/canal/i, "#111111"], [/tnt/i, "#e4002b"], [/espn/i, "#c8102e"], [/supersport/i, "#e30613"], [/paramount|cbs/i, "#0064ff"], [/peacock|nbc/i, "#6b3fa0"], [/prime|amazon/i, "#00a8e1"], [/ligue 1/i, "#1a237e"], [/sport ?tv/i, "#e11d48"], [/arryadia|al kass|alkass|ssc|abu dhabi|dubai/i, "#16803c"], [/eurosport/i, "#0a6cff"], [/viaplay/i, "#6a1bff"], [/sportsnet|tsn/i, "#d6001c"], [/fox/i, "#0a3d91"], [/globo|sportv/i, "#00a651"], [/telemundo|univision/i, "#005bbb"]];
+  // Chaînes habituelles par compétition (indice MAIN10), affichées avec « Habituel » seulement si la source ne les annonce pas
+  const TV_USUAL = {
+    0: [["Movistar Liga de Campeones", "Espagne"], ["Canal+", "France"], ["Sky Sport", "Italie"], ["TNT Sports", "Royaume-Uni"], ["Paramount+", "États-Unis"]],
+    1: [["Sky Sports", "Royaume-Uni"], ["TNT Sports", "Royaume-Uni"], ["Peacock", "États-Unis"]],
+    2: [["Movistar LaLiga", "Espagne"], ["DAZN LaLiga", "Espagne"], ["ESPN+", "États-Unis"]],
+    3: [["DAZN", "Italie"], ["Sky Sport", "Italie"], ["Paramount+", "États-Unis"]],
+    4: [["Sky Sport", "Allemagne"], ["DAZN", "Allemagne"]],
+    5: [["Ligue 1+", "France"], ["beIN SPORTS", "France"]],
+    6: [["Movistar Plus+", "Espagne"], ["TNT Sports", "Royaume-Uni"], ["Paramount+", "États-Unis"]],
+    7: [["Movistar Plus+", "Espagne"], ["TNT Sports", "Royaume-Uni"], ["Paramount+", "États-Unis"]]
+  };
+  function tvNorm(raw, sub) {   // nom propre + sous-titre + couleur ; beIN : numéro (1, 2, 3…), MAX, XTRA lus dans toutes les écritures (« beIN Sports MENA 2 », « beIN SPORTS HD1 »…)
+    let n = String(raw || "").replace(/\s+/g, " ").trim(), s = sub || "";
+    if (/bein/i.test(n)) {
+      const num = (n.match(/\d/) || [])[0];
+      const label = "beIN SPORTS" + (/\bmax\b/i.test(n) ? " MAX" : "") + (/\bxtra\b/i.test(n) ? " XTRA" : "") + (/news/i.test(n) ? " NEWS" : "") + (num ? " " + num : "");
+      if (/mena|arab|middle/i.test(n)) s = "MENA"; else if (/fran/i.test(n)) s = "France"; else if (/turk|türk/i.test(n)) s = "Turquie"; else if (/\b(usa|us)\b/i.test(n)) s = "États-Unis";
+      return { k: label, label, sub: s || "MENA", ini: "b", col: "#7b2cbf", bein: true };
+    }
+    n = n.replace(/^movistar\s*(\+|plus\+?)\s*/i, "Movistar ").trim();
+    const b = TV_BRAND.find(x => x[0].test(n));
+    return { k: n, label: n, sub: s, ini: (n[0] || "?").toUpperCase(), col: b ? b[1] : "hsl(" + hue(n) + ",55%,38%)" };
+  }
+  const tvSig = x => tvKey(x.label) + "|" + tvKey(x.sub);
+  function tvChannelsT(m, G) {   // toutes les chaînes annoncées par TheSportsDB pour ce match, tous pays (MENA, Espagne, Italie, France, Europe… d'abord) ; null = rien trouvé
     if (!G || !G.length) return null;
     const ev = G.filter(e => { const t = tvTeams(e); return t && e.strChannel && tvSame(t[0], m.home) && tvSame(t[1], m.away); }), out = [], seen = new Set(), order = Object.keys(TV_CTRY);
     const rank = c => { const i = order.indexOf(c); return i < 0 ? 99 : i; };
     ev.sort((x, y) => rank(x.strCountry) - rank(y.strCountry) || String(x.strCountry).localeCompare(String(y.strCountry)));
-    ev.forEach(e => String(e.strChannel).split(",").map(n => n.trim()).filter(Boolean).forEach(n => {
-      const k = tvKey(n); if (seen.has(k)) return; seen.add(k);
-      out.push({ k: n, label: n, sub: TV_CTRY[e.strCountry] || e.strCountry || "", ini: (n[0] || "?").toUpperCase(), col: "hsl(" + hue(n) + ",55%,38%)" });
+    ev.forEach(e => String(e.strChannel).split(/[,;|]/).map(n => n.trim()).filter(Boolean).forEach(n => {
+      const x = tvNorm(n, TV_CTRY[e.strCountry] || e.strCountry || ""), k = tvSig(x); if (!tvKey(x.label) || seen.has(k)) return; seen.add(k); out.push(x);
     }));
     return out.length ? out : null;
   }
-  function tvAllChannels(m, G) {   // chaînes habituelles, puis toutes celles annoncées par 365Scores (m.tv) et TheSportsDB, sans doublon
-    const out = tvChannels(m).slice(), bk = out.map(c => tvKey(c.label));
-    const mk = (n, sub) => ({ k: n, label: n, sub, ini: (n[0] || "?").toUpperCase(), col: "hsl(" + hue(n) + ",55%,38%)" });
-    const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,]\s*/)).map(n => n.trim()).filter(Boolean).map(n => mk(n, "Diffusion"));
+  function tvAllChannels(m, G) {   // chaîne principale (avec son numéro), puis celles de 365Scores (m.tv) et TheSportsDB, puis les chaînes habituelles de la compétition, sans doublon
+    const out = tvChannels(m).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col, main: true }));
+    const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, /bein/i.test(n) ? "MENA" : "Diffusion"));
     own.concat(tvChannelsT(m, G) || []).forEach(x => {
-      const k = tvKey(x.label); if (!k) return;
-      if (out.some(o => tvKey(o.label) === k)) return;
-      if (x.sub === "Diffusion" && bk.some(b => k.startsWith(b))) return;   // déjà affichée (ex. beIN SPORTS 2)
+      if (!tvKey(x.label)) return;
+      if (x.bein && x.sub === "MENA") {   // la beIN principale prend le numéro annoncé (beIN SPORTS 2…)
+        const mi = out.findIndex(o => o.main && o.k === "bein");
+        if (mi >= 0 && !/\d/.test(out[mi].label) && /\d/.test(x.label)) { out[mi].label = x.label; out[mi].sub = "MENA"; return; }
+      }
+      if (out.some(o => tvSig(o) === tvSig(x))) return;
+      const dI = out.findIndex(o => o.sub === "Diffusion" && tvKey(o.label) === tvKey(x.label));
+      if (dI >= 0 && x.sub !== "Diffusion") { out[dI].sub = x.sub; return; }   // même chaîne : on garde le pays annoncé
+      if (x.sub === "Diffusion" && out.some(o => tvKey(o.label) === tvKey(x.label))) return;
       out.push(x);
+    });
+    out.forEach(o => { if (o.main && o.k === "bein" && !/\d/.test(o.label)) o.sub = "MENA · n° non annoncé"; });
+    (TV_USUAL[mp(m)] || []).forEach(([n, c]) => {
+      const x = tvNorm(n, "Habituel · " + c);
+      if (!out.some(o => tvKey(o.label) === tvKey(x.label) && (o.sub === c || o.sub.indexOf(c) >= 0))) out.push(x);
     });
     return out;
   }
