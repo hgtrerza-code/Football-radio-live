@@ -780,10 +780,16 @@ if(!window.__ads)document.documentElement.className+=' ads-off';})();
 /* Mobile : une équipe par ligne (nom complet, police normale), score à droite — plus de nom coupé */
 body{overflow-x:clip}
 @media (max-width:600px){
-  .m-row,.m-wrap .m-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"d d" "h s" "a s";gap:6px 10px;padding:.7rem .8rem;font-size:.95rem;align-items:center}
+  .m-row,.m-wrap .m-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"d d" "h h1" "a a1";gap:6px 10px;padding:.7rem .8rem;font-size:.95rem;align-items:center}
   .m-date{grid-area:d;display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;font-size:.78rem}
   .m-home{grid-area:h}.m-away{grid-area:a}
-  .m-score{grid-area:s;align-self:center;min-width:60px;font-size:1.1rem;padding:6px 10px}
+  .m-score{display:contents}
+  .m-score .sep,.m-score .vs{display:none}
+  .m-score .s1,.m-score .s2{align-self:center;justify-self:end;min-width:38px;text-align:center;font-weight:800;font-size:1.1rem;line-height:1.2;padding:4px 9px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:var(--accent)}
+  .m-score .s1{grid-area:h1}.m-score .s2{grid-area:a1}
+  .m-score .lbl{grid-row:2/4;grid-column:2;align-self:center;font-size:.75rem;font-weight:700;color:var(--text-muted);text-align:center}
+  .m-row.live .m-score .s1,.m-row.live .m-score .s2{box-shadow:0 0 0 1px rgba(46,229,157,.25),0 0 12px rgba(46,229,157,.18)}
+  .goal-now .m-score .s1,.goal-now .m-score .s2{animation:goal-pop .6s ease-in-out infinite alternate}
   .m-home,.m-away{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:8px;min-width:0;font-size:.95rem;font-weight:600;line-height:1.25;overflow-wrap:break-word;word-break:normal;hyphens:none}
   .m-home .m-logo,.m-away .m-logo,.m-home .m-ph,.m-away .m-ph{order:-1;width:22px;height:22px;flex:0 0 auto;margin:0}
   .m-row .fav-star{order:1;margin-left:auto;font-size:1rem;padding:2px 4px;flex:0 0 auto}
@@ -3737,6 +3743,27 @@ document.getElementById('cb-yes').onclick=function(){set('yes');location.reload(
 document.getElementById('cb-no').onclick=function(){var was=window.__ads;set('no');b.hidden=true;if(was)location.reload();};
 var r=document.getElementById('cookie-reset');
 if(r)r.onclick=function(e){e.preventDefault();b.hidden=false;};
+})();
+</script>
+<script>
+/* Mobile : le score est affiché en face de chaque équipe (sépare « 1 - 0 » en deux valeurs, sans changer l'affichage sur ordinateur) */
+(function(){
+  var re=/^\s*(\d+)\s*-\s*(\d+)\s*$/;
+  function mk(c,t){var e=document.createElement('span');e.className=c;e.textContent=t;return e;}
+  function split(el){
+    if(el.dataset.sp)return; el.dataset.sp='1';
+    var t=el.textContent,m=re.exec(t); el.textContent='';
+    if(m){el.appendChild(mk('s1',m[1]));el.appendChild(mk('sep',' - '));el.appendChild(mk('s2',m[2]));}
+    else{t=t.trim();el.appendChild(mk(t.toLowerCase()==='vs'?'vs':'lbl',t));}
+  }
+  function scan(n){
+    if(n.nodeType!==1)return;
+    if(n.classList.contains('m-score'))split(n);
+    var l=n.querySelectorAll?n.querySelectorAll('.m-score:not([data-sp])'):[];
+    for(var i=0;i<l.length;i++)split(l[i]);
+  }
+  new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++)scan(a[j]);}}).observe(document.body,{childList:true,subtree:true});
+  scan(document.body);
 })();
 </script>
 </body>
