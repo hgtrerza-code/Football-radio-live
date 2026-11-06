@@ -2582,7 +2582,7 @@ body{overflow-x:clip}
   }
   // ---------- Programme TV : matchs importants + chaîne qui diffuse ----------
   // Chaîne principale par compétition (index = MAIN10) : source beIN SPORTS MENA, Arryadia pour la Botola Pro
-  const TV_BY_LG = { 9: ["arryadia"] };   // seule chaîne fixe : Arryadia (Botola Pro) ; les autres viennent des sources
+  const TV_BY_LG = { 1: ["bein"], 2: ["bein"], 5: ["bein"], 9: ["arryadia"] };   // fixes : beIN MENA pour Premier League, LaLiga et Ligue 1 (confirmé par le guide bein.com) ; Arryadia pour la Botola Pro ; les autres compétitions : seulement ce que les sources annoncent
   const TV_CH = { bein: { name: "beIN SPORTS", ini: "b", col: "#7b2cbf", sub: "MENA" }, arryadia: { name: "Arryadia", ini: "A", col: "#16803c", sub: "Maroc · gratuit" }, sporttv: { name: "Sport TV", ini: "S", col: "#e11d48", sub: "Portugal" } };
   function tvChannels(m) {
     const keys = TV_BY_LG[mp(m)] || [], src = Array.isArray(m.tv) ? m.tv.join(" | ") : "";
@@ -2633,6 +2633,10 @@ body{overflow-x:clip}
     const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, "Diffusion"));
     own.concat(tvChannelsT(m, G) || []).forEach(x => {
       if (!tvKey(x.label)) return;
+      if (x.bein) {   // la beIN fixe prend le numéro annoncé (beIN SPORTS 2…)
+        const mi = out.findIndex(o => o.k === "bein");
+        if (mi >= 0) { if (!/\d/.test(out[mi].label) && /\d/.test(x.label)) { out[mi].label = x.label; out[mi].k = x.label; return; } if (tvKey(out[mi].label) === tvKey(x.label)) return; }
+      }
       if (out.some(o => tvSig(o) === tvSig(x))) return;
       const dI = out.findIndex(o => o.sub === "Diffusion" && tvKey(o.label) === tvKey(x.label));
       if (dI >= 0 && x.sub !== "Diffusion") { out[dI].sub = x.sub; return; }   // même chaîne : on garde le pays annoncé
