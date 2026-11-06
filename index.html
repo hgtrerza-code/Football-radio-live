@@ -628,7 +628,7 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 @media (max-width:600px){
   .m-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;padding:.6rem .55rem;font-size:.8rem}
   .m-date{grid-column:1/-1}
-  .m-home,.m-away{display:flex;align-items:center;gap:5px;min-width:0;line-height:1.25;overflow-wrap:break-word}
+  .m-home,.m-away{display:flex;align-items:center;gap:5px;min-width:0;line-height:1.25;overflow-wrap:anywhere}
   .m-home{justify-content:flex-end;text-align:right}
   .m-away{justify-content:flex-start;text-align:left}
   .m-home .m-logo,.m-away .m-logo{flex:0 0 auto;width:20px;height:20px;margin:0}
@@ -1273,7 +1273,7 @@ if(!window.__ads)document.documentElement.className+=' ads-off';})();
             const rk = m => m.gh ? 3 : !m.tsdb ? 0 : /^n/.test(String(m.id)) ? 1 : 2;   // priorité : ESPN > 365Scores > TheSportsDB > GitHub
             const kk = m => { let v = _keyMemo.get(m); if (!v || v.h0 !== m.home || v.a0 !== m.away) { v = { h0: m.home, a0: m.away, h: nk(m.home), a: nk(m.away), th: _tok(m.home), ta: _tok(m.away) }; _keyMemo.set(m, v); } return v; };
             const same = (x, y) => !!x && !!y && (x === y || x.includes(y) || y.includes(x));
-            const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.includes(w));
+            const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.some(v => w === v || (Math.min(w.length, v.length) >= 6 && (w.startsWith(v) || v.startsWith(w)))));   // « Hamburger SV » / « Hamburg SV » : un mot qui commence par l'autre (6 lettres mini)
             const s = ents.flatMap(e => e[1]).filter(m => !isBlockedMatch(m)).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
             const keep = [], idx = new Map(), ids = new Map();
             const addIdx = (km, i) => { km.th.concat(km.ta, [km.h, km.a]).forEach(w => { if (!w) return; let l = idx.get(w); if (!l) { l = []; idx.set(w, l); } l.push(i); }); };
