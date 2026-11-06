@@ -755,7 +755,7 @@ h1{will-change:opacity}
 .tv-card .m-row:has(+ .tv-ch){border-bottom-left-radius:0;border-bottom-right-radius:0}
 .tv-card .m-row + .tv-ch{background:var(--bg-card);padding:2px .75rem 10px;border-radius:0 0 14px 14px}
 .tv-badge{display:inline-flex;align-items:center;gap:7px;padding:3px 10px 3px 3px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);font-weight:800;font-size:.72rem;color:#fff;white-space:nowrap}
-.tv-badge i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.7rem;font-weight:900;color:#fff}
+.tv-badge i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.7rem;font-weight:900;color:#fff;position:relative;overflow:hidden;flex:none}.tv-badge i img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:2px;box-sizing:border-box}
 .tv-badge span{display:flex;flex-direction:column;line-height:1.15}.tv-badge small{font-size:.6rem;font-weight:600;color:var(--text-muted)}
 #tv-days{gap:6px;padding:2px 2px 4px}
 #tv-days button{flex:1 0 48px;padding:5px 0;border-radius:12px}
@@ -2604,7 +2604,7 @@ body{overflow-x:clip}
   function tvAllChannels(m, G) {   // uniquement les chaînes réellement annoncées (365Scores m.tv et TheSportsDB) ; Arryadia pour la Botola Pro ; aucune chaîne « par défaut » ni supposée
     const ko = koFind(m);   // kooora : liste complète et fiable des chaînes ; null = indisponible → chaînes fixes (beIN PL/LaLiga/Ligue 1, Arryadia)
     const out = ((ko && ko.length) ? [] : tvChannels(m)).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col }));
-    (ko || []).forEach(n => { const x = tvNorm(n, ""); if (tvKey(x.label) && !out.some(o => tvSig(o) === tvSig(x))) out.push(x); });
+    (ko || []).forEach(n => { const x = tvNorm(n, ""); x.logo = koLogoByName[tvKey(n)] || ""; if (tvKey(x.label) && !out.some(o => tvSig(o) === tvSig(x))) out.push(x); });
     const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, "Diffusion"));
     own.concat(tvChannelsT(m, G) || []).forEach(x => {
       if (!tvKey(x.label)) return;
@@ -2658,7 +2658,7 @@ body{overflow-x:clip}
     if (d in koCache && !(koCache[d] === false && Date.now() - (koT[d] || 0) > 90000)) return;
     koCache[d] = null; koT[d] = Date.now();
     fetch(koUrl() + "/?d=" + d).then(r => r.json().catch(() => ({})).then(j => { if (!r.ok) throw new Error((j && j.error) || ("HTTP " + r.status)); return j; }))
-      .then(j => { koCache[d] = j && Array.isArray(j.matches) ? j.matches : false; if (koCache[d]) delete koErr[d]; else koErr[d] = "réponse vide"; koT[d] = Date.now(); renderTVIfOpen(); })
+      .then(j => { koCache[d] = j && Array.isArray(j.matches) ? j.matches : false; if (koCache[d]) delete koErr[d]; else koErr[d] = "réponse vide"; if (koCache[d]) koCache[d].forEach(k => (k.ch || []).forEach(nm => { const u = k.lg && k.lg[nm]; if (!u) return; koLogoByName[tvKey(nm)] = u; const b = tvBrand(nm); if (b && !koBrandLogo[b]) koBrandLogo[b] = u; })); koT[d] = Date.now(); renderTVIfOpen(); })
       .catch(e => { koCache[d] = false; koErr[d] = String((e && e.message) || "réseau"); koT[d] = Date.now(); renderTVIfOpen(); });
   }
   const koDay = m => new Date(m.start).toISOString().slice(0, 10);
@@ -2678,6 +2678,13 @@ body{overflow-x:clip}
     });
     return best && !tie ? best.ch : [];
   }
+  // Logos des chaînes : dépose un fichier PNG carré (≈ 96×96) dans le dossier /logos/ avec le nom ci-dessous.
+  // Si le fichier n'existe pas, le rond coloré avec l'initiale reste affiché (aucune image cassée).
+  const TV_LOGOS = [[/bein/i, "bein"], [/dazn/i, "dazn"], [/disney/i, "disney"], [/supersport|super sport/i, "supersport"], [/\btod\b/i, "tod"], [/dstv/i, "dstv"], [/arryadia/i, "arryadia"], [/sport ?tv/i, "sporttv"], [/canal/i, "canal"], [/sky/i, "sky"], [/espn/i, "espn"], [/tnt/i, "tnt"], [/viaplay/i, "viaplay"], [/mbc|shahid/i, "mbc"], [/arena/i, "arena"], [/movistar/i, "movistar"], [/thmanyah/i, "thmanyah"], [/starz/i, "starzplay"], [/\bstc\b/i, "stc"], [/onefootball/i, "onefootball"], [/fubo/i, "fubo"], [/apple/i, "appletv"], [/paramount/i, "paramount"], [/hbo/i, "hbo"], [/digiturk/i, "digiturk"], [/on sport/i, "onsport"], [/shoof/i, "shoof"], [/snrt/i, "snrt"], [/entv/i, "entv"], [/diwan/i, "diwan"], [/voyo/i, "voyo"], [/moja/i, "moja"], [/fancode/i, "fancode"], [/idman/i, "idman"], [/almanasa/i, "almanasa"], [/eurosport/i, "eurosport"], [/prime|amazon/i, "prime"], [/peacock/i, "peacock"], [/tsn|sportsnet/i, "tsn"]];
+  const koLogoByName = {}, koBrandLogo = {};   // logos lus sur kooora : par nom exact, puis par marque (beIN, DAZN…)
+  const tvBrand = label => { const x = TV_LOGOS.find(l => l[0].test(String(label || ""))); return x ? x[1] : ""; };
+  const tvLogoUrl = c => c.logo || koBrandLogo[tvBrand(c.label)] || tvLogo(c.label);   // kooora d'abord, sinon fichier local /logos/
+  const tvLogo = label => { const x = TV_LOGOS.find(l => l[0].test(String(label || ""))); return x ? "logos/" + x[1] + ".png" : ""; };
   let tvDay = "";
   function tvDays() {
     const t = new Date(); return [0, 1, 2, 3, 4, 5, 6].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return { k: d.toLocaleDateString("sv-SE"), lb: o === 0 ? "AUJ." : o === 1 ? "DEM." : d.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "").toUpperCase(), n: d.getDate(), o }; });
@@ -2705,7 +2712,7 @@ body{overflow-x:clip}
       const live = m.state === "in", done = m.state === "post";
       const mid = m.state === "pre" ? "vs" : (m.h ?? 0) + " - " + (m.a ?? 0);
       const when = live ? '<span class="m-live">● ' + esc(m.label || "DIRECT") + '</span>' : '<b class="tv-h">' + esc(hhmm(m.start)) + '</b>' + (done ? ' <small>Terminé</small>' : '');
-      const chs = tvAllChannels(m, KG).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
+      const chs = tvAllChannels(m, KG).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
       const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
       return '<div class="tv-card' + (done ? " done" : "") + '"><div class="m-row' + (live ? " live" : "") + '"><div class="m-date">' + when + '</div><div class="m-home">' + esc(m.home) + crest(m.hl, m.home) + '</div><div class="m-score' + (m.state === "pre" ? " next" : "") + '">' + mid + '</div><div class="m-away">' + crest(m.al, m.away) + esc(m.away) + '</div></div>' + (chs ? '<div class="tv-ch">' + chs + '</div>' : '') + dbg + '</div>';
     };
