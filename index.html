@@ -717,7 +717,7 @@ h1{will-change:opacity}
 
 /* --- Améliorations 2026-11-06 --- */
 #compbar .container,#compbar .container::-webkit-scrollbar{scrollbar-width:none}
-@media(min-width:700px){#compbar .container{flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto!important}}
+@media(min-width:700px){#compbar .container{flex-wrap:wrap;justify-content:center;overflow:visible}}
 #compbar .container{padding-top:8px;padding-bottom:8px;-webkit-overflow-scrolling:touch}
 .ticker{margin-top:.5rem}
 .m-ph{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;color:#fff;font-size:.55rem;font-weight:800;letter-spacing:0;flex:0 0 auto;vertical-align:middle;margin:0 4px}
@@ -728,15 +728,22 @@ h1{will-change:opacity}
 .daystrip button.today{border-color:var(--accent)}
 .daystrip button.today small{color:var(--accent)}
 .daystrip button.on small,.daystrip button.on b{color:#04210f}
-.tn-strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px 0 10px;scroll-snap-type:x proximity}
-.tn-strip::-webkit-scrollbar{display:none}
-.tn-card{flex:0 0 168px;scroll-snap-align:start;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
-.tn-lg{font-size:.65rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tn-time{font-weight:800;font-size:1.05rem;color:var(--accent)}
-.tn-tm{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:var(--text-main);min-width:0}
-.tn-tm img,.tn-tm .m-ph{width:22px;height:22px;margin:0;flex:0 0 auto;object-fit:contain;border-radius:50%;background:#fff;padding:2px}
-.tn-tm .m-ph{padding:0;background:#334155}
-.tn-tm span:not(.m-ph){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-row{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:10px 14px;margin-bottom:8px}
+.tv-row.live{border-color:rgba(239,68,68,.5)}.tv-row.done{opacity:.7}
+.tv-time{flex:0 0 64px;font-weight:800;font-size:1.1rem;color:var(--accent);display:flex;flex-direction:column;line-height:1.2}
+.tv-time small{font-size:.65rem;font-weight:700;color:var(--text-muted)}.tv-time .tv-live{color:var(--live-red)}
+.tv-body{flex:1;min-width:0}
+.tv-lg{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-teams{display:flex;align-items:center;gap:10px}
+.tv-tm{flex:1;display:flex;align-items:center;gap:8px;min-width:0;font-weight:700;font-size:.9rem}.tv-tm.r{justify-content:flex-end;text-align:right}
+.tv-tm span:not(.m-ph){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-tm img,.tv-tm .m-ph{width:24px;height:24px;margin:0;flex:0 0 auto;object-fit:contain;border-radius:50%;background:#fff;padding:2px}.tv-tm .m-ph{padding:0}
+.tv-vs{color:var(--text-muted);font-size:.8rem;font-weight:700}.tv-sc{font-weight:800;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--accent);border-radius:8px;padding:1px 9px}.tv-sc.live{color:var(--live-red);border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1)}
+.tv-ch{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.tv-badge{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);font-weight:800;font-size:.78rem;color:#fff;white-space:nowrap}
+.tv-badge i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.8rem;font-weight:900;color:#fff}
+.tv-badge span{display:flex;flex-direction:column;line-height:1.15}.tv-badge small{font-size:.6rem;font-weight:600;color:var(--text-muted)}
+@media(max-width:600px){.tv-row{flex-wrap:wrap}.tv-ch{flex-direction:row;width:100%;justify-content:flex-start;padding-left:76px}}
 </style>
 </head>
 <body>
@@ -747,7 +754,7 @@ h1{will-change:opacity}
         <div class="container header-content">
             <h1><span class="brand-mark"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12h"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12h)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></span><b>FootLive <span>Pro</span></b><span class="sr-only"> : scores de football en direct, classements et radios sport</span></h1>
         </div>
-        <nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="./" data-go="scores" class="on"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span>Scores</a><a href="radio.html" data-go="radio"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="15" cy="14" r="3"/><path d="M6 12h3M6 15h3"/></svg></span>Radio</a><a href="#clubs" data-go="clubs"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8l2.2 1.6-.8 2.6h-2.8l-.8-2.6z"/></svg></span>Clubs</a><a href="classements.html" data-go="table"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span>Classements</a><a href="#buteurs" data-go="buteurs"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V8l3-3h12l3 3v10"/><path d="M3 18h18M8 5v13M16 5v13M3 11h18"/></svg></span>Buteurs</a><a href="actualites.html" data-go="news"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Actus</a><a href="football-feminin.html" data-go="women"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M12 14v7M9 18h6"/></svg></span>Women's Foot</a></div></nav>
+        <nav id="tabbar" aria-label="Navigation du site"><div class="container"><a href="./" data-go="scores" class="on"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span>Scores</a><a href="radio.html" data-go="radio"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="15" cy="14" r="3"/><path d="M6 12h3M6 15h3"/></svg></span>Radio</a><a href="#clubs" data-go="clubs"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8l2.2 1.6-.8 2.6h-2.8l-.8-2.6z"/></svg></span>Clubs</a><a href="classements.html" data-go="table"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span>Classements</a><a href="#buteurs" data-go="buteurs"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V8l3-3h12l3 3v10"/><path d="M3 18h18M8 5v13M16 5v13M3 11h18"/></svg></span>Buteurs</a><a href="actualites.html" data-go="news"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></span>Actus</a><a href="programme-tv.html" data-go="tv"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>Programme TV</a><a href="football-feminin.html" data-go="women"><span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M12 14v7M9 18h6"/></svg></span>Women's Foot</a></div></nav>
         <div class="container">
             <div class="ticker" id="ticker" aria-label="Actualités du football mondial">
                 <div class="ticker-viewport"><div class="ticker-track" id="ticker-track"><span class="ticker-item">Chargement des infos du football…</span></div></div>
@@ -760,7 +767,6 @@ h1{will-change:opacity}
     <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
     <div id="scores-view">
         <div id="hero"></div>
-        <div id="tonight"></div>
         <div class="sec-title">📅 Calendrier & résultats <small>touchez un match pour voir les statistiques détaillées</small></div>
         <div class="control-group">
             <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
@@ -1103,13 +1109,14 @@ h1{will-change:opacity}
             const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0; const put365 = o => { const ix = out.findIndex(x => x.id === o.id); if (ix >= 0) out[ix] = o; else out.push(o); };
             j.games.forEach(g => {
                 const hc = g.homeCompetitor || {}, ac = g.awayCompetitor || {}; if (!hc.name || !ac.name || !g.startTime) return;
+                const tvOf = Array.isArray(g.tvNetworks) ? g.tvNetworks.map(n => String((n && n.name) || n || "")).filter(Boolean) : [];
                 const c = comps.get(g.competitionId) || {}, cname = String(g.competitionDisplayName || c.name || "Football");
                 const cn = (ctry.get(c.countryId) || {}).name || "", inf = c365Info(cn), key = cname + "\u200b" + g.competitionId;
                 S365_LG[key] = { disp: inf.fr + " · " + cname, code: inf.code, emo: inf.emo };
                 const lgl = "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2/v5/Competitions/light/" + g.competitionId;
                 const t0 = new Date(g.startTime).getTime();
                 const e = base.find(x => !x.tsdb && Math.abs(new Date(x.start).getTime() - t0) < 4 * 3600e3 && sameTeam(x.home, hc.name) && sameTeam(x.away, ac.name));
-                if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
+                if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; if (tvOf.length) e.tv = tvOf; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
                 const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon/i.test(st);
                 const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
                 let state = "pre";
@@ -1118,7 +1125,7 @@ h1{will-change:opacity}
                     else if (g.statusGroup === 3 || (g.gameTime > 0 && g.gameTime < 150) || /^(live|half|ht|\d+')/i.test(st)) state = "in";
                     else if (h != null && a != null && Date.now() - t0 > 3 * 3600e3) state = "post";
                 }
-                put365({ id: "n" + g.id, tsdb: true, raw: { strStatus: st, strVenue: (g.venue && g.venue.name) || "", intRound: g.roundName || "", strCountry: cn }, slug: "tsdb", lg: key, lgl, start: g.startTime, state, off, label: off ? (st || "Reporté") : (state === "in" ? (g.gameTimeDisplay || st || "") : st), home: hc.name, away: ac.name, hl: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + hc.id, al: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + ac.id, h, a });
+                put365({ id: "n" + g.id, tv: tvOf, tsdb: true, raw: { strStatus: st, strVenue: (g.venue && g.venue.name) || "", intRound: g.roundName || "", strCountry: cn }, slug: "tsdb", lg: key, lgl, start: g.startTime, state, off, label: off ? (st || "Reporté") : (state === "in" ? (g.gameTimeDisplay || st || "") : st), home: hc.name, away: ac.name, hl: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + hc.id, al: "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v2/Competitors/" + ac.id, h, a });
                 added++;
             });
             byDay[d] = out.filter(m => !isBlockedMatch(m));
@@ -2486,16 +2493,54 @@ h1{will-change:opacity}
     showSlide(at >= 0 ? at : 0);
     tickCd();
   }
-  function renderTonight() {
-    const box = $("#tonight"); if (!box) return;
-    const now = Date.now(), day = new Date().toLocaleDateString("sv-SE"), hr = ms => +new Date(ms).toLocaleString("en-GB", { hour: "2-digit", hour12: false }) % 24;
-    const A = all().filter(m => m.state === "pre" && !m.off && !/ncaa/i.test(String(m.lg || "")) && (!window.compFilter || window.compFilter.test(m)) && new Date(m.start).toLocaleDateString("sv-SE") === day && new Date(m.start).getTime() > now - 600000 && hr(m.start) >= 17)
-      .sort((a, b) => (isMain10(b) - isMain10(a)) || a.start.localeCompare(b.start)).slice(0, 12).sort((a, b) => a.start.localeCompare(b.start));
-    if (A.length < 2) { box.innerHTML = ""; return; }
-    const crest = (l, n) => l ? '<img src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="22" height="22" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
-    box.innerHTML = '<div class="sec-title">🌙 Matchs de ce soir <small>' + A.length + ' à suivre</small></div><div class="tn-strip">' + A.map(m =>
-      '<div class="tn-card"><div class="tn-lg">' + esc(lgDisp(m.lg, [m])) + '</div><div class="tn-time">' + esc(hhmm(m.start)) + '</div><div class="tn-tm">' + crest(m.hl, m.home) + '<span>' + esc(m.home) + '</span></div><div class="tn-tm">' + crest(m.al, m.away) + '<span>' + esc(m.away) + '</span></div></div>').join("") + '</div>';
+  // ---------- Programme TV : matchs importants + chaîne qui diffuse ----------
+  // Chaîne principale par compétition (index = MAIN10) : source beIN SPORTS MENA, Arryadia pour la Botola Pro
+  const TV_BY_LG = { 0: ["bein"], 1: ["bein"], 2: ["bein"], 3: ["bein"], 4: ["bein"], 5: ["bein"], 6: ["bein"], 7: ["bein"], 8: ["sporttv"], 9: ["arryadia"] };
+  const TV_CH = { bein: { name: "beIN SPORTS", ini: "b", col: "#7b2cbf", sub: "MENA" }, arryadia: { name: "Arryadia", ini: "A", col: "#16803c", sub: "Maroc · gratuit" }, sporttv: { name: "Sport TV", ini: "S", col: "#e11d48", sub: "Portugal" } };
+  function tvChannels(m) {
+    const keys = TV_BY_LG[mp(m)] || [], src = Array.isArray(m.tv) ? m.tv.join(" | ") : "";
+    return keys.map(k => {
+      const c = TV_CH[k]; let label = c.name;
+      if (k === "bein") { const x = src.match(/bein\s*sports?\s*(max\s*)?(\d+)/i); if (x) label = "beIN SPORTS " + (x[1] ? "MAX " : "") + x[2]; }
+      return { k, label, sub: c.sub, ini: c.ini, col: c.col };
+    });
   }
+  let tvDay = "";
+  function tvDays() {
+    const t = new Date(); return [0, 1, 2, 3, 4, 5, 6].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return { k: d.toLocaleDateString("sv-SE"), lb: o === 0 ? "AUJ." : o === 1 ? "DEM." : d.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "").toUpperCase(), n: d.getDate(), o }; });
+  }
+  function renderTV() {
+    const box = $("#tv-list"), strip = $("#tv-days"); if (!box || !strip) return;
+    const days = tvDays(); if (!tvDay) tvDay = days[0].k;
+    strip.innerHTML = days.map(d => '<button type="button" data-day="' + d.k + '" class="' + (d.k === tvDay ? "on" : "") + (d.o === 0 ? " today" : "") + '"><small>' + d.lb + '</small><b>' + d.n + '</b></button>').join("");
+    const now = Date.now();
+    const L = all().filter(m => isMain10(m) && !m.off && new Date(m.start).toLocaleDateString("sv-SE") === tvDay).sort((a, b) => a.start.localeCompare(b.start) || mp(a) - mp(b));
+    if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match important ce jour-là." : "Chargement du programme…") + '</div>'; return; }
+    const crest = (l, n) => l ? '<img src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="22" height="22" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
+    box.innerHTML = L.map(m => {
+      const live = m.state === "in", done = m.state === "post";
+      const mid = m.state === "pre" ? '<span class="tv-vs">vs</span>' : '<span class="tv-sc' + (live ? " live" : "") + '">' + (m.h ?? 0) + ' - ' + (m.a ?? 0) + '</span>';
+      const chs = tvChannels(m).map(c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + '</i><span>' + esc(c.label) + '<small>' + esc(c.sub) + '</small></span></span>').join("");
+      return '<div class="tv-row' + (live ? " live" : "") + (done ? " done" : "") + '"><div class="tv-time">' + esc(hhmm(m.start)) + (live ? '<small class="tv-live">● ' + esc(m.label || "DIRECT") + '</small>' : done ? '<small>Terminé</small>' : '') + '</div>' +
+        '<div class="tv-body"><div class="tv-lg">' + esc(lgDisp(m.lg, [m])) + '</div><div class="tv-teams"><div class="tv-tm">' + crest(m.hl, m.home) + '<span>' + esc(m.home) + '</span></div>' + mid + '<div class="tv-tm r"><span>' + esc(m.away) + '</span>' + crest(m.al, m.away) + '</div></div></div>' +
+        '<div class="tv-ch">' + chs + '</div></div>';
+    }).join("");
+  }
+  const TV_FAQ = [
+    ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Dans la région MENA, ils sont affichés sur beIN SPORTS ; la Botola Pro est affichée avec Arryadia, chaîne gratuite. Vérifiez toujours la grille de la chaîne le jour du match."],
+    ["Quel est le numéro de la chaîne beIN SPORTS pour un match ?", "Le numéro exact (beIN SPORTS 1, 2, 3…) est annoncé par la chaîne le jour du match. Il s’affiche dans le programme quand la source le fournit."],
+    ["À quelle heure commencent les matchs ?", "Les horaires sont affichés à l’heure de votre appareil et mis à jour automatiquement."]
+  ];
+  const tvSt = 'style="color:var(--accent)"';
+  const tvSeo = '<section id="tv-seo" class="container" aria-label="Présentation du programme TV football" style="margin:2rem auto 1rem;padding:1rem 4px 0;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">' +
+    '<h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">Programme TV football : matchs du jour et chaînes qui les diffusent</h2>' +
+    '<p>Le programme TV de FootLive Pro liste les matchs importants de la journée avec l’heure, les équipes, le score en direct et la chaîne qui diffuse la rencontre (beIN SPORTS, Arryadia, Sport TV). Choisissez un jour avec les boutons en haut pour préparer votre semaine.</p>' +
+    '<p>Pages à découvrir : <a href="./" ' + tvSt + '>scores en direct</a>, <a href="classements.html" ' + tvSt + '>classements de football</a>, <a href="radio.html" ' + tvSt + '>radios foot en direct</a> et <a href="actualites.html" ' + tvSt + '>actualités foot</a>.</p>' +
+    '<div class="faq"><h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Questions fréquentes</h2>' + TV_FAQ.map(f => '<h3>' + f[0] + '</h3><p>' + f[1] + '</p>').join("") + '</div></section>';
+  const tvLD = () => ({ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": TV_FAQ.map(f => ({ "@type": "Question", "name": f[0], "acceptedAnswer": { "@type": "Answer", "text": f[1] } })) });
+  $("main").insertAdjacentHTML("beforeend", '<div id="tv-view" hidden><div class="sec-title">📺 Programme TV <small>les matchs importants et la chaîne qui les diffuse</small></div><div class="daystrip" id="tv-days"></div><div id="tv-list"><div class="empty">Chargement du programme…</div></div>' + tvSeo + '</div>');
+  $("#tv-days").addEventListener("click", e => { const b = e.target.closest("button[data-day]"); if (!b) return; tvDay = b.dataset.day; renderTV(); });
+  const renderTVIfOpen = () => { const v = $("#tv-view"); if (v && !v.hidden) renderTV(); };
   function tickCd() {
     $$("#hero .hl-cd").forEach(e => {
       const s = Math.floor((new Date(e.dataset.t) - Date.now()) / 1000);
@@ -3329,14 +3374,15 @@ h1{will-change:opacity}
     radio: "Écoutez les radios foot et sport en direct (RMC, BBC Radio 5 Live, talkSPORT, Cadena SER, COPE…) par compétition. Gratuit sur FootLive Pro.",
     table: "Classements de football en direct : Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Ligue des champions et plus. Mis à jour automatiquement sur FootLive Pro.",
     news: "Actualités football du jour : ESPN, BBC Sport, The Guardian, Sky Sports et L’Équipe. Transferts, résultats et compétitions, sur FootLive Pro.",
+    tv: "Programme TV football : les matchs importants du jour et la chaîne qui les diffuse (beIN SPORTS, Arryadia…). Gratuit sur FootLive Pro.",
     women: "Football féminin : scores, résultats, classements, meilleures buteuses et actualités des compétitions féminines. Gratuit sur FootLive Pro."
   };
-  const TAB_URL = { radio: "radio.html", table: "classements.html", news: "actualites.html", women: "football-feminin.html" };
-  const TAB_BACK = { "radio.html": "radio", "classements.html": "table", "actualites.html": "news", "football-feminin.html": "women" };
+  const TAB_URL = { radio: "radio.html", table: "classements.html", news: "actualites.html", women: "football-feminin.html", tv: "programme-tv.html" };
+  const TAB_BACK = { "radio.html": "radio", "classements.html": "table", "actualites.html": "news", "football-feminin.html": "women", "programme-tv.html": "tv" };
   const locPage = () => { const h = location.hash.slice(1); if (h) return h; return TAB_BACK[location.pathname.split("/").pop()] || "scores"; };
-  const PAGES = { scores: "#scores-view", table: "#table-view", news: "#news-view", radio: "#radio-view", clubs: "#clubs-view", women: "#women-view", buteurs: "#scorers-view" };
+  const PAGES = { scores: "#scores-view", table: "#table-view", news: "#news-view", radio: "#radio-view", clubs: "#clubs-view", women: "#women-view", buteurs: "#scorers-view", tv: "#tv-view" };
   const inited = {};
-  const PAGE_TITLES = { scores: "Scores en direct", table: "Classements", news: "Actualités", radio: "Radio sport", clubs: "Clubs", women: "Women's Foot", buteurs: "Meilleurs buteurs" };
+  const PAGE_TITLES = { scores: "Scores en direct", table: "Classements", news: "Actualités", radio: "Radio sport", clubs: "Clubs", women: "Women's Foot", buteurs: "Meilleurs buteurs", tv: "Programme TV football : matchs du jour et chaînes (beIN SPORTS, Arryadia)" };
   window.showPage = function (p, fromHistory) {
     let club = null, bt = null, wk = null;
     if (/^women-/.test(p)) { wk = p.slice(6); p = "women"; if (!wFind(wk)) wk = null; }
@@ -3352,8 +3398,10 @@ h1{will-change:opacity}
     if (p === "clubs") renderClubs(club);
     if (p === "buteurs") renderButeurs(bt);
     if (p === "women") renderWomen(wk);
+    if (p === "tv") renderTV();
     if (p !== "clubs") setLD("cb-ld", null);
     if (p !== "buteurs") setLD("bt-ld", null);
+    setLD("tv-ld", p === "tv" ? tvLD() : null);
     document.title = (p === "women" ? "Women's Foot" + (wk ? " : " + wFind(wk)[2] : "") + " : scores et classements" : p === "clubs" && club ? clubOf(club)[1] + " : prochain match et résultats" : p === "buteurs" ? "Meilleurs buteurs" + (bt ? " " + btFind(bt)[2] : "") + " : classement" : PAGE_TITLES[p]) + " | FootLive Pro";
     if (!fromHistory) { try { history.pushState(null, "", TAB_URL[p] ? TAB_URL[p] + location.search + (p === "women" && wk ? "#women-" + wk : "") : p === "scores" ? (document.documentElement.dataset.tabpage ? "./" : location.pathname) + location.search : "#" + (p === "clubs" && club ? "club-" + club : p === "buteurs" && bt ? "buteurs-" + bt : p === "women" && wk ? "women-" + wk : p)); } catch (e) { } }
     window.scrollTo({ top: 0 });
@@ -3384,7 +3432,7 @@ h1{will-change:opacity}
     if (raT) return;
     raT = setTimeout(() => {
       raT = 0;
-      const steps = [renderHero, renderTonight, baseRenderAll, decorate, buildDays, status, saveCache];
+      const steps = [renderHero, renderTVIfOpen, baseRenderAll, decorate, buildDays, status, saveCache];
       const run = i => { if (i >= steps.length) return; try { steps[i](); } catch (e) { console.warn(e); } setTimeout(() => run(i + 1), 0); };   // une étape par tâche : le thread principal respire entre chaque
       run(0);
     }, 120);
