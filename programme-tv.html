@@ -873,6 +873,7 @@ body{overflow-x:clip}
             // Laisser vide = la page interroge ESPN directement. Ou mettre l'URL de votre Worker (worker.js, avec "/" final) pour mutualiser le cache.
             PROXY_URL: "https://footlive.hgtrerza.workers.dev",    // votre Worker actuel (scores / classements)
             PROXY2_URL: "https://footlive2.hgtrerza.workers.dev",   // 2e Worker (worker-court.js) : vidéos YouTube (/yt) et 365Scores (/365)
+            KOORA_URL: "https://footlive3.hgtrerza.workers.dev",   // 3e Worker (worker-kooora.js) : chaînes de chaque match lues sur kooora.com
             ESPN: "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
             DAYS_BEFORE: 2, DAYS_AFTER: 4,           // fenêtre de jours chargée autour d'aujourd'hui
             LIVE_REFRESH_MS: 30 * 1000,              // jour en cours (direct)
@@ -2580,8 +2581,9 @@ body{overflow-x:clip}
     let n = String(raw || "").replace(/\s+/g, " ").trim(), s = sub || "";
     if (/bein/i.test(n)) {
       const num = (n.match(/\d/) || [])[0];
+      if (/connect/i.test(n)) return { k: "beIN SPORTS CONNECT", label: "beIN SPORTS CONNECT", sub: s, ini: "b", col: "#7b2cbf", bein: true };
       const label = "beIN SPORTS" + (/\bmax\b/i.test(n) ? " MAX" : "") + (/\bxtra\b/i.test(n) ? " XTRA" : "") + (/news/i.test(n) ? " NEWS" : "") + (num ? " " + num : "");
-      if (/mena|arab|middle/i.test(n)) s = "MENA"; else if (/fran/i.test(n)) s = "France"; else if (/turk|türk/i.test(n)) s = "Turquie"; else if (/\b(usa|us)\b/i.test(n)) s = "États-Unis";
+      if (/mena|arab|middle/i.test(n)) s = "MENA"; else if (/fran|\(fr\)/i.test(n)) s = "France"; else if (/\beng\b/i.test(n)) s = "Anglais"; else if (/turk|türk/i.test(n)) s = "Turquie"; else if (/\b(usa|us)\b/i.test(n)) s = "États-Unis";
       return { k: label, label, sub: s, ini: "b", col: "#7b2cbf", bein: true };
     }
     n = n.replace(/^movistar\s*(\+|plus\+?)\s*/i, "Movistar ").trim();
@@ -2600,7 +2602,9 @@ body{overflow-x:clip}
     return out.length ? out : null;
   }
   function tvAllChannels(m, G) {   // uniquement les chaînes réellement annoncées (365Scores m.tv et TheSportsDB) ; Arryadia pour la Botola Pro ; aucune chaîne « par défaut » ni supposée
-    const out = tvChannels(m).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col }));
+    const ko = koFind(m);   // kooora : liste complète et fiable des chaînes ; null = indisponible → chaînes fixes (beIN PL/LaLiga/Ligue 1, Arryadia)
+    const out = (ko ? [] : tvChannels(m)).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col }));
+    (ko || []).forEach(n => { const x = tvNorm(n, ""); if (tvKey(x.label) && !out.some(o => tvSig(o) === tvSig(x))) out.push(x); });
     const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, "Diffusion"));
     own.concat(tvChannelsT(m, G) || []).forEach(x => {
       if (!tvKey(x.label)) return;
@@ -2615,6 +2619,59 @@ body{overflow-x:clip}
       out.push(x);
     });
     return out;
+  }
+  // ---------- kooora : toutes les chaînes annoncées pour chaque match (Worker footlive3 → CFG.KOORA_URL) ----------
+  // Pour chaque match, on cherche le même match sur kooora (même compétition, même heure, noms d'équipes en arabe via un dictionnaire).
+  // En cas de doute, aucune chaîne n'est affichée (jamais de chaîne supposée).
+  const koN = s => String(s || "").normalize("NFKD").replace(/[\u064B-\u065F\u0670\u0640]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/ؤ/g, "و").replace(/ئ/g, "ي").replace(/[^\u0600-\u06FFa-z0-9 ]/gi, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  const KO_LGX = {};
+  [["الدوري الإنجليزي الممتاز", 1], ["الدوري الإسباني", 2], ["الدوري الإيطالي", 3], ["الدوري الألماني", 4], ["الدوري الفرنسي", 5], ["الدوري البرتغالي الممتاز", 8], ["الدوري المغربي الممتاز", 9]].forEach(([a, i]) => { KO_LGX[koN(a)] = i; });
+  function koLg(name) {   // index MAIN10 de la compétition kooora, -1 si inconnue
+    const n = koN(name); if (!n || /للسيدات|تحت \d|شباب|الدرجه/.test(n)) return -1;
+    if (/ابطال اوروبا/.test(n)) return 0; if (/المؤتمر/.test(n)) return 7; if (n === koN("الدوري الأوروبي")) return 6;
+    return KO_LGX[n] ?? -1;
+  }
+  const KO_TEAMS = {};
+  [
+    // Angleterre
+    ["آرسنال", "Arsenal"], ["أستون فيلا", "Aston Villa"], ["بورنموث", "Bournemouth"], ["برينتفورد", "Brentford"], ["برايتون", "Brighton"], ["تشيلسي", "Chelsea"], ["كوفينتري سيتي", "Coventry"], ["كريستال بالاس", "Crystal Palace"], ["إيفرتون", "Everton"], ["فولهام", "Fulham"], ["هال سيتي", "Hull City"], ["إبسويتش تاون|ايبسويتش تاون", "Ipswich"], ["ليدز يونايتد", "Leeds"], ["ليفربول", "Liverpool"], ["مانشستر سيتي", "Manchester City|Man City"], ["مانشستر يونايتد", "Manchester United|Man United"], ["نيوكاسل يونايتد", "Newcastle"], ["نوتنجهام فوريست|نوتينجهام فورست", "Nottingham Forest|Nottm Forest"], ["سندرلاند|سندرلند", "Sunderland"], ["توتنهام هوتسبير|توتنهام", "Tottenham"], ["وست هام يونايتد|وست هام", "West Ham"], ["وولفرهامبتون|ولفرهامبتون", "Wolverhampton|Wolves"], ["بيرنلي", "Burnley"], ["ليستر سيتي", "Leicester"], ["ساوثهامبتون|ساوثامبتون", "Southampton"],
+    // Espagne
+    ["ريال مدريد", "Real Madrid"], ["برشلونة", "Barcelona"], ["أتلتيكو مدريد", "Atletico Madrid|Atletico"], ["إشبيلية", "Sevilla"], ["ديبورتيفو ألافيس|ديبورتيفو الافيس", "Alaves"], ["مالاجا|مالقة", "Malaga"], ["راسينج سانتاندير", "Racing Santander|Racing"], ["إسبانيول", "Espanyol"], ["ديبورتيفو لاكورنيا", "Deportivo La Coruna|Deportivo"], ["أوساسونا", "Osasuna"], ["أتلتيك بيلباو", "Athletic Club|Athletic Bilbao"], ["فالنسيا", "Valencia"], ["ريال سوسييداد", "Real Sociedad"], ["فياريال", "Villarreal"], ["ريال بيتيس", "Real Betis|Betis"], ["سيلتا فيجو", "Celta Vigo|Celta"], ["خيتافي", "Getafe"], ["رايو فاليكانو", "Rayo Vallecano"], ["ليفانتي", "Levante"], ["إلتشي|التشي", "Elche"], ["جيرونا", "Girona"], ["ألميريا|الميريا", "Almeria"], ["مايوركا", "Mallorca"], ["ريال أوفييدو|ريال اوفييدو", "Real Oviedo|Oviedo"], ["ليجانيس", "Leganes"],
+    // Italie
+    ["يوفنتوس", "Juventus"], ["ميلان", "AC Milan|Milan"], ["إنتر|انتر ميلان|إنتر ميلان", "Inter|Inter Milan|Internazionale"], ["نابولي", "Napoli"], ["روما", "Roma"], ["لاتسيو", "Lazio"], ["أتالانتا|اتالانتا", "Atalanta"], ["فيورنتينا", "Fiorentina"], ["بولونيا", "Bologna"], ["تورينو", "Torino"], ["جنوى|جنوه", "Genoa"], ["كالياري", "Cagliari"], ["ليتشي", "Lecce"], ["فروسينوني", "Frosinone"], ["بارما", "Parma"], ["ساسولو", "Sassuolo"], ["فينيسيا", "Venezia"], ["أودينيزي|اودينيزي", "Udinese"], ["كومو", "Como"], ["كريمونيزي", "Cremonese"], ["بيزا", "Pisa"], ["هيلاس فيرونا|فيرونا", "Verona"],
+    // Allemagne
+    ["بايرن ميونخ", "Bayern"], ["بوروسيا دورتموند", "Borussia Dortmund|Dortmund"], ["لايبزيج", "RB Leipzig|Leipzig"], ["باير ليفركوزن|ليفركوزن", "Leverkusen"], ["شتوتجارت", "Stuttgart"], ["آينتراخت فرانكفورت|اينتراخت فرانكفورت", "Eintracht Frankfurt|Frankfurt"], ["فرايبورج", "Freiburg"], ["هوفنهايم", "Hoffenheim"], ["فولفسبورج", "Wolfsburg"], ["ماينتس", "Mainz"], ["أوجسبورج|اوجسبورج", "Augsburg"], ["فيردر بريمن", "Werder Bremen|Bremen"], ["يونيون برلين", "Union Berlin"], ["بوروسيا مونشنجلادباخ|مونشنجلادباخ", "Monchengladbach|Gladbach"], ["هايدنهايم", "Heidenheim"], ["سانت باولي", "St. Pauli|Pauli"], ["كولن", "Koln|Cologne"], ["هامبورج", "Hamburg"], ["باديربورن", "Paderborn"], ["إيلفيرسبيرج|ايلفيرسبيرج", "Elversberg"],
+    // France
+    ["باريس سان جيرمان", "Paris Saint-Germain|PSG"], ["باريس", "Paris FC"], ["مارسيليا", "Marseille"], ["موناكو", "Monaco"], ["ليون", "Lyon"], ["ليل", "Lille"], ["لانس", "Lens"], ["نيس", "Nice"], ["رين|رينس", "Rennes"], ["ستراسبورج", "Strasbourg"], ["تولوز", "Toulouse"], ["نانت", "Nantes"], ["بريست", "Brest"], ["لوهافر", "Le Havre|Havre"], ["لوريان", "Lorient"], ["أنجيه|انجيه", "Angers"], ["ميتز", "Metz"], ["أوكسير|اوكسير", "Auxerre"], ["تروا", "Troyes"], ["لومان", "Le Mans"],
+    // Portugal
+    ["بنفيكا", "Benfica"], ["بورتو", "Porto"], ["سبورتنج لشبونة|سبورتينج لشبونة", "Sporting CP|Sporting"], ["سبورتنج براجا|براجا", "Braga"], ["فيتوريا جيماريش|جيماريش", "Vitoria Guimaraes|Guimaraes"], ["ناسيونال", "Nacional"], ["فيسيو", "Viseu"], ["ألفيركا|الفيركا", "Alverca"], ["كاسا بيا", "Casa Pia"], ["مورييرينسي", "Moreirense"], ["فاماليكاو", "Famalicao"], ["آروكا|اروكا", "Arouca"],
+    // Maroc
+    ["الوداد الرياضي|الوداد", "Wydad"], ["الرجاء الرياضي|الرجاء", "Raja"], ["الجيش الملكي", "AS FAR|FAR Rabat"], ["نهضة بركان", "Berkane"], ["حسنية أغادير|حسنيه اغادير", "Hassania Agadir|Agadir"], ["الفتح الرباطي", "FUS Rabat|Fath Union Sport|Rabat"], ["المغرب الفاسي", "MAS Fez|Maghreb Fez|Maghrib Fes"], ["الكوكب الرياضي المراكشي|الكوكب المراكشي", "Kawkab Marrakech|KACM"], ["المغرب التطواني", "Tetouan|MAT"], ["النادي المكناسي", "Meknes|CAYB"], ["إتحاد تواركة|اتحاد تواركه", "Touarga|Tuwarqa"], ["أمل تيزنيت|امل تيزنيت", "Tiznit"]
+  ].forEach(([ar, en]) => ar.split("|").forEach(a => { KO_TEAMS[koN(a)] = en.split("|"); }));
+  const koSame = (a, b) => { a = tvKey(a); b = tvKey(b); return !!a && !!b && (a === b || (a.length >= 5 && b.length >= 5 && (a.startsWith(b) || b.startsWith(a)))); };
+  const koSide = (ar, name) => { const en = KO_TEAMS[koN(ar)]; if (!en) return 0; return en.some(e => koSame(e, name)) ? 1 : -1; };   // 1 = même équipe, 0 = inconnue, -1 = équipe différente
+  const koCache = {};   // date UTC → matchs kooora ; null = en cours ; false = indisponible
+  const koUrl = () => (typeof CFG !== "undefined" && CFG.KOORA_URL ? String(CFG.KOORA_URL).replace(/\/+$/, "") : "");
+  function koLoad(d) {
+    if (d in koCache || !koUrl()) return; koCache[d] = null;
+    fetch(koUrl() + "/?d=" + d).then(r => r.ok ? r.json() : Promise.reject()).then(j => { koCache[d] = j && Array.isArray(j.matches) ? j.matches : false; renderTVIfOpen(); }).catch(() => { koCache[d] = false; renderTVIfOpen(); });
+  }
+  const koDay = m => new Date(m.start).toISOString().slice(0, 10);
+  function koFind(m) {   // null = kooora indisponible (on retombe sur les autres sources) ; [] = aucune chaîne sûre ; sinon liste des chaînes
+    const li = mp(m), t = new Date(m.start).getTime(); if (!koUrl() || li > 9 || !t) return null;
+    const arr = koCache[koDay(m)]; if (arr === null) return []; if (!Array.isArray(arr)) return null;
+    const slot = all().filter(x => mp(x) === li && Math.abs(new Date(x.start).getTime() - t) <= 15 * 60e3).length;
+    let best = null, bs = -1, tie = false;
+    arr.forEach(k => {
+      if (koLg(k.c) !== li) return;
+      if (k.t && Math.abs(new Date(k.t).getTime() - t) > 15 * 60e3) return;
+      const s1 = [koSide(k.h, m.home), koSide(k.a, m.away)], s2 = [koSide(k.h, m.away), koSide(k.a, m.home)];
+      const ok = s => s[0] >= 0 && s[1] >= 0, sc = s => s[0] + s[1];
+      const s = ok(s1) && (!ok(s2) || sc(s1) >= sc(s2)) ? s1 : ok(s2) ? s2 : null; if (!s) return;   // une équipe connue et différente → autre match
+      const score = sc(s); if ((slot > 1 || !k.t) && score < 1) return;   // plusieurs matchs au même créneau : il faut au moins un nom confirmé
+      if (score > bs) { best = k; bs = score; tie = false; } else if (score === bs) tie = true;
+    });
+    return best && !tie ? best.ch : [];
   }
   let tvDay = "";
   function tvDays() {
@@ -2636,6 +2693,7 @@ body{overflow-x:clip}
       else { const o = L[i], sc = x => (x.hl ? 1 : 0) + (x.al ? 1 : 0) + (x.state === "in" ? 2 : 0) + (String(x.id).match(/^\d+$/) ? 1 : 0); if (sc(m) > sc(o)) L[i] = m; }
     });
     tvLoad(tvDay); const KG = tvCache[tvDay] || null;
+    L.forEach(m => koLoad(koDay(m)));
     if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match important ce jour-là." : "Chargement du programme…") + '</div>'; return; }
     const crest = (l, n) => l ? '<img class="m-logo" src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     const rowFn = m => {
