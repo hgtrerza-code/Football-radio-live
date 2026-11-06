@@ -2652,9 +2652,14 @@ body{overflow-x:clip}
   const koSide = (ar, name) => { const en = KO_TEAMS[koN(ar)]; if (!en) return 0; return en.some(e => koSame(e, name)) ? 1 : -1; };   // 1 = même équipe, 0 = inconnue, -1 = équipe différente
   const koCache = {};   // date UTC → matchs kooora ; null = en cours ; false = indisponible
   const koUrl = () => (typeof CFG !== "undefined" && CFG.KOORA_URL ? String(CFG.KOORA_URL).replace(/\/+$/, "") : "");
+  const koErr = {}, koT = {};   // koErr : raison de l'échec par jour ; koT : heure du dernier essai (un échec est retenté après 90 s)
   function koLoad(d) {
-    if (d in koCache || !koUrl()) return; koCache[d] = null;
-    fetch(koUrl() + "/?d=" + d).then(r => r.ok ? r.json() : Promise.reject()).then(j => { koCache[d] = j && Array.isArray(j.matches) ? j.matches : false; renderTVIfOpen(); }).catch(() => { koCache[d] = false; renderTVIfOpen(); });
+    if (!koUrl()) return;
+    if (d in koCache && !(koCache[d] === false && Date.now() - (koT[d] || 0) > 90000)) return;
+    koCache[d] = null; koT[d] = Date.now();
+    fetch(koUrl() + "/?d=" + d).then(r => r.json().catch(() => ({})).then(j => { if (!r.ok) throw new Error((j && j.error) || ("HTTP " + r.status)); return j; }))
+      .then(j => { koCache[d] = j && Array.isArray(j.matches) ? j.matches : false; if (koCache[d]) delete koErr[d]; else koErr[d] = "réponse vide"; koT[d] = Date.now(); renderTVIfOpen(); })
+      .catch(e => { koCache[d] = false; koErr[d] = String((e && e.message) || "réseau"); koT[d] = Date.now(); renderTVIfOpen(); });
   }
   const koDay = m => new Date(m.start).toISOString().slice(0, 10);
   function koFind(m) {   // null = kooora indisponible (on retombe sur les autres sources) ; [] = aucune chaîne sûre ; sinon liste des chaînes
@@ -2705,6 +2710,8 @@ body{overflow-x:clip}
       return '<div class="tv-card' + (done ? " done" : "") + '"><div class="m-row' + (live ? " live" : "") + '"><div class="m-date">' + when + '</div><div class="m-home">' + esc(m.home) + crest(m.hl, m.home) + '</div><div class="m-score' + (m.state === "pre" ? " next" : "") + '">' + mid + '</div><div class="m-away">' + crest(m.al, m.away) + esc(m.away) + '</div></div>' + (chs ? '<div class="tv-ch">' + chs + '</div>' : '') + dbg + '</div>';
     };
     box.innerHTML = grouped(L, rowFn, false, true);
+    const kd = [...new Set(L.map(koDay))].filter(d => koCache[d] === false);
+    if (kd.length) box.insertAdjacentHTML("afterbegin", '<div class="note" style="font-size:.72rem;opacity:.7;padding:4px 6px">Détail des chaînes indisponible pour le moment (' + esc(kd.map(d => koErr[d] || "erreur").join(", ")) + ') — chaînes principales affichées.</div>');
   }
   const TV_FAQ = [
     ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Le programme ne montre que les matchs des 10 compétitions de la barre (Ligue des champions, Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Europa League, Conference League, Liga Portugal, Botola Pro). Pour chaque match, il affiche ensemble beIN SPORTS, Arryadia ou Sport TV selon la compétition, puis toutes les autres chaînes annoncées par la source (Espagne, Italie, France, Europe…), quand elles sont disponibles. Vérifiez toujours la grille de la chaîne le jour du match."],
