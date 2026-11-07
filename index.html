@@ -885,12 +885,12 @@ body{overflow-x:clip}
 .lang-links a{color:var(--text-muted,#9aa6bd);text-decoration:none}.lang-links a[aria-current]{color:var(--accent,#3b82f6);font-weight:700}
 /* Bouton de langue (drapeau + code) : taille fixe, sur la ligne du titre en mobile, aucun décalage au chargement */
 .lang-wrap{position:relative;flex:0 0 auto}
-.lang-btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:#0d1524;color:#fff;font:700 .8rem/1 Inter,'Inter Fallback',Arial,sans-serif;cursor:pointer}
-.lang-btn .fl,.lang-menu .fl{width:20px;height:20px;flex:0 0 20px;display:block}
-.lang-btn .chev{width:12px;height:12px}
-.lang-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:300;min-width:190px;background:#0d1524;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:4px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.lang-btn{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 8px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:#0d1524;color:#fff;font:700 .7rem/1 Inter,'Inter Fallback',Arial,sans-serif;cursor:pointer}
+.lang-btn .fl{width:15px;height:15px;flex:0 0 15px;display:block}.lang-menu .fl{width:18px;height:18px;flex:0 0 18px;display:block}
+.lang-btn .chev{width:10px;height:10px}
+.lang-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:300;min-width:165px;background:#0d1524;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:4px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
 .lang-menu[hidden]{display:none}
-.lang-menu a{display:flex;align-items:center;gap:10px;height:40px;padding:0 10px;border-radius:8px;color:#fff;text-decoration:none;font-size:.9rem;font-weight:600}
+.lang-menu a{display:flex;align-items:center;gap:9px;height:34px;padding:0 9px;border-radius:8px;color:#fff;text-decoration:none;font-size:.82rem;font-weight:600}
 .lang-menu a:hover,.lang-menu a[aria-current]{background:rgba(34,197,94,.15)}
 html[dir=rtl] .lang-menu{right:auto;left:0}
 @media(max-width:700px){.header-content h1{order:1}.lang-wrap{order:2;margin-left:auto}.header-actions{order:3;flex:0 0 100%;justify-content:flex-end}}
