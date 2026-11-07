@@ -2621,7 +2621,7 @@ body{overflow-x:clip}
       if (x.sub === "Diffusion" && out.some(o => tvKey(o.label) === tvKey(x.label))) return;
       out.push(x);
     });
-    return out;
+    return out.filter(c => !(/bein/i.test(c.label) && /mena/i.test(c.sub || '')));   // beIN MENA écartées
   }
   // ---------- kooora : toutes les chaînes annoncées pour chaque match (Worker footlive3 → CFG.KOORA_URL) ----------
   // Pour chaque match, on cherche le même match sur kooora (même compétition, même heure, noms d'équipes en arabe via un dictionnaire).
@@ -2717,7 +2717,12 @@ body{overflow-x:clip}
     });
     tvLoad(tvDay); const KG = tvCache[tvDay] || null;
     L.forEach(m => koLoad(koDay(m)));
-    for (let i = L.length - 1; i >= 0; i--) if (!tvAllChannels(L[i], KG).length) L.splice(i, 1);   // match sans chaîne : écarté de la page
+    if (L.some(m => koCache[koDay(m)] === null)) { box.innerHTML = '<div class="empty">Chargement du programme…</div>'; return; }
+    for (let i = L.length - 1; i >= 0; i--) {   // on ne garde que les matchs avec une vraie chaîne : confirmée par kooora, ou Arryadia pour la Botola Pro
+      const m = L[i], ko = koFind(m), c = tvAllChannels(m, KG).length;
+      const real = Array.isArray(ko) && ko.length ? c > 0 : ko === null ? (c > 0 && mp(m) <= 9) : (mp(m) === 9 && c > 0);
+      if (!real) L.splice(i, 1);
+    }
     if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match avec chaîne annoncée ce jour-là." : "Chargement du programme…") + '</div>'; return; }
     const crest = (l, n) => l ? '<img class="m-logo" src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     const rowFn = m => {
