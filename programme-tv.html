@@ -750,9 +750,12 @@ h1{will-change:opacity}
 .tv-line[data-id]{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .tv-t{flex:none;min-width:44px;font-size:.95rem;font-weight:800;color:var(--accent)}
 .tv-t.live{color:var(--live-red);font-size:.8rem}
-.tv-nm{flex:1;min-width:0;font-size:.88rem;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tv-nm em{font-style:normal;font-weight:800;color:var(--text-muted);padding:0 2px}
-.tv-nm small{font-size:.66rem;font-weight:500;color:var(--text-muted);margin-left:4px}
+.tv-nm{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.tv-tm{display:flex;align-items:center;gap:8px;min-width:0}
+.tv-tm .m-logo,.tv-tm .m-ph{width:20px;height:20px;flex:none}
+.tv-n{flex:1;min-width:0;font-size:.88rem;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tv-s{flex:none;font-size:.95rem;font-weight:800;min-width:16px;text-align:right}
+.tv-t small{display:block;font-size:.6rem;font-weight:500;color:var(--text-muted)}
 .tv-lgs{display:flex;align-items:center;gap:4px;flex:none}
 .tv-lg i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.62rem;font-weight:900;color:#fff;position:relative;overflow:hidden}
 .tv-lg i img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:2px;box-sizing:border-box}
@@ -2727,15 +2730,15 @@ body{overflow-x:clip}
     const crest = (l, n) => l ? '<img class="m-logo" src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     const rowFn = m => {
       const live = m.state === "in", done = m.state === "post";
-      const mid = m.state === "pre" ? "-" : (m.h ?? 0) + " - " + (m.a ?? 0);
-      const when = live ? '<span class="tv-t live">● ' + esc(m.label || "DIRECT") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + '</span>';
+      const sc = v => m.state === "pre" ? "" : '<b class="tv-s">' + (v ?? 0) + '</b>';
+      const when = live ? '<span class="tv-t live">● ' + esc(m.label || "DIRECT") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
       const lgo = c => '<span class="tv-lg" title="' + esc(c.label) + '"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i></span>';
       const badge = c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + (c.sub ? '<small>' + esc(c.sub) + '</small>' : '') + '</span></span>';
       const chl = tvAllChannels(m, KG), TV_VIS = 2, isOpen = tvOpen.has(m.id);
       const logos = chl.length ? '<span class="tv-lgs">' + chl.slice(0, TV_VIS).map(lgo).join("") + '<span class="tv-chev" aria-hidden="true">' + (isOpen ? "⌃" : "⌄") + '</span></span>' : "";
       const more = chl.length ? '<div class="tv-more"' + (isOpen ? "" : " hidden") + '>' + chl.map(badge).join("") + '</div>' : "";
       const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
-      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm">' + esc(m.home) + ' <em>' + mid + '</em> ' + esc(m.away) + (done ? ' <small>Terminé</small>' : '') + '</span>' + logos + '</div>' + more + dbg + '</div>';
+      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm"><span class="tv-tm">' + crest(m.hl, m.home) + '<span class="tv-n">' + esc(m.home) + '</span>' + sc(m.h) + '</span><span class="tv-tm">' + crest(m.al, m.away) + '<span class="tv-n">' + esc(m.away) + '</span>' + sc(m.a) + '</span></span>' + logos + '</div>' + more + dbg + '</div>';
     };
     box.innerHTML = grouped(L, rowFn, false, true);
     const kd = [...new Set(L.map(koDay))].filter(d => koCache[d] === false);
