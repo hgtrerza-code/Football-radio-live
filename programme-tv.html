@@ -835,7 +835,7 @@ body{overflow-x:clip}
 }
 
 /* Bouton de détails : rond plein, flèche vers le bas (pivote quand le détail est ouvert) */
-.m-wrap .m-date .chev,.m-wrap>.m-row .m-date .chev{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#04210f;font-size:0;line-height:0;margin-left:auto;vertical-align:middle;flex:none;transition:transform .2s,box-shadow .2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.m-wrap .m-date .chev,.m-wrap>.m-row .m-date .chev{appearance:none;-webkit-appearance:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#04210f;font-size:0;line-height:0;margin-left:auto;vertical-align:middle;flex:none;transition:transform .2s,box-shadow .2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .m-wrap .m-date .chev::before{content:"";width:8px;height:8px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg) translate(-1px,-1px)}
 .m-wrap.open .chev{transform:rotate(180deg)}
 .m-wrap .m-row:hover .chev{box-shadow:0 0 0 3px rgba(34,197,94,.25)}
@@ -846,6 +846,34 @@ body{overflow-x:clip}
 .tv-lgs .tv-chev::before{content:"";width:8px;height:8px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg) translate(-1px,-1px)}
 .tv-line[aria-expanded="true"] .tv-chev{transform:rotate(180deg)}
 .tv-line:hover .tv-chev{box-shadow:0 0 0 3px rgba(34,197,94,.25)}
+</style>
+<style id="live-fix">
+/* Direct : pastille rouge animée à côté des minutes */
+.ldot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live-red,#ef4444);margin-right:5px;vertical-align:middle;animation:ldot 1.4s infinite}
+@keyframes ldot{0%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}70%{box-shadow:0 0 0 6px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+@media (prefers-reduced-motion:reduce){.ldot{animation:none}}
+/* Match terminé : mention à côté de l'heure */
+.m-ft{color:var(--text-muted);font-weight:700;font-size:.66rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.m-live{white-space:nowrap}
+.m-wrap .m-date .m-ft{margin-left:auto;margin-right:6px;align-self:center}
+.m-wrap .m-date .m-ft+.chev{margin-left:0}
+@media (min-width:601px){.m-wrap>.m-row .m-d{line-height:1.3}.m-wrap>.m-row{grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr) 90px}}
+/* Score : vert uniquement pendant le match ; une fois terminé, aucune couleur */
+.m-row:not(.live) .m-score:not(.next),.m-row:not(.live) .m-score .s1,.m-row:not(.live) .m-score .s2{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--text-main)}
+/* Programme TV : noms sur toute la largeur (option B) + direct bien visible */
+.tv-card .tv-line{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"t lgs" "nm nm";align-items:center;gap:2px 8px;padding:8px 0 10px;min-height:0}
+.tv-card .tv-t{grid-area:t;display:flex;align-items:center;gap:8px;min-width:0;flex:none;justify-self:start}
+.tv-card .tv-t small{display:inline;margin:0;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.tv-card .tv-lgs{grid-area:lgs}
+.tv-card .tv-nm{grid-area:nm;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tv-card .tv-vs{display:none}
+.tv-card .tv-nm>.tv-tm{justify-content:flex-start;text-align:left;padding:2px 0}
+.tv-card .tv-nm>.tv-tm .m-logo,.tv-card .tv-nm>.tv-tm .m-ph{order:0}
+.tv-card .tv-nm>.tv-tm .tv-n{order:1;text-align:left;font-size:.95rem;font-weight:600;-webkit-line-clamp:2}
+.tv-card .tv-nm>.tv-tm .tv-s{order:2;text-align:right;font-size:1rem}
+.tv-card .tv-t.live{color:var(--live-red);font-size:.8rem;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.35);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.tv-card.live{border-color:rgba(239,68,68,.45);background:linear-gradient(90deg,rgba(239,68,68,.10),var(--bg-card) 55%);box-shadow:inset 3px 0 0 var(--live-red)}
+.tv-card.live .tv-s{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -881,10 +909,10 @@ body{overflow-x:clip}
                     <button data-tab="results"><span class="ic ic-goal"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7M8 15l1.5 1.5L12 14M14 9h3M14 16h3"/></svg></span> Résultats</button>
                     <button data-tab="next"><span class="ic ic-ball"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span> À venir</button>
                 </div>
-                <select class="region-select" id="league-filter"><option value="all">🌍 Toutes les ligues</option></select>
+                <select class="region-select" id="league-filter" aria-label="Filtrer par compétition"><option value="all">🌍 Toutes les ligues</option></select>
             </div>
             <div class="daystrip" id="daystrip"></div>
-            <div class="search-box"><input type="text" id="search" placeholder="🔍 Rechercher une équipe..."></div>
+            <div class="search-box"><input type="text" id="search" aria-label="Rechercher une équipe" placeholder="🔍 Rechercher une équipe..."></div>
         </div>
         <div id="matches"><div class="sk tall"></div><div class="sk tall"></div><div class="sk"></div><div class="sk"></div></div>
         <p class="note" id="static-note"></p>
@@ -1172,12 +1200,13 @@ body{overflow-x:clip}
                     .catch(() => window.__n365(id, 599, ""));
             });
         }
-        const nk = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(fc|cf|afc|sc|ac|as|ud|cd|sd|club|de|the)\b/g, "").replace(/[^a-z0-9]/g, "");
+        const _nkM = new Map(); const nk = s => { s = String(s || ""); let v = _nkM.get(s); if (v === undefined) { v = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(fc|cf|afc|sc|ac|as|ud|cd|sd|club|de|the)\b/g, "").replace(/[^a-z0-9]/g, ""); if (_nkM.size > 30000) _nkM.clear(); _nkM.set(s, v); } return v; };
         const sameTeam = (a, b) => { a = nk(a); b = nk(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
         const C365_CODE = { England: "gb-eng", Scotland: "gb-sct", Wales: "gb-wls", "Northern Ireland": "gb-nir", Turkiye: "tr", USA: "us", UAE: "ae", Europe: "eu", Spain: "es", Germany: "de", Italy: "it", France: "fr" };
         const C365_FR = { "gb-eng": "Angleterre", "gb-sct": "Écosse", "gb-wls": "Pays de Galles", "gb-nir": "Irlande du Nord", eu: "Europe" };
         const C365_CONT = { Asia: ["Asie", "🌏"], Africa: ["Afrique", "🌍"], "North America": ["Amérique du Nord", "🌎"], "South America": ["Amérique du Sud", "🌎"], International: ["Monde", "🌐"], America: ["Amérique", "🌎"], Olympics: ["Monde", "🌐"] };
-        function c365Info(cn) {
+        const _c365M = Object.create(null); function c365Info(cn) { return _c365M[cn] || (_c365M[cn] = c365InfoRaw(cn)); }
+        function c365InfoRaw(cn) {
             if (C365_CONT[cn]) return { fr: C365_CONT[cn][0], code: "", emo: C365_CONT[cn][1] };
             const code = C365_CODE[cn] || ((ISO_NAME.find(r => r[0].test(cn)) || [])[1]) || "";
             let fr = C365_FR[code] || cn;
@@ -1198,7 +1227,7 @@ body{overflow-x:clip}
             if (n365Fresh(d)) j = ck.j; else { j = JSON.parse(await n365Get(url)); n365Cache[d] = { t: Date.now(), j }; }
             if (!Array.isArray(j.games)) throw new Error("format de réponse inattendu");
             const comps = new Map((j.competitions || []).map(c => [c.id, c])), ctry = new Map((j.countries || []).map(c => [c.id, c]));
-            const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0; const put365 = o => { const ix = out.findIndex(x => x.id === o.id); if (ix >= 0) out[ix] = o; else out.push(o); };
+            const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0; const baseT = base.map(x => [x, x.tsdb ? NaN : new Date(x.start).getTime()]), oidx = new Map(); out.forEach((x, i) => { if (!oidx.has(x.id)) oidx.set(x.id, i); }); const put365 = o => { const ix = oidx.get(o.id); if (ix !== undefined) out[ix] = o; else oidx.set(o.id, out.push(o) - 1); };
             j.games.forEach(g => {
                 const hc = g.homeCompetitor || {}, ac = g.awayCompetitor || {}; if (!hc.name || !ac.name || !g.startTime) return;
                 const tvOf = Array.isArray(g.tvNetworks) ? g.tvNetworks.map(n => String((n && n.name) || n || "")).filter(Boolean) : [];
@@ -1207,7 +1236,7 @@ body{overflow-x:clip}
                 S365_LG[key] = { disp: inf.fr + " · " + cname, code: inf.code, emo: inf.emo };
                 const lgl = "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2/v5/Competitions/light/" + g.competitionId;
                 const t0 = new Date(g.startTime).getTime();
-                const e = base.find(x => !x.tsdb && Math.abs(new Date(x.start).getTime() - t0) < 4 * 3600e3 && sameTeam(x.home, hc.name) && sameTeam(x.away, ac.name));
+                const e = (baseT.find(p => Math.abs(p[1] - t0) < 4 * 3600e3 && sameTeam(p[0].home, hc.name) && sameTeam(p[0].away, ac.name)) || [])[0];
                 if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; if (tvOf.length) e.tv = tvOf; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
                 const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon/i.test(st);
                 const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
@@ -1483,19 +1512,19 @@ body{overflow-x:clip}
         const phSpan = n => `<span class="m-ph" style="background:hsl(${phHue(n)},45%,32%)">${esc(phIni(n))}</span>`;
         const logo = (u, n) => u ? `<img class="m-logo" src="${esc(String(u).replace(/w=64&h=64/, "w=40&h=40"))}" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="${esc(n || "")}" onerror="window.flPh(this)">` : (n ? phSpan(n) : "");
         const open = new Set(), cache = {};   // cache[id] = { html, t, loading }
-        const chev = '<span class="chev">▸</span>';
+        const chev = '<button type="button" class="chev" aria-label="Afficher les détails du match" aria-expanded="false"></button>';
         function wrap(m, row) {
             const c = cache[m.id];
-            return `<div class="m-wrap ${open.has(m.id) ? "open" : ""}" data-id="${esc(m.id)}">${row}<div class="m-detail">${c ? c.html : ""}</div></div>`;
+            if (open.has(m.id)) row = row.replace('aria-expanded="false"', 'aria-expanded="true"'); return `<div class="m-wrap ${open.has(m.id) ? "open" : ""}" data-id="${esc(m.id)}">${row}<div class="m-detail">${c ? c.html : ""}</div></div>`;
         }
         function liveRow(m) {
-            return wrap(m, `<div class="m-row live${goalCls(m)}"><div class="m-date">${goalBadge(m)}<span class="m-live">● ${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
+            return wrap(m, `<div class="m-row live${goalCls(m)}"><div class="m-date">${goalBadge(m)}<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
         }
         function rowHTML(m) {
             const d = new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
             const mid = m.state === "pre" ? (m.off ? esc(m.label) : "vs") : `${m.h ?? 0} - ${m.a ?? 0}`;
-            const when = goalBadge(m) + (m.state === "in" ? `<span class="m-live">● ${esc(m.label)}</span>` : `${d}<br>${hhmm(m.start)}`);
-            return wrap(m, `<div class="m-row ${m.state === "in" ? "live" : ""}${goalCls(m)}"><div class="m-date">${when}${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score ${m.state === "pre" ? "next" : ""}">${mid}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div>${m.state === "pre" ? `<span class="m-t">${m.off ? esc(m.label) : hhmm(m.start)}</span>` : ""}${m.state === "in" ? "" : `<span class="m-d">${d}</span>`}</div>`);
+            const when = goalBadge(m) + (m.state === "in" ? `<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>` : `${d}<br>${hhmm(m.start)}` + (m.state === "post" ? `<span class="m-ft">Terminé</span>` : ""));
+            return wrap(m, `<div class="m-row ${m.state === "in" ? "live" : ""}${goalCls(m)}"><div class="m-date">${when}${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score ${m.state === "pre" ? "next" : ""}">${mid}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div>${m.state === "pre" ? `<span class="m-t">${m.off ? esc(m.label) : hhmm(m.start)}</span>` : ""}${m.state === "in" ? "" : m.state === "post" ? `<span class="m-d">${d}<br>${hhmm(m.start)}</span>` : `<span class="m-d">${d}</span>`}</div>`);
         }
         // ===== Détails du match (ESPN summary) =====
         const FR = { possessionPct: "Possession (%)", totalShots: "Tirs", shotsOnTarget: "Tirs cadrés", blockedShots: "Tirs bloqués", shotPct: "Tirs cadrés (%)", wonCorners: "Corners", foulsCommitted: "Fautes commises", offsides: "Hors-jeu", yellowCards: "Cartons jaunes", redCards: "Cartons rouges", saves: "Arrêts du gardien", totalPasses: "Passes", accuratePasses: "Passes réussies", passPct: "Passes réussies (%)", effectiveTackles: "Tacles réussis", totalTackles: "Tacles", tacklePct: "Tacles réussis (%)", interceptions: "Interceptions", totalCrosses: "Centres", accurateCrosses: "Centres réussis", crossPct: "Centres réussis (%)", totalLongBalls: "Longs ballons", accurateLongBalls: "Longs ballons réussis", longballPct: "Longs ballons réussis (%)", effectiveClearance: "Dégagements réussis", totalClearance: "Dégagements", penaltyKickGoals: "Penalties marqués", penaltyKickShots: "Penalties tirés", shotAssists: "Passes décisives de tir", goalAssists: "Passes décisives", ownGoals: "Contre son camp", totalGoals: "Buts" };
@@ -1989,7 +2018,7 @@ body{overflow-x:clip}
             const w = row.closest(".m-wrap"); if (!w) return;
             const id = w.dataset.id, on = !open.has(id);
             on ? open.add(id) : open.delete(id);
-            document.querySelectorAll('.m-wrap[data-id="' + CSS.escape(id) + '"]').forEach(x => x.classList.toggle("open", on));
+            document.querySelectorAll('.m-wrap[data-id="' + CSS.escape(id) + '"]').forEach(x => { x.classList.toggle("open", on); const b = x.querySelector(".chev"); if (b) b.setAttribute("aria-expanded", on ? "true" : "false"); });
             if (on) { paintDetail(id); const c = cache[id], m = all().find(x => x.id === id); if (!c || !c.t || (m && m.state !== "post" && Date.now() - c.t > 20000)) loadDetail(id); }
         });
         // ===== Classement des compétitions par importance =====
@@ -2787,14 +2816,14 @@ body{overflow-x:clip}
     const rowFn = m => {
       const live = m.state === "in", done = m.state === "post";
       const sc = v => m.state === "pre" ? "" : '<b class="tv-s">' + (v ?? 0) + '</b>';
-      const when = live ? '<span class="tv-t live">● ' + esc(m.label || "DIRECT") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
+      const when = live ? '<span class="tv-t live"><i class="ldot" aria-hidden="true"></i>' + esc(m.label || "DIRECT") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
       const lgo = c => '<span class="tv-lg" title="' + esc(c.label) + '"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i></span>';
       const badge = c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + (c.sub ? '<small>' + esc(c.sub) + '</small>' : '') + '</span></span>';
       const chl = tvAllChannels(m, KG), TV_VIS = 2, isOpen = tvOpen.has(m.id);
       const logos = chl.length ? '<span class="tv-lgs">' + chl.slice(0, TV_VIS).map(lgo).join("") + '<span class="tv-chev" aria-hidden="true">' + (isOpen ? "⌃" : "⌄") + '</span></span>' : "";
       const more = chl.length ? '<div class="tv-more"' + (isOpen ? "" : " hidden") + '>' + chl.map(badge).join("") + '</div>' : "";
       const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
-      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm"><span class="tv-tm">' + crest(m.hl, m.home) + '<span class="tv-n">' + esc(m.home) + '</span>' + sc(m.h) + '</span><span class="tv-vs" aria-hidden="true">vs</span><span class="tv-tm">' + crest(m.al, m.away) + '<span class="tv-n">' + esc(m.away) + '</span>' + sc(m.a) + '</span></span>' + logos + '</div>' + more + dbg + '</div>';
+      return '<div class="tv-card' + (done ? " done" : "") + (live ? " live" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm"><span class="tv-tm">' + crest(m.hl, m.home) + '<span class="tv-n">' + esc(m.home) + '</span>' + sc(m.h) + '</span><span class="tv-vs" aria-hidden="true">vs</span><span class="tv-tm">' + crest(m.al, m.away) + '<span class="tv-n">' + esc(m.away) + '</span>' + sc(m.a) + '</span></span>' + logos + '</div>' + more + dbg + '</div>';
     };
     box.innerHTML = grouped(L, rowFn, false, true);
     const kd = [...new Set(L.map(koDay))].filter(d => koCache[d] === false);
@@ -2896,10 +2925,10 @@ body{overflow-x:clip}
   };
   $("main").insertAdjacentHTML("beforeend",
     '<div id="table-view" hidden><div class="sec-title">🏆 Classements <small>tous les championnats, mis à jour automatiquement</small></div>' +
-    '<div class="toolbar"><select class="region-select" id="tb-league">' + lgOptions() + '</select><button class="btn-action" id="tb-reload">↻ Actualiser</button></div>' +
+    '<div class="toolbar"><select class="region-select" id="tb-league" aria-label="Choisir une compétition">' + lgOptions() + '</select><button class="btn-action" id="tb-reload">↻ Actualiser</button></div>' +
     '<div id="tb-box" class="standings"></div><p class="note">Vos équipes favorites ⭐ sont surlignées dans les classements.</p>' + TABSEO.table + '</div>' +
     '<div id="news-view" hidden><div class="sec-title">📰 Actualités <small>sources gratuites : ESPN, BBC Sport, The Guardian, Sky Sports, L’Équipe</small></div>' +
-    '<div class="toolbar"><select class="region-select" id="nw-src">' + NEWS_SRC.map(g => '<optgroup label="' + esc(g[0]) + '">' + g[1].map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join("") + '</optgroup>').join("") + '</select><button class="btn-action" id="nw-reload">↻ Actualiser</button></div>' +
+    '<div class="toolbar"><select class="region-select" id="nw-src" aria-label="Choisir une source d\'actualités">' + NEWS_SRC.map(g => '<optgroup label="' + esc(g[0]) + '">' + g[1].map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join("") + '</optgroup>').join("") + '</select><button class="btn-action" id="nw-reload">↻ Actualiser</button></div>' +
     '<div id="nw-box" class="news-grid"></div>' + TABSEO.news + '</div>');
 
   // Classements
@@ -2990,7 +3019,7 @@ body{overflow-x:clip}
   const RB_CC = [["", "🌍 Tous les pays"], ["MA", "Maroc"], ["FR", "France"], ["ES", "Espagne"], ["GB", "Royaume-Uni"], ["IT", "Italie"], ["DE", "Allemagne"], ["PT", "Portugal"], ["BE", "Belgique"], ["NL", "Pays-Bas"], ["TR", "Turquie"], ["EG", "Égypte"], ["DZ", "Algérie"], ["TN", "Tunisie"], ["SA", "Arabie saoudite"], ["QA", "Qatar"], ["AE", "Émirats arabes unis"], ["BR", "Brésil"], ["AR", "Argentine"], ["MX", "Mexique"], ["US", "États-Unis"]];
   const rg = $("#radio-groups");
   rg.insertAdjacentHTML("beforebegin",
-    '<div class="rf"><div class="rf-row"><input type="text" id="rb-q" placeholder="🔍 Rechercher une radio (nom, ville…)" autocomplete="off"><select class="region-select" id="rb-cc">' + RB_CC.map(c => '<option value="' + c[0] + '">' + esc(c[1]) + '</option>').join("") + '</select></div>' +
+    '<div class="rf"><div class="rf-row"><input type="text" id="rb-q" aria-label="Rechercher une radio" placeholder="🔍 Rechercher une radio (nom, ville…)" autocomplete="off"><select class="region-select" id="rb-cc" aria-label="Choisir un pays">' + RB_CC.map(c => '<option value="' + c[0] + '">' + esc(c[1]) + '</option>').join("") + '</select></div>' +
     '<label class="chk"><input type="checkbox" id="rb-sport" checked> Radios sport uniquement</label></div>' +
     '<div class="rgt">🔎 Radios du monde entier <span class="rgs" style="margin:0">(Radio-Browser.info, mis à jour automatiquement)</span></div><div class="rlist" id="rb-box"></div>');
   async function rbSearch() {
@@ -3871,7 +3900,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
   } catch (e) { }
 })();
 </script>
-<script>(function(){try{var V="2026-11-06b";if(localStorage.getItem("fl_swv")===V)return;localStorage.setItem("fl_swv",V);var p=[];if(navigator.serviceWorker)p.push(navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}));if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n)}))}));Promise.all(p).then(function(){location.reload()})}catch(e){}})();</script><script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
+<script>(function(){try{var V="2026-11-07";if(localStorage.getItem("fl_swv")===V)return;localStorage.setItem("fl_swv",V);var sw=navigator.serviceWorker;if(!sw||!sw.controller)return;if(/Lighthouse|PageSpeed|Chrome-Lighthouse/i.test(navigator.userAgent))return;var p=[sw.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))})];if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c)}))}));Promise.all(p).then(function(){location.reload()})}catch(e){}})();</script><script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
 <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Choix des cookies publicitaires" hidden>
 <div class="cb-in"><p>FootLive Pro est gratuit grâce à la publicité. Nos partenaires publicitaires peuvent utiliser des cookies pour afficher des annonces. Acceptez-vous ? Vous pouvez changer d’avis à tout moment via « Gérer les cookies » en bas de page. <a href="confidentialite.html">En savoir plus</a></p>
