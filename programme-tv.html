@@ -767,6 +767,22 @@ h1{will-change:opacity}
 .tv-badge small{font-size:.66rem;font-weight:500;color:var(--text-muted)}
 .tv-more{display:flex;flex-flow:row wrap;gap:6px;padding:8px 0 10px;border-top:1px solid var(--border)}
 .tv-more[hidden]{display:none}
+
+/* PC : équipes centrées, séparées par « vs » (mobile inchangé) */
+.tv-vs{display:none}
+@media(min-width:601px){
+  .tv-nm{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;column-gap:14px;row-gap:0}
+  .tv-vs{display:block;font-size:.75rem;font-weight:800;letter-spacing:1px;text-transform:lowercase;color:var(--text-muted);text-align:center;min-width:28px}
+  .tv-tm{gap:8px}
+  .tv-nm>.tv-tm:first-child{justify-content:flex-end;text-align:right}
+  .tv-nm>.tv-tm:first-child .tv-n{order:1;text-align:right}
+  .tv-nm>.tv-tm:first-child .m-logo,.tv-nm>.tv-tm:first-child .m-ph{order:2}
+  .tv-nm>.tv-tm:first-child .tv-s{order:3;text-align:left}
+  .tv-nm>.tv-tm:last-child{justify-content:flex-start;text-align:left}
+  .tv-nm>.tv-tm:last-child .tv-s{order:1;text-align:right}
+  .tv-nm>.tv-tm:last-child .m-logo,.tv-nm>.tv-tm:last-child .m-ph{order:2}
+  .tv-nm>.tv-tm:last-child .tv-n{order:3;text-align:left}
+}
 </style>
 <script>
 /* Consentement publicité : les scripts pub ne se chargent qu'après acceptation */
@@ -881,7 +897,7 @@ body{overflow-x:clip}
             PROXY2_URL: "https://footlive2.hgtrerza.workers.dev",   // 2e Worker (worker-court.js) : vidéos YouTube (/yt) et 365Scores (/365)
             KOORA_URL: "https://footlive3.hgtrerza.workers.dev",   // 3e Worker (worker-kooora.js) : chaînes de chaque match lues sur kooora.com
             ESPN: "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
-            DAYS_BEFORE: 2, DAYS_AFTER: 4,           // fenêtre de jours chargée autour d'aujourd'hui
+            DAYS_BEFORE: 2, DAYS_AFTER: 6,           // fenêtre de jours chargée autour d'aujourd'hui
             LIVE_REFRESH_MS: 30 * 1000,              // jour en cours (direct)
             OTHER_REFRESH_MS: 30 * 60 * 1000         // autres jours
         };
@@ -1993,6 +2009,13 @@ body{overflow-x:clip}
         const mp = m => (_mpMemo[m.lg] ??= mainPri(m.lg, [m]));
         // Programme TV : version stricte, le pays doit être confirmé pour les noms ambigus (Premier League, Serie A, Ligue 1, Bundesliga)
         const _tvMemo = Object.create(null);
+        const TV_CUPS = [/\bfa cup\b/i, /coupe de france|french cup/i, /copa del rey/i, /coppa italia/i, /dfb[- ]?pokal|german cup/i, /\befl cup\b|carabao|english league cup/i];   // FA Cup, Coupe de France, Copa del Rey, Coppa Italia, DFB-Pokal, EFL Cup
+        const TV_CUP_NO = /women|feminin|féminin|femenin|frauen|\bu-?\d{2}\b|youth|junior|reserve|primavera|amateur|trophy|vase|qualif|serie [cd]\b/i;
+        function tvCupIdx(m) {   // index de la grande coupe (0..5), -1 sinon
+            const raw = String(m.lg || "").split(String.fromCharCode(8203))[0].trim(); let d = ""; try { d = lgDisp(m.lg, [m]); } catch (e) { }
+            const t = raw + " | " + d; if (TV_CUP_NO.test(t)) return -1;
+            return TV_CUPS.findIndex(r => r.test(t));
+        }
         function tvMain(m) {
             const k = m.lg; if (k in _tvMemo) return _tvMemo[k];
             const raw = String(k || "").split(String.fromCharCode(8203))[0].trim();
@@ -2007,6 +2030,7 @@ body{overflow-x:clip}
                     ok = re.test(pref) || !!(sl && sl.code === MAIN_CODE[MAIN10[i][0]]) || (!!cn && re.test(cn));
                 }
             }
+            if (!ok && tvCupIdx(m) >= 0) ok = true;
             return (_tvMemo[k] = ok);
         }
         const isMain10 = m => mp(m) < 99;   // vrai = match d'une des 10 compétitions de la barre
@@ -2631,10 +2655,12 @@ body{overflow-x:clip}
   // En cas de doute, aucune chaîne n'est affichée (jamais de chaîne supposée).
   const koN = s => String(s || "").normalize("NFKD").replace(/[\u064B-\u065F\u0670\u0640]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/ؤ/g, "و").replace(/ئ/g, "ي").replace(/[^\u0600-\u06FFa-z0-9 ]/gi, " ").replace(/\s+/g, " ").trim().toLowerCase();
   const KO_LGX = {};
+  const KO_CUP_AR = [/كاس الاتحاد الانجليزي/, /كاس فرنسا/, /كاس (ملك )?اسبانيا|كاس الملك/, /كاس ايطاليا/, /كاس المانيا/, /كاس الرابطه الانجليزيه|كاس رابطه الاندييه الانجليزيه|كاس كاراباو/];   // même ordre que TV_CUPS
   [["الدوري الإنجليزي الممتاز", 1], ["الدوري الإسباني", 2], ["الدوري الإيطالي", 3], ["الدوري الألماني", 4], ["الدوري الفرنسي", 5], ["الدوري البرتغالي الممتاز", 8], ["الدوري المغربي الممتاز", 9]].forEach(([a, i]) => { KO_LGX[koN(a)] = i; });
   function koLg(name) {   // index MAIN10 de la compétition kooora, -1 si inconnue
     const n = koN(name); if (!n || /للسيدات|تحت \d|شباب|الدرجه/.test(n)) return -1;
     if (/ابطال اوروبا/.test(n)) return 0; if (/المؤتمر/.test(n)) return 7; if (n === koN("الدوري الأوروبي")) return 6;
+    const cp = KO_CUP_AR.findIndex(r => r.test(n)); if (cp >= 0) return 10 + cp;
     return KO_LGX[n] ?? -1;
   }
   const KO_TEAMS = {};
@@ -2668,10 +2694,11 @@ body{overflow-x:clip}
       .catch(e => { koCache[d] = false; koErr[d] = String((e && e.message) || "réseau"); koT[d] = Date.now(); renderTVIfOpen(); });
   }
   const koDay = m => new Date(m.start).toISOString().slice(0, 10);
+  const tvLi = m => { const i = mp(m); if (i < 99) return i; const j = tvCupIdx(m); return j >= 0 ? 10 + j : 99; };   // 0..9 : les 10 compétitions ; 10..15 : grandes coupes ; 99 : autre
   function koFind(m) {   // null = kooora indisponible (on retombe sur les autres sources) ; [] = aucune chaîne sûre ; sinon liste des chaînes
-    const li = mp(m), t = new Date(m.start).getTime(); if (!koUrl() || li > 9 || !t) return null;
+    const li = tvLi(m), t = new Date(m.start).getTime(); if (!koUrl() || li >= 99 || !t) return null;
     const arr = koCache[koDay(m)]; if (arr === null) return []; if (!Array.isArray(arr)) return null;
-    const slot = all().filter(x => mp(x) === li && Math.abs(new Date(x.start).getTime() - t) <= 15 * 60e3).length;
+    const slot = all().filter(x => tvLi(x) === li && Math.abs(new Date(x.start).getTime() - t) <= 15 * 60e3).length;
     let best = null, bs = -1, tie = false;
     arr.forEach(k => {
       if (koLg(k.c) !== li) return;
@@ -2723,7 +2750,7 @@ body{overflow-x:clip}
     if (L.some(m => koCache[koDay(m)] === null)) { box.innerHTML = '<div class="empty">Chargement du programme…</div>'; return; }
     for (let i = L.length - 1; i >= 0; i--) {   // on ne garde que les matchs avec une vraie chaîne : confirmée par kooora, ou Arryadia pour la Botola Pro
       const m = L[i], ko = koFind(m), c = tvAllChannels(m, KG).length;
-      const real = Array.isArray(ko) && ko.length ? c > 0 : ko === null ? (c > 0 && mp(m) <= 9) : (mp(m) === 9 && c > 0);
+      const real = Array.isArray(ko) && ko.length ? c > 0 : ko === null ? (c > 0 && tvLi(m) < 99) : (tvLi(m) === 9 && c > 0);
       if (!real) L.splice(i, 1);
     }
     if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match avec chaîne annoncée ce jour-là." : "Chargement du programme…") + '</div>'; return; }
@@ -2738,7 +2765,7 @@ body{overflow-x:clip}
       const logos = chl.length ? '<span class="tv-lgs">' + chl.slice(0, TV_VIS).map(lgo).join("") + '<span class="tv-chev" aria-hidden="true">' + (isOpen ? "⌃" : "⌄") + '</span></span>' : "";
       const more = chl.length ? '<div class="tv-more"' + (isOpen ? "" : " hidden") + '>' + chl.map(badge).join("") + '</div>' : "";
       const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
-      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm"><span class="tv-tm">' + crest(m.hl, m.home) + '<span class="tv-n">' + esc(m.home) + '</span>' + sc(m.h) + '</span><span class="tv-tm">' + crest(m.al, m.away) + '<span class="tv-n">' + esc(m.away) + '</span>' + sc(m.a) + '</span></span>' + logos + '</div>' + more + dbg + '</div>';
+      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm"><span class="tv-tm">' + crest(m.hl, m.home) + '<span class="tv-n">' + esc(m.home) + '</span>' + sc(m.h) + '</span><span class="tv-vs" aria-hidden="true">vs</span><span class="tv-tm">' + crest(m.al, m.away) + '<span class="tv-n">' + esc(m.away) + '</span>' + sc(m.a) + '</span></span>' + logos + '</div>' + more + dbg + '</div>';
     };
     box.innerHTML = grouped(L, rowFn, false, true);
     const kd = [...new Set(L.map(koDay))].filter(d => koCache[d] === false);
