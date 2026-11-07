@@ -1,6 +1,6 @@
 {
  "date": "2026-11-07",
- "generated": "2026-11-07T08:48:07.530Z",
+ "generated": "2026-11-07T10:40:01.161Z",
  "extra": 167,
  "matches": [
   {
@@ -384,12 +384,12 @@
    "id": "401888255",
    "lg": "Süper Lig",
    "start": "2026-11-07T10:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "9'",
    "home": "Eyupspor",
    "away": "Kocaelispor",
    "h": 0,
-   "a": 0,
+   "a": 1,
    "venue": "Esenyurt Necmi Kadioglu Stadi",
    "place": "Istanbul, Türkiye"
   },
@@ -748,8 +748,8 @@
    "id": "401877560",
    "lg": "J1 League",
    "start": "2026-11-07T07:00Z",
-   "state": "in",
-   "label": "88'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "Kashiwa Reysol",
    "away": "Kawasaki Frontale",
    "h": 2,
