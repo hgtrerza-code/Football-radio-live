@@ -744,9 +744,10 @@ h1{will-change:opacity}
 #tv-days button small{font-size:.62rem}
 #tv-days button b{font-size:.95rem}
 @media(min-width:601px){#tv-list{max-width:900px;margin:0 auto}}
-.tv-card{margin-bottom:5px;background:var(--bg-card);border-radius:12px;padding:0 .7rem}
+.tv-card{margin-bottom:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0 .7rem}
 .tv-card.done{opacity:.7}
 .tv-line{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 0}
+.tv-line[data-id]{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .tv-t{flex:none;min-width:44px;font-size:.95rem;font-weight:800;color:var(--accent)}
 .tv-t.live{color:var(--live-red);font-size:.8rem}
 .tv-nm{flex:1;min-width:0;font-size:.88rem;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -755,14 +756,13 @@ h1{will-change:opacity}
 .tv-lgs{display:flex;align-items:center;gap:4px;flex:none}
 .tv-lg i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.62rem;font-weight:900;color:#fff;position:relative;overflow:hidden}
 .tv-lg i img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:2px;box-sizing:border-box}
+.tv-chev{width:18px;text-align:center;font-size:1.1rem;line-height:1;color:var(--text-muted)}
 .tv-badge{display:inline-flex;align-items:center;gap:6px;padding:2px 10px 2px 2px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);font-weight:700;font-size:.74rem;color:#fff;white-space:nowrap}
 .tv-badge i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.62rem;font-weight:900;color:#fff;position:relative;overflow:hidden;flex:none}
 .tv-badge i img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:2px;box-sizing:border-box}
 .tv-badge span{display:flex;flex-direction:row;align-items:baseline;gap:5px;line-height:1.15}
 .tv-badge small{font-size:.66rem;font-weight:500;color:var(--text-muted)}
-.tv-more-btn{background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:999px;min-width:28px;height:24px;padding:0 7px;font:700 .72rem Inter,sans-serif;cursor:pointer;white-space:nowrap}
-.tv-more-btn:hover,.tv-more-btn[aria-expanded="true"]{color:var(--text-main);border-color:var(--accent)}
-.tv-more{display:flex;flex-flow:row wrap;gap:6px;padding:2px 0 10px}
+.tv-more{display:flex;flex-flow:row wrap;gap:6px;padding:8px 0 10px;border-top:1px solid var(--border)}
 .tv-more[hidden]{display:none}
 </style>
 <script>
@@ -2691,11 +2691,12 @@ body{overflow-x:clip}
   let tvDay = "";
   const tvOpen = new Set();   // matchs dont la liste complète des chaînes est dépliée (conservé entre deux rafraîchissements)
   document.addEventListener("click", e => {
-    const b = e.target.closest(".tv-more-btn"); if (!b) return;
-    const id = b.dataset.id, on = !tvOpen.has(id); on ? tvOpen.add(id) : tvOpen.delete(id);
-    const card = b.closest(".tv-card"), box = card && card.querySelector(".tv-more"); if (box) box.hidden = !on;
-    b.textContent = on ? "\u2303" : b.dataset.lb; b.setAttribute("aria-expanded", on);
+    const ln = e.target.closest(".tv-line[data-id]"); if (!ln) return;
+    const id = ln.dataset.id, on = !tvOpen.has(id); on ? tvOpen.add(id) : tvOpen.delete(id);
+    const box = ln.parentElement.querySelector(".tv-more"); if (box) box.hidden = !on;
+    ln.setAttribute("aria-expanded", on); const c = ln.querySelector(".tv-chev"); if (c) c.textContent = on ? "⌃" : "⌄";
   });
+  document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".tv-line[data-id]")) { e.preventDefault(); e.target.click(); } });
   function tvDays() {
     const t = new Date(); return [0, 1, 2, 3, 4, 5, 6].map(o => { const d = new Date(t); d.setDate(t.getDate() + o); return { k: d.toLocaleDateString("sv-SE"), lb: o === 0 ? "AUJ." : o === 1 ? "DEM." : d.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "").toUpperCase(), n: d.getDate(), o }; });
   }
@@ -2716,20 +2717,20 @@ body{overflow-x:clip}
     });
     tvLoad(tvDay); const KG = tvCache[tvDay] || null;
     L.forEach(m => koLoad(koDay(m)));
-    if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match important ce jour-là." : "Chargement du programme…") + '</div>'; return; }
+    for (let i = L.length - 1; i >= 0; i--) if (!tvAllChannels(L[i], KG).length) L.splice(i, 1);   // match sans chaîne : écarté de la page
+    if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match avec chaîne annoncée ce jour-là." : "Chargement du programme…") + '</div>'; return; }
     const crest = (l, n) => l ? '<img class="m-logo" src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     const rowFn = m => {
       const live = m.state === "in", done = m.state === "post";
       const mid = m.state === "pre" ? "-" : (m.h ?? 0) + " - " + (m.a ?? 0);
-      const when = live ? '<span class="tv-t live">\u25cf ' + esc(m.label || "DIRECT") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + '</span>';
+      const when = live ? '<span class="tv-t live">● ' + esc(m.label || "DIRECT") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + '</span>';
       const lgo = c => '<span class="tv-lg" title="' + esc(c.label) + '"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i></span>';
       const badge = c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + (c.sub ? '<small>' + esc(c.sub) + '</small>' : '') + '</span></span>';
-      const chl = tvAllChannels(m, KG), TV_VIS = 3, isOpen = tvOpen.has(m.id);
-      const lb = chl.length > TV_VIS ? "+" + (chl.length - TV_VIS) : "\u2304";
-      const logos = chl.length ? '<span class="tv-lgs">' + chl.slice(0, TV_VIS).map(lgo).join("") + '<button type="button" class="tv-more-btn" data-id="' + esc(m.id) + '" data-lb="' + lb + '" aria-label="Voir toutes les cha\u00eenes" aria-expanded="' + isOpen + '">' + (isOpen ? "\u2303" : lb) + '</button></span>' : "";
+      const chl = tvAllChannels(m, KG), TV_VIS = 2, isOpen = tvOpen.has(m.id);
+      const logos = chl.length ? '<span class="tv-lgs">' + chl.slice(0, TV_VIS).map(lgo).join("") + '<span class="tv-chev" aria-hidden="true">' + (isOpen ? "⌃" : "⌄") + '</span></span>' : "";
       const more = chl.length ? '<div class="tv-more"' + (isOpen ? "" : " hidden") + '>' + chl.map(badge).join("") + '</div>' : "";
-      const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demand\u00e9" : a === null ? "en cours" : a === false ? "\u00c9CHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
-      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="tv-line">' + when + '<span class="tv-nm">' + esc(m.home) + ' <em>' + mid + '</em> ' + esc(m.away) + (done ? ' <small>Termin\u00e9</small>' : '') + '</span>' + logos + '</div>' + more + dbg + '</div>';
+      const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
+      return '<div class="tv-card' + (done ? " done" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm">' + esc(m.home) + ' <em>' + mid + '</em> ' + esc(m.away) + (done ? ' <small>Terminé</small>' : '') + '</span>' + logos + '</div>' + more + dbg + '</div>';
     };
     box.innerHTML = grouped(L, rowFn, false, true);
     const kd = [...new Set(L.map(koDay))].filter(d => koCache[d] === false);
