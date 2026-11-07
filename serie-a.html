@@ -1032,12 +1032,13 @@ body{overflow-x:clip}
                     .catch(() => window.__n365(id, 599, ""));
             });
         }
-        const nk = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(fc|cf|afc|sc|ac|as|ud|cd|sd|club|de|the)\b/g, "").replace(/[^a-z0-9]/g, "");
+        const _nkM = new Map(); const nk = s => { s = String(s || ""); let v = _nkM.get(s); if (v === undefined) { v = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(fc|cf|afc|sc|ac|as|ud|cd|sd|club|de|the)\b/g, "").replace(/[^a-z0-9]/g, ""); if (_nkM.size > 30000) _nkM.clear(); _nkM.set(s, v); } return v; };
         const sameTeam = (a, b) => { a = nk(a); b = nk(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
         const C365_CODE = { England: "gb-eng", Scotland: "gb-sct", Wales: "gb-wls", "Northern Ireland": "gb-nir", Turkiye: "tr", USA: "us", UAE: "ae", Europe: "eu", Spain: "es", Germany: "de", Italy: "it", France: "fr" };
         const C365_FR = { "gb-eng": "Angleterre", "gb-sct": "Écosse", "gb-wls": "Pays de Galles", "gb-nir": "Irlande du Nord", eu: "Europe" };
         const C365_CONT = { Asia: ["Asie", "🌏"], Africa: ["Afrique", "🌍"], "North America": ["Amérique du Nord", "🌎"], "South America": ["Amérique du Sud", "🌎"], International: ["Monde", "🌐"], America: ["Amérique", "🌎"], Olympics: ["Monde", "🌐"] };
-        function c365Info(cn) {
+        const _c365M = Object.create(null); function c365Info(cn) { return _c365M[cn] || (_c365M[cn] = c365InfoRaw(cn)); }
+        function c365InfoRaw(cn) {
             if (C365_CONT[cn]) return { fr: C365_CONT[cn][0], code: "", emo: C365_CONT[cn][1] };
             const code = C365_CODE[cn] || ((ISO_NAME.find(r => r[0].test(cn)) || [])[1]) || "";
             let fr = C365_FR[code] || cn;
@@ -1058,7 +1059,7 @@ body{overflow-x:clip}
             if (n365Fresh(d)) j = ck.j; else { j = JSON.parse(await n365Get(url)); n365Cache[d] = { t: Date.now(), j }; }
             if (!Array.isArray(j.games)) throw new Error("format de réponse inattendu");
             const comps = new Map((j.competitions || []).map(c => [c.id, c])), ctry = new Map((j.countries || []).map(c => [c.id, c]));
-            const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0; const put365 = o => { const ix = out.findIndex(x => x.id === o.id); if (ix >= 0) out[ix] = o; else out.push(o); };
+            const base = byDay[d] || [], out = base.slice(); let added = 0, fixed = 0; const baseT = base.map(x => [x, x.tsdb ? NaN : new Date(x.start).getTime()]), oidx = new Map(); out.forEach((x, i) => { if (!oidx.has(x.id)) oidx.set(x.id, i); }); const put365 = o => { const ix = oidx.get(o.id); if (ix !== undefined) out[ix] = o; else oidx.set(o.id, out.push(o) - 1); };
             j.games.forEach(g => {
                 const hc = g.homeCompetitor || {}, ac = g.awayCompetitor || {}; if (!hc.name || !ac.name || !g.startTime) return;
                 const c = comps.get(g.competitionId) || {}, cname = String(g.competitionDisplayName || c.name || "Football");
@@ -1066,7 +1067,7 @@ body{overflow-x:clip}
                 S365_LG[key] = { disp: inf.fr + " · " + cname, code: inf.code, emo: inf.emo };
                 const lgl = "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2/v5/Competitions/light/" + g.competitionId;
                 const t0 = new Date(g.startTime).getTime();
-                const e = base.find(x => !x.tsdb && Math.abs(new Date(x.start).getTime() - t0) < 4 * 3600e3 && sameTeam(x.home, hc.name) && sameTeam(x.away, ac.name));
+                const e = (baseT.find(p => Math.abs(p[1] - t0) < 4 * 3600e3 && sameTeam(p[0].home, hc.name) && sameTeam(p[0].away, ac.name)) || [])[0];
                 if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
                 const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon/i.test(st);
                 const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
