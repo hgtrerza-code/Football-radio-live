@@ -845,6 +845,19 @@ body{overflow-x:clip}
 .tv-line[aria-expanded="true"] .tv-chev{transform:rotate(180deg)}
 .tv-line:hover .tv-chev{box-shadow:0 0 0 3px rgba(34,197,94,.25)}
 </style>
+<style id="live-fix">
+/* Direct : pastille rouge animée à côté des minutes */
+.ldot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live-red,#ef4444);margin-right:5px;vertical-align:middle;animation:ldot 1.4s infinite}
+@keyframes ldot{0%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}70%{box-shadow:0 0 0 6px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+@media (prefers-reduced-motion:reduce){.ldot{animation:none}}
+/* Match terminé : mention à côté de l'heure */
+.m-ft{color:var(--text-muted);font-weight:700;font-size:.66rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+@media (max-width:600px){.m-date .m-ft{align-self:flex-end;padding-bottom:1px}}
+.m-live{white-space:nowrap}
+@media (min-width:601px){.m-date .m-ft{display:none}.m-wrap>.m-row .m-d{line-height:1.3}.m-wrap>.m-row{grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr) 90px}}
+/* Score : vert uniquement pendant le match ; une fois terminé, aucune couleur */
+.m-row:not(.live) .m-score:not(.next),.m-row:not(.live) .m-score .s1,.m-row:not(.live) .m-score .s2{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--text-main)}
+</style>
 </head>
 <body>
 <script>try{if(sessionStorage.getItem("fl_splash"))document.documentElement.classList.add("nosplash");else sessionStorage.setItem("fl_splash","1")}catch(e){}</script><div id="splash"><div class="lg"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="c12s"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c12s)"><rect x="0" y="0" width="512" height="512" rx="0" fill="#0a0f1e" /><g fill="none" stroke="#22c55e" stroke-width="6"><circle cx="256" cy="210" r="150" stroke-opacity=".25"/><circle cx="256" cy="210" r="115" stroke-opacity=".5"/></g><g transform="translate(124.0 82.4) scale(2.2)"><circle cx="60" cy="58" r="34" fill="#fff"/><polygon points="60,40 74,50 69,67 51,67 46,50" fill="#0a0f1e"/><path d="M60 40V24M74 50l14-6M69 67l9 13M51 67l-9 13M46 50l-14-6" stroke="#0a0f1e" stroke-width="3" stroke-linecap="round" fill="none"/></g><text x="256" y="420" font-size="62" fill="#fff" letter-spacing="0" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">FootLive Pro</text><text x="256" y="474" font-size="28" fill="#22c55e" letter-spacing="8" font-family="Inter,Arial,sans-serif" font-weight="900" text-anchor="middle">EN DIRECT</text></g></svg></div><div class="nm">Footlive <span>Pro</span></div><div class="tg">Scores en direct · Radio sport</div><div class="ld"><i></i></div></div>
@@ -1519,13 +1532,13 @@ body{overflow-x:clip}
             if (open.has(m.id)) row = row.replace('aria-expanded="false"', 'aria-expanded="true"'); return `<div class="m-wrap ${open.has(m.id) ? "open" : ""}" data-id="${esc(m.id)}">${row}<div class="m-detail">${c ? c.html : ""}</div></div>`;
         }
         function liveRow(m) {
-            return wrap(m, `<div class="m-row live${goalCls(m)}"><div class="m-date">${goalBadge(m)}<span class="m-live">● ${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
+            return wrap(m, `<div class="m-row live${goalCls(m)}"><div class="m-date">${goalBadge(m)}<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
         }
         function rowHTML(m) {
             const d = new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
             const mid = m.state === "pre" ? (m.off ? esc(m.label) : "vs") : `${m.h ?? 0} - ${m.a ?? 0}`;
-            const when = goalBadge(m) + (m.state === "in" ? `<span class="m-live">● ${esc(m.label)}</span>` : `${d}<br>${hhmm(m.start)}`);
-            return wrap(m, `<div class="m-row ${m.state === "in" ? "live" : ""}${goalCls(m)}"><div class="m-date">${when}${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score ${m.state === "pre" ? "next" : ""}">${mid}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div>${m.state === "pre" ? `<span class="m-t">${m.off ? esc(m.label) : hhmm(m.start)}</span>` : ""}${m.state === "in" ? "" : `<span class="m-d">${d}</span>`}</div>`);
+            const when = goalBadge(m) + (m.state === "in" ? `<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>` : `${d}<br>${hhmm(m.start)}` + (m.state === "post" ? ` <span class="m-ft">Terminé</span>` : ""));
+            return wrap(m, `<div class="m-row ${m.state === "in" ? "live" : ""}${goalCls(m)}"><div class="m-date">${when}${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score ${m.state === "pre" ? "next" : ""}">${mid}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div>${m.state === "pre" ? `<span class="m-t">${m.off ? esc(m.label) : hhmm(m.start)}</span>` : ""}${m.state === "in" ? "" : m.state === "post" ? `<span class="m-d">${d}<br>${hhmm(m.start)} · <span class="m-ft">Terminé</span></span>` : `<span class="m-d">${d}</span>`}</div>`);
         }
         // ===== Détails du match (ESPN summary) =====
         const FR = { possessionPct: "Possession (%)", totalShots: "Tirs", shotsOnTarget: "Tirs cadrés", blockedShots: "Tirs bloqués", shotPct: "Tirs cadrés (%)", wonCorners: "Corners", foulsCommitted: "Fautes commises", offsides: "Hors-jeu", yellowCards: "Cartons jaunes", redCards: "Cartons rouges", saves: "Arrêts du gardien", totalPasses: "Passes", accuratePasses: "Passes réussies", passPct: "Passes réussies (%)", effectiveTackles: "Tacles réussis", totalTackles: "Tacles", tacklePct: "Tacles réussis (%)", interceptions: "Interceptions", totalCrosses: "Centres", accurateCrosses: "Centres réussis", crossPct: "Centres réussis (%)", totalLongBalls: "Longs ballons", accurateLongBalls: "Longs ballons réussis", longballPct: "Longs ballons réussis (%)", effectiveClearance: "Dégagements réussis", totalClearance: "Dégagements", penaltyKickGoals: "Penalties marqués", penaltyKickShots: "Penalties tirés", shotAssists: "Passes décisives de tir", goalAssists: "Passes décisives", ownGoals: "Contre son camp", totalGoals: "Buts" };
