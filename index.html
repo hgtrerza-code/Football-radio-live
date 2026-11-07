@@ -832,6 +832,19 @@ body{overflow-x:clip}
   .m-wrap>.m-row .m-t{grid-column:2;grid-row:1;justify-self:center;align-self:end;display:block;font-weight:800;font-size:.95rem;line-height:1.2;color:var(--accent);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:999px;padding:2px 12px;white-space:nowrap}
   .m-wrap>.m-row .m-d{grid-column:2;grid-row:2;justify-self:center;align-self:start;display:block;margin-top:2px;font-size:.65rem;font-weight:600;color:var(--text-muted);white-space:nowrap}
 }
+
+/* Bouton de détails : rond plein, flèche vers le bas (pivote quand le détail est ouvert) */
+.m-wrap .m-date .chev,.m-wrap>.m-row .m-date .chev{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#04210f;font-size:0;line-height:0;margin-left:auto;vertical-align:middle;flex:none;transition:transform .2s,box-shadow .2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.m-wrap .m-date .chev::before{content:"";width:8px;height:8px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg) translate(-1px,-1px)}
+.m-wrap.open .chev{transform:rotate(180deg)}
+.m-wrap .m-row:hover .chev{box-shadow:0 0 0 3px rgba(34,197,94,.25)}
+@media (min-width:601px){.m-wrap>.m-row .m-date{display:flex;justify-content:flex-end;align-items:center;gap:6px}}
+
+/* Programme TV : même bouton rond plein pour ouvrir les chaînes */
+.tv-lgs .tv-chev{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#04210f;font-size:0;line-height:0;margin-left:4px;flex:none;transition:transform .2s,box-shadow .2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.tv-lgs .tv-chev::before{content:"";width:8px;height:8px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg) translate(-1px,-1px)}
+.tv-line[aria-expanded="true"] .tv-chev{transform:rotate(180deg)}
+.tv-line:hover .tv-chev{box-shadow:0 0 0 3px rgba(34,197,94,.25)}
 </style>
 </head>
 <body>
