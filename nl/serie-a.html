@@ -245,7 +245,7 @@
         .ic-live { width: 10px; height: 10px; border-radius: 50%; background: var(--live-red); animation: pulse-animation 1.5s infinite, ic-blink 1s ease-in-out infinite; }
         .btn-live:hover .ic-live, .btn-live.active .ic-live { background: #fff; }
         @keyframes ic-blink { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .55; transform: scale(1.3); } }
-        .live-count { background: rgba(0,0,0,.3); border-radius: 10px; padding: 0 7px; font-size: .7rem; font-weight: 800; }
+        .live-count { background: rgba(0,0,0,.3); border-radius: 10px; padding: 0 7px; font-size: .7rem; font-weight: 800;  min-width: 2.2em; display: inline-block; text-align: center; }
         @media (prefers-reduced-motion: reduce) { .ic-live { animation: none; } }
         #goal-toasts { position: fixed; top: 0; left: 0; right: 0; z-index: 1100; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
         .goal-toast { pointer-events: auto; cursor: pointer; display: flex; align-items: stretch; width: 100%; background: linear-gradient(90deg, #0b1b3a 0%, #12305f 100%); color: #fff; border-bottom: 3px solid var(--accent); box-shadow: 0 8px 28px rgba(0,0,0,.6); overflow: hidden; animation: tv-in .5s cubic-bezier(.2,.9,.3,1.1); }
@@ -866,7 +866,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             PROXY2_URL: "https://footlive2.hgtrerza.workers.dev",   // 2e Worker (worker-court.js) : vidéos YouTube (/yt) et 365Scores (/365)
             ESPN: "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
             DAYS_BEFORE: 2, DAYS_AFTER: 4,           // fenêtre de jours chargée autour d'aujourd'hui
-            LIVE_REFRESH_MS: 30 * 1000,              // jour en cours (direct)
+            LIVE_REFRESH_MS: 15 * 1000,              // jour en cours (direct)
             OTHER_REFRESH_MS: 30 * 60 * 1000         // autres jours
         };
         // Bascule automatique : si le Worker PROXY_URL est en panne, ne connaît pas la route ou répond autre chose que du JSON,
@@ -1223,9 +1223,9 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const pre = (N365 && days.includes(todayK)) ? prefetch365(todayK) : null;   // en parallèle d'ESPN
             const res = await Promise.allSettled(days.map(d => loadDay(d).then(async () => {
                 if (d === todayK) {
-                    if (pre) { await Promise.race([pre, new Promise(r => setTimeout(r, 2500))]); if (n365Fresh(d)) { try { await merge365(d); } catch (e) { } } }   // fusion instantanée depuis le cache : plus de « 41 puis 45 »
+                    if (pre) { await Promise.race([pre, new Promise(r => setTimeout(r, 600))]); if (n365Fresh(d)) { try { await merge365(d); } catch (e) { } } }   // fusion instantanée depuis le cache : plus de « 41 puis 45 »
                     lastErr = ""; lastOk = Date.now();
-                    try { liveN = all().filter(m => m.state === "in").length; } catch (e) { }
+                    // compteur « en direct » : volontairement NON calculé ici (affiche « … » jusqu'à la valeur finale, pour éviter 41 → 45)
                     renderAll();
                 }   // compteur provisoire immédiat ; la valeur exacte arrive quand les sources complémentaires ont répondu
             })));
@@ -1253,6 +1253,9 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const sameT = (k1, t1, k2, t2) => same(k1, k2) || t1.some(w => t2.some(v => w === v || (Math.min(w.length, v.length) >= 6 && (w.startsWith(v) || v.startsWith(w)))));   // « Hamburger SV » / « Hamburg SV » : un mot qui commence par l'autre (6 lettres mini)
             const s = ents.flatMap(e => e[1]).filter(m => !isBlockedMatch(m)).map(m => { const t = new Date(m.start).getTime(); return [m, isNaN(t) ? 0 : t]; }).sort((p, q) => p[1] - q[1]);
             const keep = [], idx = new Map(), ids = new Map();
+            // Ne jamais fusionner un match masculin avec un match féminin / jeunes / réserve (« FC Barcelona » est contenu dans « FC Barcelona Femení »)
+            const YW_N = /\b(women|femen|femin|féminin|frauen|damen|ladies|youth|reserve|castilla)|\((?:w|f)\)|\s(?:w|b|ii)$|\bu-?\d{2}\b/i, YW_L = /women|femin|femen|\bliga f\b|\bu-?\d{2}\b|youth|reserve/i;
+            const yw = x => YW_N.test(String(x.home || "")) || YW_N.test(String(x.away || "")) || YW_L.test(String(x.lg || "").replace(/\u200b.*$/, ""));
             const addIdx = (km, i) => { km.th.concat(km.ta, [km.h, km.a]).forEach(w => { if (!w) return; let l = idx.get(w); if (!l) { l = []; idx.set(w, l); } l.push(i); }); };
             for (const [m, t] of s) {
                 const km = kk(m); let dup = -1;
@@ -1263,6 +1266,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                     km.th.concat(km.ta, [km.h, km.a]).forEach(w => { const l = idx.get(w); if (l) l.forEach(i => cands.add(i)); });
                     for (const i of cands) {
                         const o = keep[i][0], gh = !!(o.gh || m.gh); if (Math.abs(t - keep[i][1]) >= (gh ? 10 * 86400e3 : 12 * 3600e3)) continue;   // GitHub : dates parfois périmées (match reporté) -> fenêtre plus large
+                        if (yw(o) !== yw(m)) continue;
                         const ko = kk(o);
                         if ((sameT(ko.h, ko.th, km.h, km.th) && sameT(ko.a, ko.ta, km.a, km.ta)) || (!gh && sameT(ko.h, ko.th, km.a, km.ta) && sameT(ko.a, ko.ta, km.h, km.th)) || (!gh && Math.abs(t - keep[i][1]) < 3 * 3600e3 && ((ko.h && ko.h === km.h) || (ko.a && ko.a === km.a)))) { dup = i; break; }
                     }
@@ -2304,7 +2308,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         // onglet masqué : on ralentit (1 rafraîchissement sur 4) au lieu de recharger toutes les 30 s pour rien
         let hidTick = 0;
         let liveBusy = 0;
-        setInterval(() => { if (document.hidden && ++hidTick % 4) return; if (liveBusy && Date.now() - liveBusy < 25000) return; liveBusy = Date.now(); refresh(allDays(0, 0), "light").then(refreshOpen).catch(() => { }).finally(() => { liveBusy = 0; }); }, CFG.LIVE_REFRESH_MS);
+        setInterval(() => { if (document.hidden && ++hidTick % 4) return; if (liveBusy && Date.now() - liveBusy < 12000) return; liveBusy = Date.now(); refresh(allDays(0, 0), "light").then(refreshOpen).catch(() => { }).finally(() => { liveBusy = 0; }); }, CFG.LIVE_REFRESH_MS);
         setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); }, CFG.OTHER_REFRESH_MS);
         document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0), "light"); });
     </script>
