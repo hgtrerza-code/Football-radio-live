@@ -948,6 +948,10 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 @media(max-width:700px){.header-content h1,#net-badge{order:1}.hdr-capsule{order:2}}
 @media (prefers-reduced-motion:reduce){.header-actions .goal-toggle{animation:none}}
 .goal-toggle:focus-visible,.lang-wrap .lang-btn:focus-visible{outline:2px solid #2ee59d;outline-offset:2px}
+/* Matchs en direct : barre gauche + contour verts (accueil, compétitions, Programme TV) */
+.m-row.live,.m-wrap>.m-row.live{border:1.5px solid var(--accent);border-left:4px solid var(--accent)}
+.match-card.live{border:1.5px solid var(--accent);border-left:4px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.tv-card.live{border:1.5px solid var(--accent);background:linear-gradient(90deg,rgba(46,229,157,.10),var(--bg-card) 55%);box-shadow:inset 3px 0 0 var(--accent)}
 </style>
 
 </head>
@@ -1023,9 +1027,6 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     <div id="radio-mini" role="region" aria-label="Lecteur radio"></div>
 
     </main>
-    <div class="container"><div class="ad-slot ad-300" aria-label="Publicité"><small>Publicité</small>
-<script>if(window.__ads){document.write("<script>atOptions={'key':'979f5cfaa63c2ae055449968d13984a3','format':'iframe','height':250,'width':300,'params':{}};<\/script><script src=\"https://czernik.org/22/979f5cfaa63c2ae055449968d13984a3\"><\/script>");}</script>
-    </div></div>
     <section class="container" aria-label="Présentation de FootLive Pro" style="margin:2rem auto 1rem;padding:1rem 16px;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">
         <h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">FootLive Pro : scores de football en direct, classements, actualités et radios sport</h2>
         <p class="byline" style="font-size:.8rem;margin-bottom:.8rem">Par <a href="a-propos.html" rel="author" style="color:var(--accent)">la rédaction FootLive Pro</a> · données mises à jour automatiquement pendant les matchs · <a href="a-propos.html" style="color:var(--accent)">À propos de FootLive Pro</a></p>
