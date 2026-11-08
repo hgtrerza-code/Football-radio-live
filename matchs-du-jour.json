@@ -1,6 +1,6 @@
 {
  "date": "2026-11-08",
- "generated": "2026-11-08T08:48:31.566Z",
+ "generated": "2026-11-08T10:40:20.132Z",
  "extra": 190,
  "matches": [
   {
@@ -514,8 +514,8 @@
    "id": "401888253",
    "lg": "Süper Lig",
    "start": "2026-11-08T10:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "10'",
    "home": "Caykur Rizespor",
    "away": "Erzurum BB",
    "h": 0,
@@ -774,11 +774,11 @@
    "id": "401877577",
    "lg": "J1 League",
    "start": "2026-11-08T08:00Z",
-   "state": "in",
-   "label": "45'",
+   "state": "post",
+   "label": "90'+13'",
    "home": "JEF United Ichihara-Chiba",
    "away": "Mito Hollyhock",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Fukuda Denshi Arena",
    "place": "Chiba, Japan"
