@@ -927,27 +927,26 @@ html[dir=rtl] #matches,html[dir=rtl] #hero{direction:ltr}
 html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
 </style>
 <style id="hdr-style-i">
-/* En-tête : une seule capsule = Direct (indicateur) | Buts (cloche + interrupteur) | FR */
-.hdr-capsule{margin-left:auto;display:inline-flex;align-items:center;gap:10px;flex:0 0 auto;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);border-radius:20px;padding:3px 12px}
+/* En-tête : Direct collé au titre ; à droite Buts (sans bordure, fond vert léger, halo qui pulse) et FR (sans bordure) */
+.header-content{justify-content:flex-start}
+#net-badge{flex:0 0 auto;margin-left:2px;background:none;border:0;border-radius:0;padding:0;color:#f87171;font-size:.7rem;letter-spacing:1px}
+#net-badge.bad{background:none;color:var(--yellow,#f59e0b)}
+.hdr-capsule{margin-left:auto;display:inline-flex;align-items:center;gap:12px;flex:0 0 auto}
 html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .hdr-capsule .header-actions{margin-left:0;flex:0 0 auto;order:0;min-height:0;gap:10px;flex-wrap:nowrap;justify-content:flex-start}
-.hdr-capsule .lang-wrap{order:0;margin-left:0;padding-left:10px;border-left:1px solid rgba(255,255,255,.18)}
-html[dir=rtl] .hdr-capsule .lang-wrap{padding-left:0;margin-right:0;padding-right:10px;border-left:0;border-right:1px solid rgba(255,255,255,.18)}
-.header-actions .status-badge{order:-1;background:none;border:0;border-radius:0;padding:0 10px 0 0;border-right:1px solid rgba(255,255,255,.18);color:#f87171;font-size:.7rem;letter-spacing:1px}
-.header-actions .status-badge.bad{background:none;color:var(--yellow,#f59e0b)}
-.header-actions .goal-toggle{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 2px;border:0;border-radius:6px;background:none;color:#e2e8f0;font-size:.78rem;font-weight:700;white-space:nowrap;animation:none}
+.hdr-capsule .lang-wrap{order:0;margin-left:0}
+.header-actions .goal-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 14px;border:0;border-radius:18px;background:rgba(46,229,157,.12);color:#2ee59d;font-size:.78rem;font-weight:700;white-space:nowrap;animation:gt-halo 1.8s infinite}
 .header-actions .goal-toggle.off{background:none;border:0;color:var(--text-muted,#9aa6bd);animation:none}
-.goal-toggle .gt-ic{flex:0 0 18px;width:18px;height:18px;color:#2ee59d;transform-origin:50% 10%;animation:gt-ring 3s ease-in-out infinite}
-.goal-toggle.off .gt-ic{color:#64748b;animation:none}
-@keyframes gt-ring{0%,55%,100%{transform:rotate(0)}60%{transform:rotate(16deg)}66%{transform:rotate(-16deg)}72%{transform:rotate(12deg)}78%{transform:rotate(-12deg)}84%{transform:rotate(0)}}
-.gt-sw{width:30px;height:18px;border-radius:9px;background:#2ee59d;position:relative;flex:0 0 30px;transition:background .2s}
-.gt-sw i{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#0b1020;transition:right .2s,left .2s}
+@keyframes gt-halo{0%{box-shadow:0 0 0 0 rgba(46,229,157,.6)}70%,100%{box-shadow:0 0 0 10px rgba(46,229,157,0)}}
+.goal-toggle .gt-ic{flex:0 0 18px;width:18px;height:18px}
+.gt-sw{width:28px;height:16px;border-radius:8px;background:#2ee59d;position:relative;flex:0 0 28px;transition:background .2s}
+.gt-sw i{position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#0b1020;transition:right .2s,left .2s}
 .goal-toggle.off .gt-sw{background:#475569}
 .goal-toggle.off .gt-sw i{right:auto;left:2px;background:#cbd5e1}
-.hdr-capsule .lang-wrap .lang-btn{height:30px;padding:0 2px;gap:6px;border:0;background:none;color:#e2e8f0;border-radius:6px;font-size:.78rem}
-.lang-wrap .lang-btn .fl{width:18px;height:18px;flex:0 0 18px}
-@media(max-width:700px){.header-content h1{order:1}.hdr-capsule{order:2}}
-@media (prefers-reduced-motion:reduce){.goal-toggle .gt-ic{animation:none}}
+.hdr-capsule .lang-wrap .lang-btn{height:36px;padding:0 6px;gap:6px;border:0;background:none;color:#e2e8f0;border-radius:8px;font-size:.78rem}
+.lang-wrap .lang-btn .fl{width:20px;height:20px;flex:0 0 20px}
+@media(max-width:700px){.header-content h1,#net-badge{order:1}.hdr-capsule{order:2}}
+@media (prefers-reduced-motion:reduce){.header-actions .goal-toggle{animation:none}}
 .goal-toggle:focus-visible,.lang-wrap .lang-btn:focus-visible{outline:2px solid #2ee59d;outline-offset:2px}
 </style>
 
@@ -2586,7 +2585,9 @@ html[dir=rtl] .hdr-capsule .lang-wrap{padding-left:0;margin-right:0;padding-righ
 
   // ---------- En-tête ----------
   $(".header-actions").insertAdjacentHTML("beforeend",
-    '<button type="button" id="goal-toggle" class="goal-toggle" aria-pressed="true"><svg class="gt-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg><span class="gt-t">Buts</span><span class="gt-sw" aria-hidden="true"><i></i></span></button><span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>');
+    '<button type="button" id="goal-toggle" class="goal-toggle" aria-pressed="true"><svg class="gt-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg><span class="gt-t">Buts</span><span class="gt-sw" aria-hidden="true"><i></i></span></button>');
+  $(".header-content h1").insertAdjacentHTML("afterend",
+    '<span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>');
   document.body.insertAdjacentHTML("beforeend",
     '<div id="offline-bar" hidden>📡 Hors connexion — affichage des dernières données enregistrées</div>' +
     '<button id="fab-top" aria-label="Remonter">↑</button>');
