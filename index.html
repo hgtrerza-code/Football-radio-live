@@ -926,6 +926,22 @@ html[dir=rtl] body{text-align:right}
 html[dir=rtl] #matches,html[dir=rtl] #hero{direction:ltr}
 html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
 </style>
+<style id="hdr-style-i">
+/* Style I : LIVE rouge plein + interrupteur Buts + langue */
+.header-actions .status-badge{order:-1;background:#ef4444;color:#fff;border:0;border-radius:4px;padding:3px 8px;font-size:.7rem;letter-spacing:1px}
+.header-actions .status-badge .pulse{background:#fff}
+.header-actions .status-badge .pulse::after{background:#fff}
+.header-actions .status-badge.bad{background:var(--yellow,#f59e0b);color:#1a1200}
+.header-actions .status-badge.bad .pulse{background:#1a1200}
+.header-actions .goal-toggle,.header-actions .goal-toggle.off{display:inline-flex;align-items:center;gap:7px;min-height:32px;background:none;border:0;border-radius:0;padding:0 4px;animation:none;color:var(--text-main,#e5e7eb);font-size:.78rem;font-weight:700}
+.header-actions .goal-toggle.off{color:var(--text-muted,#9aa6bd)}
+.gt-sw{width:34px;height:20px;border-radius:10px;background:#2ee59d;position:relative;flex:0 0 34px;transition:background .2s}
+.gt-sw i{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#0b1020;transition:right .2s,left .2s}
+.goal-toggle.off .gt-sw{background:#475569}
+.goal-toggle.off .gt-sw i{right:auto;left:2px;background:#cbd5e1}
+.goal-toggle:focus-visible{outline:2px solid #2ee59d;outline-offset:2px;border-radius:6px}
+</style>
+
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -2561,7 +2577,7 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
 
   // ---------- En-tête ----------
   $(".header-actions").insertAdjacentHTML("beforeend",
-    '<button type="button" id="goal-toggle" class="goal-toggle" aria-pressed="true"></button><span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>');
+    '<button type="button" id="goal-toggle" class="goal-toggle" aria-pressed="true"><span class="gt-sw" aria-hidden="true"><i></i></span><span class="gt-t">Buts</span></button><span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>');
   document.body.insertAdjacentHTML("beforeend",
     '<div id="offline-bar" hidden>📡 Hors connexion — affichage des dernières données enregistrées</div>' +
     '<button id="fab-top" aria-label="Remonter">↑</button>');
@@ -2573,7 +2589,7 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
     css.textContent = ".goal-toggle{background:var(--bg-card,#111827);border:1px solid var(--accent,#22c55e);color:inherit;border-radius:20px;padding:4px 10px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap}.goal-toggle.off{background:#2ee59d;border-color:#2ee59d;color:#04210f}.goal-toggle{animation:gt-shake 5s ease-in-out infinite}@keyframes gt-shake{0%,80%,100%{transform:translateX(0)}83%{transform:translateX(-5px)}86%{transform:translateX(5px)}89%{transform:translateX(-4px)}92%{transform:translateX(4px)}95%{transform:translateX(0)}}@media (prefers-reduced-motion:reduce){.goal-toggle{animation:none}}.sn-who{display:block;color:var(--accent,#22c55e);font-weight:800;font-size:.78rem;margin-top:2px}";
     document.head.appendChild(css);
     const btn = $("#goal-toggle");
-    const paint = () => { btn.textContent = cfg.goals ? "🔔 Buts : activés" : "🔕 Buts : désactivés"; btn.classList.toggle("off", !cfg.goals); btn.setAttribute("aria-pressed", String(cfg.goals)); btn.title = cfg.goals ? "Désactiver les notifications de buts" : "Activer les notifications de buts"; };
+    const paint = () => { btn.setAttribute("aria-label", cfg.goals ? "Notifications de buts activées" : "Notifications de buts désactivées"); btn.classList.toggle("off", !cfg.goals); btn.setAttribute("aria-pressed", String(cfg.goals)); btn.title = cfg.goals ? "Désactiver les notifications de buts" : "Activer les notifications de buts"; };
     paint();
     // Le choix est lu dans le stockage à chaque but : il s'applique à toutes les pages et à tous les onglets ouverts du site
     window.goalAlertsOn = () => { cfg.goals = LS.get("fl_goal_alerts", true) !== false; return cfg.goals; };
