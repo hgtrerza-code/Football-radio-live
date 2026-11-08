@@ -891,7 +891,7 @@ body{overflow-x:clip}
 .tv-card.live .tv-s{color:var(--accent)}
 /* PC : une seule ligne — heure | Équipe A (logo) vs (logo) Équipe B | chaînes */
 @media(min-width:601px){
-  .tv-card .tv-line{grid-template-columns:96px minmax(0,1fr) auto;grid-template-areas:"t nm lgs";gap:0 16px;padding:10px 0;min-height:56px}
+  .tv-card .tv-line{grid-template-columns:128px minmax(0,1fr) auto;grid-template-areas:"t nm lgs";gap:0 16px;padding:10px 0;min-height:56px}
   .tv-card .tv-nm{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;column-gap:14px;row-gap:0}
   .tv-card .tv-vs{display:block}
   .tv-card .tv-nm>.tv-tm{align-items:center;padding:0;white-space:nowrap}
@@ -953,6 +953,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .match-card.live{border:1.5px solid var(--accent);border-left:4px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .tv-card.live{border:1.5px solid var(--accent);background:linear-gradient(90deg,rgba(46,229,157,.10),var(--bg-card) 55%);box-shadow:inset 3px 0 0 var(--accent)}
 .m-dir{display:inline-block;background:var(--live-red);color:#fff;font-size:.55rem;font-weight:800;letter-spacing:.04em;line-height:1;padding:3px 5px;border-radius:4px;margin-right:6px;vertical-align:middle}
+.tv-card .tv-t.live .m-dir{margin-right:5px}
 </style>
 
 </head>
@@ -2940,7 +2941,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     const rowFn = m => {
       const live = m.state === "in", done = m.state === "post";
       const sc = v => m.state === "pre" ? "" : '<b class="tv-s">' + (v ?? 0) + '</b>';
-      const when = live ? '<span class="tv-t live"><i class="ldot" aria-hidden="true"></i>' + esc(m.label || "DIRECT") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
+      const when = live ? '<span class="tv-t live"><b class=m-dir>DIRECT</b>' + esc(m.label || "") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
       const lgo = c => '<span class="tv-lg" title="' + esc(c.label) + '"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i></span>';
       const badge = c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + (c.sub ? '<small>' + esc(c.sub) + '</small>' : '') + '</span></span>';
       const chl = tvAllChannels(m, KG), TV_VIS = 2, isOpen = tvOpen.has(m.id);
