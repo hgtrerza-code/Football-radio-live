@@ -976,7 +976,6 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             return base + "?dates=" + d + "&limit=1000";
         }
         async function loadDay(d) {
-            if (document.documentElement.dataset.comp === "premier-league") { if (!byDay[d]) byDay[d] = []; return; }   // page Premier League : 365Scores uniquement (ESPN non interrogé)
             let r;
             try { r = await fetch(endpoint(d)); } catch (e) { throw new Error("Connexion impossible aux scores (" + (CFG.PROXY_URL ? "vérifiez PROXY_URL" : "ESPN") + ") : " + e.message); }
             if (!r.ok) throw new Error("Le serveur de scores a répondu " + r.status + (CFG.PROXY_URL ? " (vérifiez PROXY_URL)" : ""));
@@ -1111,7 +1110,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                     .catch(() => window.__n365(id, 599, ""));
             });
         }
-        const _nkM = new Map(); const nk = s => { s = String(s || ""); let v = _nkM.get(s); if (v === undefined) { v = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(fc|cf|afc|sc|ac|as|ud|cd|sd|club|de|the)\b/g, "").replace(/[^a-z0-9]/g, ""); if (_nkM.size > 30000) _nkM.clear(); _nkM.set(s, v); } return v; };
+        const _nkM = new Map(); const nk = s => { s = String(s || ""); let v = _nkM.get(s); if (v === undefined) { v = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\bkoln\b/g, "cologne").replace(/\bmunchen\b/g, "munich").replace(/\bnurnberg\b/g, "nuremberg").replace(/\b(fc|cf|afc|sc|ac|as|ud|cd|sd|club|de|the)\b/g, "").replace(/[^a-z0-9]/g, ""); if (_nkM.size > 30000) _nkM.clear(); _nkM.set(s, v); } return v; };
         const sameTeam = (a, b) => { a = nk(a); b = nk(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
         const C365_CODE = { England: "gb-eng", Scotland: "gb-sct", Wales: "gb-wls", "Northern Ireland": "gb-nir", Turkiye: "tr", USA: "us", UAE: "ae", Europe: "eu", Spain: "es", Germany: "de", Italy: "it", France: "fr" };
         const C365_FR = { "gb-eng": "Angleterre", "gb-sct": "Écosse", "gb-wls": "Pays de Galles", "gb-nir": "Irlande du Nord", eu: "Europe" };
@@ -1268,7 +1267,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                     for (const i of cands) {
                         const o = keep[i][0], gh = !!(o.gh || m.gh); if (Math.abs(t - keep[i][1]) >= (gh ? 10 * 86400e3 : 12 * 3600e3)) continue;   // GitHub : dates parfois périmées (match reporté) -> fenêtre plus large
                         const ko = kk(o);
-                        if ((sameT(ko.h, ko.th, km.h, km.th) && sameT(ko.a, ko.ta, km.a, km.ta)) || (!gh && sameT(ko.h, ko.th, km.a, km.ta) && sameT(ko.a, ko.ta, km.h, km.th))) { dup = i; break; }
+                        if ((sameT(ko.h, ko.th, km.h, km.th) && sameT(ko.a, ko.ta, km.a, km.ta)) || (!gh && sameT(ko.h, ko.th, km.a, km.ta) && sameT(ko.a, ko.ta, km.h, km.th)) || (!gh && Math.abs(t - keep[i][1]) < 3 * 3600e3 && ((ko.h && ko.h === km.h) || (ko.a && ko.a === km.a)))) { dup = i; break; }
                     }
                 }
                 if (dup < 0) { keep.push([m, t]); ids.set(sid, keep.length - 1); addIdx(km, keep.length - 1); }
@@ -2905,7 +2904,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         const el = Date.now() - doneAt;
         if ((el >= 3000 && Date.now() - stable >= 1500) || el >= 8000) paintFirst(); else setTimeout(tick, 400);
       };
-      if (cpSlug === "premier-league") paintFirst(); else tick();   // 365Scores seul : pas de noms à corriger, on affiche tout de suite
+      tick();
     })();
   }
   if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) { const t0 = document.title; applyComp(ca); document.title = t0; } if (!COMP_STRICT[cpSlug]) hydrate(); }
