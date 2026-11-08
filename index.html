@@ -861,13 +861,13 @@ body{overflow-x:clip}
 .m-live{white-space:nowrap}
 .m-wrap .m-date .m-ft{margin-left:auto;margin-right:6px;align-self:center}
 .m-wrap .m-date .m-ft+.chev{margin-left:0}
-@media (min-width:601px){.m-wrap>.m-row .m-d{line-height:1.3}.m-wrap>.m-row{grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr) 90px}}
+@media (min-width:601px){.m-wrap>.m-row .m-d{line-height:1.3}.m-wrap>.m-row{grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr) 122px}}
 /* Score : vert uniquement pendant le match ; une fois terminé, aucune couleur */
 .m-row:not(.live) .m-score:not(.next),.m-row:not(.live) .m-score .s1,.m-row:not(.live) .m-score .s2{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--text-main)}
 /* Accueil PC : date toujours affichée à gauche des équipes (Aujourd'hui / Résultats / À venir) */
 .m-dl{display:none}
 @media (min-width:601px){
-  .m-wrap>.m-row.has-dl{grid-template-columns:92px minmax(0,1fr) 96px minmax(0,1fr) 90px}
+  .m-wrap>.m-row.has-dl{grid-template-columns:92px minmax(0,1fr) 96px minmax(0,1fr) 122px}
   .m-wrap>.m-row.has-dl .m-dl{display:block;grid-column:1;grid-row:1/span 2;align-self:center;text-align:left;font-size:.78rem;font-weight:700;color:var(--text-muted);white-space:nowrap;text-transform:capitalize}
   .m-wrap>.m-row.has-dl .m-home{grid-column:2}
   .m-wrap>.m-row.has-dl .m-away{grid-column:4}
@@ -952,6 +952,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .m-row.live,.m-wrap>.m-row.live{border:1.5px solid var(--accent);border-left:4px solid var(--accent)}
 .match-card.live{border:1.5px solid var(--accent);border-left:4px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .tv-card.live{border:1.5px solid var(--accent);background:linear-gradient(90deg,rgba(46,229,157,.10),var(--bg-card) 55%);box-shadow:inset 3px 0 0 var(--accent)}
+.m-dir{display:inline-block;background:var(--live-red);color:#fff;font-size:.55rem;font-weight:800;letter-spacing:.04em;line-height:1;padding:3px 5px;border-radius:4px;margin-right:6px;vertical-align:middle}
 </style>
 
 </head>
@@ -1633,12 +1634,12 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             if (open.has(m.id)) row = row.replace('aria-expanded="false"', 'aria-expanded="true"'); return `<div class="m-wrap ${open.has(m.id) ? "open" : ""}" data-id="${esc(m.id)}">${row}<div class="m-detail">${c ? c.html : ""}</div></div>`;
         }
         function liveRow(m) {
-            return wrap(m, `<div class="m-row live has-dl${goalCls(m)}"><div class="m-dl">${new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}</div><div class="m-date">${goalBadge(m)}<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
+            return wrap(m, `<div class="m-row live has-dl${goalCls(m)}"><div class="m-dl">${new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}</div><div class="m-date">${goalBadge(m)}<span class="m-live"><b class="m-dir">DIRECT</b>${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
         }
         function rowHTML(m) {
             const d = new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
             const mid = m.state === "pre" ? (m.off ? esc(m.label) : "vs") : `${m.h ?? 0} - ${m.a ?? 0}`;
-            const when = goalBadge(m) + (m.state === "in" ? `<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>` : `${d}<br>${hhmm(m.start)}` + (m.state === "post" ? `<span class="m-ft">Terminé</span>` : ""));
+            const when = goalBadge(m) + (m.state === "in" ? `<span class="m-live"><b class="m-dir">DIRECT</b>${esc(m.label)}</span>` : `${d}<br>${hhmm(m.start)}` + (m.state === "post" ? `<span class="m-ft">Terminé</span>` : ""));
             return wrap(m, `<div class="m-row has-dl ${m.state === "in" ? "live" : ""}${goalCls(m)}"><div class="m-dl">${d}</div><div class="m-date">${when}${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score ${m.state === "pre" ? "next" : ""}">${mid}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div>${m.state === "pre" ? `<span class="m-t">${m.off ? esc(m.label) : hhmm(m.start)}</span>` : ""}${m.state === "in" ? "" : m.state === "post" ? `<span class="m-d">${d}<br>${hhmm(m.start)}</span>` : `<span class="m-d">${d}</span>`}</div>`);
         }
         // ===== Détails du match (ESPN summary) =====
