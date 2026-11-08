@@ -933,13 +933,12 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
 .header-actions .status-badge .pulse::after{background:#fff}
 .header-actions .status-badge.bad{background:var(--yellow,#f59e0b);color:#1a1200}
 .header-actions .status-badge.bad .pulse{background:#1a1200}
-.header-actions .goal-toggle,.header-actions .goal-toggle.off{display:inline-flex;align-items:center;gap:7px;min-height:32px;background:none;border:0;border-radius:0;padding:0 4px;animation:none;color:var(--text-main,#e5e7eb);font-size:.78rem;font-weight:700}
-.header-actions .goal-toggle.off{color:var(--text-muted,#9aa6bd)}
-.gt-sw{width:34px;height:20px;border-radius:10px;background:#2ee59d;position:relative;flex:0 0 34px;transition:background .2s}
-.gt-sw i{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#0b1020;transition:right .2s,left .2s}
-.goal-toggle.off .gt-sw{background:#475569}
-.goal-toggle.off .gt-sw i{right:auto;left:2px;background:#cbd5e1}
-.goal-toggle:focus-visible{outline:2px solid #2ee59d;outline-offset:2px;border-radius:6px}
+.header-actions .goal-toggle{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 14px;border-radius:18px;border:1px solid #2ee59d;background:#2ee59d;color:#04210f;font-size:.78rem;font-weight:700;white-space:nowrap;animation:gt-vib 4s ease-in-out infinite}
+.header-actions .goal-toggle.off{background:transparent;border-color:rgba(255,255,255,.25);color:var(--text-muted,#9aa6bd);animation:none}
+.goal-toggle .gt-ic{flex:0 0 16px}
+@keyframes gt-vib{0%,65%,100%{transform:translateX(0)}69%{transform:translateX(-5px)}73%{transform:translateX(5px)}77%{transform:translateX(-4px)}81%{transform:translateX(4px)}85%{transform:translateX(0)}}
+@media (prefers-reduced-motion:reduce){.header-actions .goal-toggle{animation:none}}
+.goal-toggle:focus-visible{outline:2px solid #2ee59d;outline-offset:2px}
 </style>
 
 </head>
@@ -2577,7 +2576,7 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
 
   // ---------- En-tête ----------
   $(".header-actions").insertAdjacentHTML("beforeend",
-    '<button type="button" id="goal-toggle" class="goal-toggle" aria-pressed="true"><span class="gt-sw" aria-hidden="true"><i></i></span><span class="gt-t">Buts</span></button><span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>');
+    '<button type="button" id="goal-toggle" class="goal-toggle" aria-pressed="true"><svg class="gt-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg><span class="gt-t">Buts activés</span></button><span class="status-badge" id="net-badge"><span class="pulse"></span><span id="net-txt">Direct</span></span>');
   document.body.insertAdjacentHTML("beforeend",
     '<div id="offline-bar" hidden>📡 Hors connexion — affichage des dernières données enregistrées</div>' +
     '<button id="fab-top" aria-label="Remonter">↑</button>');
@@ -2589,7 +2588,7 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
     css.textContent = ".goal-toggle{background:var(--bg-card,#111827);border:1px solid var(--accent,#22c55e);color:inherit;border-radius:20px;padding:4px 10px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap}.goal-toggle.off{background:#2ee59d;border-color:#2ee59d;color:#04210f}.goal-toggle{animation:gt-shake 5s ease-in-out infinite}@keyframes gt-shake{0%,80%,100%{transform:translateX(0)}83%{transform:translateX(-5px)}86%{transform:translateX(5px)}89%{transform:translateX(-4px)}92%{transform:translateX(4px)}95%{transform:translateX(0)}}@media (prefers-reduced-motion:reduce){.goal-toggle{animation:none}}.sn-who{display:block;color:var(--accent,#22c55e);font-weight:800;font-size:.78rem;margin-top:2px}";
     document.head.appendChild(css);
     const btn = $("#goal-toggle");
-    const paint = () => { btn.setAttribute("aria-label", cfg.goals ? "Notifications de buts activées" : "Notifications de buts désactivées"); btn.classList.toggle("off", !cfg.goals); btn.setAttribute("aria-pressed", String(cfg.goals)); btn.title = cfg.goals ? "Désactiver les notifications de buts" : "Activer les notifications de buts"; };
+    const paint = () => { btn.querySelector(".gt-t").textContent = cfg.goals ? "Buts activés" : "Buts désactivés"; btn.setAttribute("aria-label", cfg.goals ? "Notifications de buts activées" : "Notifications de buts désactivées"); btn.classList.toggle("off", !cfg.goals); btn.setAttribute("aria-pressed", String(cfg.goals)); btn.title = cfg.goals ? "Désactiver les notifications de buts" : "Activer les notifications de buts"; };
     paint();
     // Le choix est lu dans le stockage à chaque but : il s'applique à toutes les pages et à tous les onglets ouverts du site
     window.goalAlertsOn = () => { cfg.goals = LS.get("fl_goal_alerts", true) !== false; return cfg.goals; };
