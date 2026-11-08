@@ -864,6 +864,17 @@ body{overflow-x:clip}
 @media (min-width:601px){.m-wrap>.m-row .m-d{line-height:1.3}.m-wrap>.m-row{grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr) 90px}}
 /* Score : vert uniquement pendant le match ; une fois terminé, aucune couleur */
 .m-row:not(.live) .m-score:not(.next),.m-row:not(.live) .m-score .s1,.m-row:not(.live) .m-score .s2{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--text-main)}
+/* Accueil PC : date toujours affichée à gauche des équipes (Aujourd'hui / Résultats / À venir) */
+.m-dl{display:none}
+@media (min-width:601px){
+  .m-wrap>.m-row.has-dl{grid-template-columns:92px minmax(0,1fr) 96px minmax(0,1fr) 90px}
+  .m-wrap>.m-row.has-dl .m-dl{display:block;grid-column:1;grid-row:1/span 2;align-self:center;text-align:left;font-size:.78rem;font-weight:700;color:var(--text-muted);white-space:nowrap;text-transform:capitalize}
+  .m-wrap>.m-row.has-dl .m-home{grid-column:2}
+  .m-wrap>.m-row.has-dl .m-away{grid-column:4}
+  .m-wrap>.m-row.has-dl .m-date{grid-column:5}
+  .m-wrap>.m-row.has-dl .m-score,.m-wrap>.m-row.has-dl .m-t{grid-column:3;grid-row:1/span 2;align-self:center}
+  .m-wrap>.m-row.has-dl .m-d{display:none}
+}
 /* Programme TV : noms sur toute la largeur (option B) + direct bien visible */
 .tv-card .tv-line{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"t lgs" "nm nm";align-items:center;gap:2px 8px;padding:8px 0 10px;min-height:0}
 .tv-card .tv-t{grid-area:t;display:flex;align-items:center;gap:8px;min-width:0;flex:none;justify-self:start}
@@ -1597,13 +1608,13 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
             if (open.has(m.id)) row = row.replace('aria-expanded="false"', 'aria-expanded="true"'); return `<div class="m-wrap ${open.has(m.id) ? "open" : ""}" data-id="${esc(m.id)}">${row}<div class="m-detail">${c ? c.html : ""}</div></div>`;
         }
         function liveRow(m) {
-            return wrap(m, `<div class="m-row live${goalCls(m)}"><div class="m-date">${goalBadge(m)}<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
+            return wrap(m, `<div class="m-row live has-dl${goalCls(m)}"><div class="m-dl">${new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}</div><div class="m-date">${goalBadge(m)}<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
         }
         function rowHTML(m) {
             const d = new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
             const mid = m.state === "pre" ? (m.off ? esc(m.label) : "vs") : `${m.h ?? 0} - ${m.a ?? 0}`;
             const when = goalBadge(m) + (m.state === "in" ? `<span class="m-live"><i class="ldot" aria-hidden="true"></i>${esc(m.label)}</span>` : `${d}<br>${hhmm(m.start)}` + (m.state === "post" ? `<span class="m-ft">Terminé</span>` : ""));
-            return wrap(m, `<div class="m-row ${m.state === "in" ? "live" : ""}${goalCls(m)}"><div class="m-date">${when}${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score ${m.state === "pre" ? "next" : ""}">${mid}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div>${m.state === "pre" ? `<span class="m-t">${m.off ? esc(m.label) : hhmm(m.start)}</span>` : ""}${m.state === "in" ? "" : m.state === "post" ? `<span class="m-d">${d}<br>${hhmm(m.start)}</span>` : `<span class="m-d">${d}</span>`}</div>`);
+            return wrap(m, `<div class="m-row has-dl ${m.state === "in" ? "live" : ""}${goalCls(m)}"><div class="m-dl">${d}</div><div class="m-date">${when}${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score ${m.state === "pre" ? "next" : ""}">${mid}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div>${m.state === "pre" ? `<span class="m-t">${m.off ? esc(m.label) : hhmm(m.start)}</span>` : ""}${m.state === "in" ? "" : m.state === "post" ? `<span class="m-d">${d}<br>${hhmm(m.start)}</span>` : `<span class="m-d">${d}</span>`}</div>`);
         }
         // ===== Détails du match (ESPN summary) =====
         const FR = { possessionPct: "Possession (%)", totalShots: "Tirs", shotsOnTarget: "Tirs cadrés", blockedShots: "Tirs bloqués", shotPct: "Tirs cadrés (%)", wonCorners: "Corners", foulsCommitted: "Fautes commises", offsides: "Hors-jeu", yellowCards: "Cartons jaunes", redCards: "Cartons rouges", saves: "Arrêts du gardien", totalPasses: "Passes", accuratePasses: "Passes réussies", passPct: "Passes réussies (%)", effectiveTackles: "Tacles réussis", totalTackles: "Tacles", tacklePct: "Tacles réussis (%)", interceptions: "Interceptions", totalCrosses: "Centres", accurateCrosses: "Centres réussis", crossPct: "Centres réussis (%)", totalLongBalls: "Longs ballons", accurateLongBalls: "Longs ballons réussis", longballPct: "Longs ballons réussis (%)", effectiveClearance: "Dégagements réussis", totalClearance: "Dégagements", penaltyKickGoals: "Penalties marqués", penaltyKickShots: "Penalties tirés", shotAssists: "Passes décisives de tir", goalAssists: "Passes décisives", ownGoals: "Contre son camp", totalGoals: "Buts" };
