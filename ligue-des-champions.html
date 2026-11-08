@@ -165,7 +165,7 @@
         .ticker-item .t-score { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2); color: var(--accent); border-radius: 6px; padding: 0 8px; font-weight: 800; }
         .ticker-item .t-live { color: var(--live-red); font-weight: 800; font-size: .7rem; }
         .ticker-item .t-info { color: var(--yellow); font-weight: 700; }
-        @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes ticker-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
         @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } .ticker-viewport { overflow-x: auto; } }
         .video-wrap { position: relative; padding-top: 56.25%; margin-bottom: 8px; }
         .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 8px; }
@@ -2031,8 +2031,14 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
             if (html === tickerSig) return;
             tickerSig = html;
             const track = document.getElementById("ticker-track");
+            // Mise à jour SANS à-coup : on garde la position (en pixels) et une vitesse constante, au lieu de relancer / ré-échelonner l'animation
+            let px = 0;
+            try { const an0 = track.getAnimations()[0], d0 = parseFloat(track.dataset.dur) * 1000, h0 = parseFloat(track.dataset.half); if (an0 && d0 && h0) px = ((an0.currentTime % d0) / d0) * h0; } catch (e) { }
             track.innerHTML = html + html;
-            track.style.setProperty("--ticker-duration", Math.max(30, items.length * 4.5) + "s");
+            const half = track.scrollWidth / 2, dur = Math.max(20, half / 50);   // ≈ 50 px/s
+            track.dataset.half = half; track.dataset.dur = dur;
+            track.style.setProperty("--ticker-duration", dur + "s");
+            try { const an1 = track.getAnimations()[0]; if (an1 && half) { an1.currentTime = ((px % half) / half) * dur * 1000; } } catch (e) { }
         }
         function renderAll() {
             renderLive(); renderMatches(); updateTicker();

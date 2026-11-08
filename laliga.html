@@ -165,7 +165,7 @@
         .ticker-item .t-score { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.2); color: var(--accent); border-radius: 6px; padding: 0 8px; font-weight: 800; }
         .ticker-item .t-live { color: var(--live-red); font-weight: 800; font-size: .7rem; }
         .ticker-item .t-info { color: var(--yellow); font-weight: 700; }
-        @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes ticker-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
         @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } .ticker-viewport { overflow-x: auto; } }
         .video-wrap { position: relative; padding-top: 56.25%; margin-bottom: 8px; }
         .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 8px; }
@@ -1991,7 +1991,7 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
         function renderMatches(userAction) {
             if (!userAction && vidBusy()) { vidPending = true; return; }
             const q = document.getElementById("search").value.trim().toLowerCase(), lgSel = document.getElementById("league-filter");
-            const names = [...new Set(all().map(m => m.lg))].sort(lgCmp);
+            const names = [...new Set(all().filter(m => !window.compFilter || window.compFilter.test(m)).map(m => m.lg))].sort(lgCmp);
             const cur = lgSel.value || "all";
             const byLg = {}; all().forEach(m => (byLg[m.lg] ||= []).push(m));
             const opts = `<option value="all">🌍 Toutes les compétitions</option>` + names.map(n => { const f = lgInfo(byLg[n] || [], n); return `<option value="${esc(n)}">${(codeEmoji(f.code) || f.emo || "⚽")} ${esc(lgDisp(n, byLg[n]))}</option>`; }).join("");
@@ -2012,7 +2012,7 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
             radPaint();
         }
         function updateTicker() {
-            const item = h => `<span class="ticker-item">${h}</span>`, items = [], A = all(), t = localDay(new Date().toISOString());
+            const item = h => `<span class="ticker-item">${h}</span>`, items = [], A = all().filter(m => !window.compFilter || window.compFilter.test(m)), t = localDay(new Date().toISOString());   // page de compétition : le bandeau n'affiche que cette compétition
             const sc = m => `<span class="t-score">${m.h ?? 0} - ${m.a ?? 0}</span>`;
             A.filter(m => m.state === "in").sort((a, b) => mp(a) - mp(b)).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-live">● ${esc(m.label)}</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
             A.filter(m => m.state === "post").sort((a, b) => (isMain10(b) - isMain10(a)) || b.start.localeCompare(a.start)).slice(0, 15).forEach(m => items.push(item(`${tLogo(m)}<span class="t-comp">${esc(lgDisp(m.lg, [m]))}</span> <span class="t-comp">Terminé</span> ${esc(m.home)} ${sc(m)} ${esc(m.away)}`)));
@@ -2025,8 +2025,14 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
             if (html === tickerSig) return;
             tickerSig = html;
             const track = document.getElementById("ticker-track");
+            // Mise à jour SANS à-coup : on garde la position (en pixels) et une vitesse constante, au lieu de relancer / ré-échelonner l'animation
+            let px = 0;
+            try { const an0 = track.getAnimations()[0], d0 = parseFloat(track.dataset.dur) * 1000, h0 = parseFloat(track.dataset.half); if (an0 && d0 && h0) px = ((an0.currentTime % d0) / d0) * h0; } catch (e) { }
             track.innerHTML = html + html;
-            track.style.setProperty("--ticker-duration", Math.max(30, items.length * 4.5) + "s");
+            const half = track.scrollWidth / 2, dur = Math.max(20, half / 50);   // ≈ 50 px/s
+            track.dataset.half = half; track.dataset.dur = dur;
+            track.style.setProperty("--ticker-duration", dur + "s");
+            try { const an1 = track.getAnimations()[0]; if (an1 && half) { an1.currentTime = ((px % half) / half) * dur * 1000; } } catch (e) { }
         }
         function renderAll() {
             renderLive(); renderMatches(); updateTicker();
@@ -2731,12 +2737,13 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
   fab.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   // Démarrage instantané : dernières données enregistrées (remplacées dès que le réseau répond)
-  (function hydrate() {
+  function hydrate() {
     const c = LS.get("fl_cache", null);
     if (!c || !c.t || Date.now() - c.t > 12 * 3600e3 || Object.keys(byDay).length) return;
     Object.keys(c.d || {}).forEach(k => { byDay[k] = (c.d[k] || []).map(m => m.state === "in" && Date.now() - c.t > 5 * 60e3 ? Object.assign({}, m, { state: "post" }) : m); });
     try { window.renderAll(); } catch (e) { }
-  })();
+  }
+  if (!document.documentElement.dataset.comp) hydrate();   // page de compétition : le cache n'est affiché qu'une fois le filtre actif (évite de voir les autres compétitions au début)
 
   // Actualisation périodique des pages Classements / Actualités quand elles sont affichées
   setInterval(() => { if (!$("#news-view").hidden) loadNews(true); }, 5 * 60e3);
@@ -2801,7 +2808,7 @@ html[dir=rtl] #matches .lbl,html[dir=rtl] #matches [class*=lg]{direction:rtl}
   });
   // Page de compétition (ex. ligue-1.html) : même page que l'accueil, filtrée sur la compétition
   const cpSlug = document.documentElement.dataset.comp;
-  if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) { const t0 = document.title; applyComp(ca); document.title = t0; } }
+  if (cpSlug) { const ca = $('#compbar a[href="' + cpSlug + '.html"]'); if (ca) { const t0 = document.title; applyComp(ca); document.title = t0; } hydrate(); }
   ["#filters", "#daystrip"].forEach(s => $(s).addEventListener("click", () => { if (window.compFilter && !cpSlug) { window.compFilter = null; compChip(); } }, true));   // page de compétition : le filtre reste actif
   document.addEventListener("click", e => {
     if (!e.target.closest("#comp-clear")) return;
