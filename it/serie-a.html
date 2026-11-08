@@ -44,8 +44,8 @@
     <link rel="preconnect" href="https://a.espncdn.com" crossorigin>
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
     <style>
         :root {
             --bg-dark: #0a0f1e; 
@@ -615,6 +615,7 @@ header{background:rgba(7,11,22,.97)!important}
 .news-card{content-visibility:auto;contain-intrinsic-size:auto 280px}
 
 /* ===== Anti-CLS : police de secours aux métriques d'Inter + espace réservé aux blocs injectés par JS ===== */
+.ticker{contain:layout style}
 @font-face{font-family:'Inter Fallback';src:local('Arial'),local('Helvetica Neue'),local('Roboto');size-adjust:107.4%;ascent-override:90.2%;descent-override:22.5%;line-gap-override:0%}
 body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,sans-serif}
 #hero{min-height:205px;contain:layout}
@@ -2056,10 +2057,13 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             let px = 0;
             try { const an0 = track.getAnimations()[0], d0 = parseFloat(track.dataset.dur) * 1000, h0 = parseFloat(track.dataset.half); if (an0 && d0 && h0) px = ((an0.currentTime % d0) / d0) * h0; } catch (e) { }
             track.innerHTML = html + html;
-            const half = track.scrollWidth / 2, dur = Math.max(20, half / 50);   // ≈ 50 px/s
-            track.dataset.half = half; track.dataset.dur = dur;
-            track.style.setProperty("--ticker-duration", dur + "s");
-            try { const an1 = track.getAnimations()[0]; if (an1 && half) { an1.currentTime = ((px % half) / half) * dur * 1000; } } catch (e) { }
+            // mesure déférée à la frame suivante (évite un reflow forcé pendant le rendu de la liste)
+            requestAnimationFrame(() => {
+                const half = track.scrollWidth / 2, dur = Math.max(20, half / 50);   // ≈ 50 px/s
+                track.dataset.half = half; track.dataset.dur = dur;
+                track.style.setProperty("--ticker-duration", dur + "s");
+                try { const an1 = track.getAnimations()[0]; if (an1 && half) { an1.currentTime = ((px % half) / half) * dur * 1000; } } catch (e) { }
+            });
         }
         function renderAll() {
             renderLive(); renderMatches(); updateTicker();
