@@ -965,6 +965,15 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .control-group,.control-group>*{min-width:0;max-width:100%}
 #scores-view,main.container{overflow-x:clip}
 </style>
+<style id="lf-style">
+/* Liste « Toutes les compétitions » : carte avec pastille trophée (style 14), un peu plus grande */
+.lf-wrap{position:relative;flex:1 1 100%;width:100%;min-width:0}
+.lf-wrap #league-filter{appearance:none;-webkit-appearance:none;display:block;width:100%;height:60px;box-sizing:border-box;padding-block:0;padding-inline:66px 48px;border-radius:16px;background:var(--bg-card);border:1px solid rgba(255,255,255,.12);color:var(--text-main);font-size:1rem;font-weight:600;line-height:60px;cursor:pointer}
+.lf-wrap #league-filter:focus-visible{border-color:var(--accent);outline:none}
+.lf-ic{position:absolute;inset-inline-start:8px;top:8px;width:44px;height:44px;border-radius:12px;background:rgba(46,229,157,.18);color:#2ee59d;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.lf-ch{position:absolute;inset-inline-end:16px;top:0;height:60px;display:flex;align-items:center;color:var(--text-muted);pointer-events:none}
+html[dir=rtl] .lf-ch svg{transform:none}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -1008,7 +1017,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                     <button data-tab="results"><span class="ic ic-goal"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7M8 15l1.5 1.5L12 14M14 9h3M14 16h3"/></svg></span> Résultats</button>
                     <button data-tab="next"><span class="ic ic-ball"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 8V3M15.5 10.5l4.5-1.5M14.2 14.5l2.8 3.8M9.8 14.5L7 18.3M8.5 10.5L4 9"/></svg></span> À venir</button>
                 </div>
-                <select class="region-select" id="league-filter" aria-label="Filtrer par compétition"><option value="all">🌍 Toutes les ligues</option></select>
+                <div class="lf-wrap"><span class="lf-ic" aria-hidden="true"><svg class="svgi" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a3 3 0 0 0 4 3M16 6h4v2a3 3 0 0 1-4 3"/><path d="M12 14v4M8 20h8"/></svg></span><select class="region-select" id="league-filter" aria-label="Filtrer par compétition"><option value="all">🌍 Toutes les ligues</option></select><span class="lf-ch" aria-hidden="true"><svg class="svgi" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
             </div>
             <div class="daystrip" id="daystrip"></div>
             <div class="search-box"><input type="text" id="search" aria-label="Rechercher une équipe" placeholder="🔍 Rechercher une équipe..."></div>
