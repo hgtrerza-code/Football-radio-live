@@ -1,6 +1,6 @@
 {
  "date": "2026-11-09",
- "generated": "2026-11-09T20:50:53.163Z",
+ "generated": "2026-11-09T22:42:35.102Z",
  "extra": 42,
  "matches": [
   {
@@ -33,8 +33,8 @@
    "id": "401883139",
    "lg": "LaLiga 2",
    "start": "2026-11-09T19:30Z",
-   "state": "in",
-   "label": "58'",
+   "state": "post",
+   "label": "90'+4'",
    "home": "CD Sabadell",
    "away": "Real Sociedad II",
    "h": 0,
@@ -46,11 +46,11 @@
    "id": "401883140",
    "lg": "LaLiga 2",
    "start": "2026-11-09T19:30Z",
-   "state": "in",
-   "label": "63'",
+   "state": "post",
+   "label": "90'+11'",
    "home": "Las Palmas",
    "away": "Eldense",
-   "h": 0,
+   "h": 2,
    "a": 0,
    "venue": "Estadio Gran Canaria",
    "place": "Las Palmas de Gran Canaria, Spain"
@@ -59,11 +59,11 @@
    "id": "401931098",
    "lg": "FA Cup",
    "start": "2026-11-09T19:30Z",
-   "state": "in",
-   "label": "63'",
+   "state": "post",
+   "label": "120'+1'",
    "home": "Plymouth Parkway",
    "away": "Berkhamsted",
-   "h": 0,
+   "h": 2,
    "a": 1,
    "venue": "Manadon Sports Hub",
    "place": "Plymouth, England"
