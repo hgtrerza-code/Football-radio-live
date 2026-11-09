@@ -976,6 +976,16 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .lf-ch{position:absolute;inset-inline-end:14px;top:0;height:46px;display:flex;align-items:center;color:var(--text-muted);pointer-events:none}
 .lf-ch svg{width:18px;height:18px}
 </style>
+<style id="brand-mobile">
+/* Mobile : le logo passe sous le titre FootLive Pro, aligné à gauche */
+@media(max-width:700px){
+.header-content{align-items:flex-start}
+.header-content h1{flex-direction:column;align-items:flex-start;gap:4px}
+.header-content h1 b{order:1}
+.header-content h1 .brand-mark{order:2;width:36px;height:36px}
+#net-badge{margin-top:8px}
+}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
