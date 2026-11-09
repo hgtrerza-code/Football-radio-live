@@ -51,6 +51,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.footlivepro.com/eredivisie.html</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.footlivepro.com/botola-pro.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
