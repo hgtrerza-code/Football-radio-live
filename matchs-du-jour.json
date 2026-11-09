@@ -1,14 +1,14 @@
 {
  "date": "2026-11-09",
- "generated": "2026-11-09T00:58:55.242Z",
+ "generated": "2026-11-09T02:50:26.601Z",
  "extra": 42,
  "matches": [
   {
    "id": "401876903",
    "lg": "Liga MX",
    "start": "2026-11-09T00:00Z",
-   "state": "in",
-   "label": "45'+4'",
+   "state": "post",
+   "label": "90'+6'",
    "home": "Querétaro",
    "away": "Puebla",
    "h": 0,
@@ -20,8 +20,8 @@
    "id": "401876902",
    "lg": "Liga MX",
    "start": "2026-11-09T02:10Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "40'",
    "home": "León",
    "away": "Guadalajara",
    "h": 0,
