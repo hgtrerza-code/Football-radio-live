@@ -1,6 +1,6 @@
 {
  "date": "2026-11-09",
- "generated": "2026-11-09T02:50:26.601Z",
+ "generated": "2026-11-09T05:00:14.052Z",
  "extra": 42,
  "matches": [
   {
@@ -20,12 +20,12 @@
    "id": "401876902",
    "lg": "Liga MX",
    "start": "2026-11-09T02:10Z",
-   "state": "in",
-   "label": "40'",
+   "state": "post",
+   "label": "90'+6'",
    "home": "León",
    "away": "Guadalajara",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 1,
    "venue": "Estadio León",
    "place": "León de los Aldamas, Mexico"
   },
