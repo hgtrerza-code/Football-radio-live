@@ -975,24 +975,29 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .lf-ch{position:absolute;inset-inline-end:12px;top:0;height:44px;display:flex;align-items:center;color:var(--text-muted);pointer-events:none}
 html[dir=rtl] .lf-ch svg{transform:none}
 
-/* En-tete mobile compact : une seule ligne */
+/* En-tete mobile : une seule ligne, elements bien visibles */
 @media(max-width:600px){
-  header{padding:calc(.5rem + var(--sat)) 0 .35rem}
-  .header-content{flex-wrap:nowrap;gap:8px;justify-content:flex-start}
-  h1{font-size:1.25rem;gap:7px;flex:0 1 auto;min-width:0}
-  h1 .brand-mark{width:32px;height:32px}
+  header{padding:calc(.7rem + var(--sat)) 0 .5rem}
+  .header-content{flex-wrap:nowrap;gap:10px;justify-content:flex-start}
+  h1{font-size:1.5rem;gap:9px;flex:0 1 auto;min-width:0}
+  h1 .brand-mark{width:40px;height:40px}
   h1 b{white-space:nowrap}
   #net-badge{order:1;flex:0 0 auto;margin-left:0;padding:0;gap:0}
-  #net-badge .pulse{width:9px;height:9px}
+  #net-badge .pulse{width:12px;height:12px}
   #net-badge #net-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-  .hdr-capsule{order:2;margin-left:auto;gap:4px;flex:0 0 auto}
-  .hdr-capsule .header-actions{flex-wrap:nowrap;gap:4px}
-  .header-actions .goal-toggle{height:32px;padding:0 8px;gap:5px}
+  .hdr-capsule{order:2;margin-left:auto;gap:6px;flex:0 0 auto}
+  .hdr-capsule .header-actions{flex-wrap:nowrap;gap:6px}
+  .header-actions .goal-toggle{height:42px;padding:0 12px;gap:7px;border-radius:21px}
   .goal-toggle .gt-t{display:none}
-  .hdr-capsule .lang-wrap .lang-btn{height:32px;padding:0 4px}
+  .goal-toggle .gt-ic{flex:0 0 24px;width:24px;height:24px}
+  .gt-sw{width:38px;height:22px;border-radius:11px;flex:0 0 38px}
+  .gt-sw i{top:3px;right:3px;width:16px;height:16px}
+  .goal-toggle.off .gt-sw i{left:3px}
+  .hdr-capsule .lang-wrap .lang-btn{height:42px;padding:0 4px}
+  .hdr-capsule .lang-wrap .lang-btn .fl{width:30px;height:30px;flex:0 0 30px}
   .lang-wrap .lang-btn span,.lang-wrap .lang-btn svg:last-child{display:none}
 }
-@media(max-width:360px){h1{font-size:1.1rem}h1 .brand-mark{width:28px;height:28px}}
+@media(max-width:380px){h1{font-size:1.25rem;gap:7px}h1 .brand-mark{width:34px;height:34px}.header-actions .goal-toggle{padding:0 9px}.gt-sw{width:34px;flex-basis:34px}}
 </style>
 </head>
 <body>
