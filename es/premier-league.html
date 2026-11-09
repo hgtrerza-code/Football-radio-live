@@ -41,6 +41,8 @@
     <title>Premier League: resultados y clasificación en directo | FootLive Pro</title>
     <link rel="preconnect" href="https://footlive.hgtrerza.workers.dev" crossorigin>
     <link rel="preconnect" href="https://a.espncdn.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="preload" as="style" onload="this.onload=null;if(matchMedia('(min-width:700px)').matches)this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
     <style>
@@ -791,6 +793,13 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .match-card.live{border:1.5px solid var(--accent);border-left:4px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .m-dir{display:inline-block;background:var(--live-red);color:#fff;font-size:.55rem;font-weight:800;letter-spacing:.04em;line-height:1;padding:3px 5px;border-radius:4px;margin-right:6px;vertical-align:middle}
 </style>
+<style id="fix-mobile-select">
+/* Mobile : les listes déroulantes ne dépassent jamais la largeur de l'écran (sinon la page se décale) */
+.region-select{box-sizing:border-box;width:100%;max-width:100%;min-width:0;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.toolbar .region-select{width:auto;flex:1 1 160px}
+.control-group,.control-group>*{min-width:0;max-width:100%}
+#scores-view,main.container{overflow-x:clip}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -816,7 +825,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             </div>
         </div>
     </header>
-    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
+    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="eredivisie.html"><span>🇳🇱</span><img class="cl" alt="" data-lgre="eredivisie|dutch (?!eerste)" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/11.png&w=40&h=40" width="20" height="20" data-id="11">Eredivisie</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
     <main class="container">
     <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
@@ -2791,7 +2800,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   buildDays(); status();
   // ---------- Boutons des compétitions : la radio n'est jamais coupée ----------
   // Changer de page arrêterait le lecteur. Quand une radio joue, on affiche donc la compétition ici même (même page, même lecteur).
-  const COMP_CTRY = { "ligue-des-champions": "Europe", "europa-league": "Europe", "conference-league": "Europe", "premier-league": "Angleterre", "laliga": "Espagne", "serie-a": "Italie", "bundesliga": "Allemagne", "ligue-1": "France", "liga-portugal": "Portugal", "botola-pro": "Maroc" };
+  const COMP_CTRY = { "ligue-des-champions": "Europe", "europa-league": "Europe", "conference-league": "Europe", "premier-league": "Angleterre", "laliga": "Espagne", "serie-a": "Italie", "bundesliga": "Allemagne", "ligue-1": "France", "liga-portugal": "Portugal", "botola-pro": "Maroc", "eredivisie": "Pays-Bas" };
   const COMP_EXCL = /women|feminin|féminin|qualif|\bu-?\d{2}\b|youth|reserve/i;
   const COMP_MAIN = {
     "premier-league": /^(english )?premier league$/i,
@@ -2801,6 +2810,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     "ligue-1": /^(french )?ligue 1( (?!2$|ii$|women).*)?$/i,
     "liga-portugal": /^(portuguese )?(liga portugal|primeira liga)( .*)?$/i,
     "botola-pro": /^(moroccan )?botola pro( 1)?( inwi)?$/i,
+    "eredivisie": /^(dutch )?eredivisie$/i,
     "ligue-des-champions": /^(uefa )?champions league$/i,
     "europa-league": /^(uefa )?europa league$/i,
     "conference-league": /^(uefa )?(europa )?conference league$/i
