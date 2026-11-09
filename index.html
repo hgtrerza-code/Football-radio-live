@@ -966,25 +966,13 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 #scores-view,main.container{overflow-x:clip}
 </style>
 <style id="lf-style">
-/* Liste « Toutes les compétitions » : même taille que le champ « Rechercher une équipe » (46 px, coins 14 px) */
+/* Liste « Toutes les compétitions » : carte avec pastille trophée (style 14), un peu plus grande */
 .lf-wrap{position:relative;flex:1 1 100%;width:100%;min-width:0}
-.lf-wrap #league-filter{appearance:none;-webkit-appearance:none;display:block;width:100%;height:46px;box-sizing:border-box;padding-block:0;padding-inline:52px 40px;border-radius:14px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-main);font-size:.9rem;font-weight:600;line-height:normal;cursor:pointer}
+.lf-wrap #league-filter{appearance:none;-webkit-appearance:none;display:block;width:100%;height:60px;box-sizing:border-box;padding-block:0;padding-inline:66px 48px;border-radius:16px;background:var(--bg-card);border:1px solid rgba(255,255,255,.12);color:var(--text-main);font-size:1rem;font-weight:600;line-height:60px;cursor:pointer}
 .lf-wrap #league-filter:focus-visible{border-color:var(--accent);outline:none}
-.search-box input{height:46px;box-sizing:border-box}
-.lf-ic{position:absolute;inset-inline-start:6px;top:6px;width:34px;height:34px;border-radius:10px;background:rgba(46,229,157,.18);color:#2ee59d;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.lf-ic svg{width:18px;height:18px}
-.lf-ch{position:absolute;inset-inline-end:14px;top:0;height:46px;display:flex;align-items:center;color:var(--text-muted);pointer-events:none}
-.lf-ch svg{width:18px;height:18px}
-</style>
-<style id="brand-mobile">
-/* Mobile : le logo passe sous le titre FootLive Pro, aligné à gauche */
-@media(max-width:700px){
-.header-content{align-items:flex-start}
-.header-content h1{flex-direction:column;align-items:flex-start;gap:4px}
-.header-content h1 b{order:1}
-.header-content h1 .brand-mark{order:2;width:36px;height:36px}
-#net-badge{margin-top:8px}
-}
+.lf-ic{position:absolute;inset-inline-start:8px;top:8px;width:44px;height:44px;border-radius:12px;background:rgba(46,229,157,.18);color:#2ee59d;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.lf-ch{position:absolute;inset-inline-end:16px;top:0;height:60px;display:flex;align-items:center;color:var(--text-muted);pointer-events:none}
+html[dir=rtl] .lf-ch svg{transform:none}
 </style>
 </head>
 <body>
