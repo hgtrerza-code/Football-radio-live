@@ -959,19 +959,11 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 </style>
 
 <style id="direct-mobile">
-/* Mobile : ligne 1 = logo + titre + « DIRECT » (lumière rouge qui défile) ; ligne 2 = boutons Buts et langue */
+/* Mobile : badge « DIRECT » d'origine, simplement plus petit */
 @media (max-width:700px){
-  .header-content{display:grid;grid-template-columns:auto auto minmax(0,1fr);grid-template-areas:"h b ." "c c c";align-items:center;column-gap:10px;row-gap:6px}
-  .header-content h1{grid-area:h;order:0;min-width:0}
-  #net-badge{grid-area:b;order:0;justify-self:start;align-self:center;margin:0;display:inline-block;position:relative;padding:0 0 6px;font-size:.66rem;font-weight:900;letter-spacing:.26em;line-height:1;color:#ff6b6b;text-shadow:0 0 10px rgba(239,68,68,.7);white-space:nowrap}
-  #net-badge .pulse{display:none}
-  #net-badge::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;border-radius:2px;background:linear-gradient(90deg,transparent,#ef4444,transparent);background-size:60% 100%;background-repeat:no-repeat;animation:nb-sweep 2.2s ease-in-out infinite}
-  #net-badge.bad{color:var(--yellow,#f59e0b);text-shadow:0 0 10px rgba(245,158,11,.6)}
-  #net-badge.bad::after{background-image:linear-gradient(90deg,transparent,#f59e0b,transparent)}
-  .header-content .hdr-capsule{grid-area:c;order:0;margin:0;justify-self:end}
-  @keyframes nb-sweep{0%{background-position:-60% 0}100%{background-position:160% 0}}
+  #net-badge{font-size:.55rem;letter-spacing:.5px;gap:4px;margin-left:-8px}
+  #net-badge .pulse{width:6px;height:6px}
 }
-@media (max-width:700px) and (prefers-reduced-motion:reduce){#net-badge::after{animation:none;background-position:50% 0}}
 </style>
 <style id="fix-mobile-select">
 /* Mobile : les listes déroulantes ne dépassent jamais la largeur de l'écran (sinon la page se décale) */
