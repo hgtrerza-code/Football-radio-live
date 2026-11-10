@@ -1102,15 +1102,16 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         const UP_SLUG = ({ "premier-league": "eng.1", "laliga": "esp.1", "serie-a": "ita.1", "bundesliga": "ger.1", "ligue-1": "fra.1", "liga-portugal": "por.1", "eredivisie": "ned.1", "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "botola-pro": "mar.1" })[document.documentElement.dataset.comp] || "";
         async function loadUpcoming() {
             if (!UP_SLUG) return;
-            try {
-                const a = new Date(), b = new Date(a); b.setDate(a.getDate() + 90);
-                const r = await fetch(lgUrl(UP_SLUG, ymd(a) + "-" + ymd(b)));
-                if (!r.ok) return;
-                const j = await r.json();
-                const evs = (j.events || []).map(ev => normalize(ev, j, UP_SLUG)).filter(Boolean);
-                evs.forEach(m => { m.lg = cleanLg(m.lg); });
-                byDay["x-up"] = evs.filter(m => !isBlockedMatch(m));
-            } catch (e) { }
+            const a = new Date(), b = new Date(a); b.setDate(a.getDate() + 90);
+            const rng = ymd(a) + "-" + ymd(b), now = Date.now();
+            const get = async u => { try { const r = await fetch(u); if (!r.ok) return []; const j = await r.json(); return (j.events || []).map(ev => normalize(ev, j, UP_SLUG)).filter(Boolean); } catch (e) { return []; } };
+            const fut = l => l.filter(m => m.state === "pre" && new Date(m.start).getTime() > now + 36 * 3600e3).length;
+            // 1) le service du site ; 2) si aucun match à venir n'est renvoyé (plage ignorée, erreur…), ESPN directement
+            let evs = await get(lgUrl(UP_SLUG, rng));
+            if (!fut(evs)) { const d = await get("https://site.api.espn.com/apis/site/v2/sports/soccer/" + UP_SLUG + "/scoreboard?dates=" + rng + "&limit=1000"); if (fut(d) >= fut(evs)) evs = d; }
+            if (!evs.length) return;
+            evs.forEach(m => { m.lg = cleanLg(m.lg); });
+            byDay["x-up"] = evs.filter(m => !isBlockedMatch(m));
         }
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
