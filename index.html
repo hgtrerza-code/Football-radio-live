@@ -959,11 +959,9 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 </style>
 
 <style id="direct-mobile">
-/* Mobile : badge « DIRECT » d'origine, simplement plus petit */
-@media (max-width:700px){
-  #net-badge{font-size:.55rem;letter-spacing:.5px;gap:4px;margin-left:-8px}
-  #net-badge .pulse{width:6px;height:6px}
-}
+/* Badge « DIRECT » : petit et collé à « Pro » (mobile et ordinateur) */
+#net-badge{font-size:.55rem;letter-spacing:.5px;gap:4px;margin-left:-8px}
+#net-badge .pulse{width:6px;height:6px}
 </style>
 <style id="app-nav">
 /* Mobile : menu du bas façon application (4 onglets + « Plus ») */
@@ -3959,7 +3957,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
   // ---------- Boutons des compétitions : la radio n'est jamais coupée ----------
   // Changer de page arrêterait le lecteur. Quand une radio joue, on affiche donc la compétition ici même (même page, même lecteur).
   const COMP_CTRY = { "ligue-des-champions": "Europe", "europa-league": "Europe", "conference-league": "Europe", "premier-league": "Angleterre", "laliga": "Espagne", "serie-a": "Italie", "bundesliga": "Allemagne", "ligue-1": "France", "liga-portugal": "Portugal", "botola-pro": "Maroc", "eredivisie": "Pays-Bas" };
-  const COMP_EXCL = /women|feminin|féminin|qualif|\bu-?\d{2}\b|youth|reserve/i;
+  const COMP_EXCL = /women|vrouwen|dames|femmes|frauen|damen|femenin|feminin|féminin|feminino|qualif|\bu-?\d{2}\b|youth|reserve/i;
   const COMP_MAIN = {
     "premier-league": /^(english )?premier league$/i,
     "laliga": /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i,
@@ -3975,9 +3973,9 @@ html[dir=rtl] .lf-ch svg{transform:none}
   };
   // Filtre strict : Ligue des champions, Europa League, Conference League et Premier League ne gardent que la compétition elle-même
   // (ni autre coupe d'Europe, ni D2 / Premier League 2 / coupes, ni féminines, ni jeunes)
-  const COMP_STRICT = { "ligue-des-champions": 1, "europa-league": 1, "conference-league": 1, "premier-league": 1 };
-  const COMP_ESPN = { "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "premier-league": "eng.1" };
-  const COMP_TEAM_W = /\b(women|femen[ií]|femin|féminin|frauen|damen|ladies)\b|\((?:w|f)\)|\sW$|\bU-?\d{2}\b|\bII$/i;
+  const COMP_STRICT = { "ligue-des-champions": 1, "europa-league": 1, "conference-league": 1, "premier-league": 1, "eredivisie": 1 };
+  const COMP_ESPN = { "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "premier-league": "eng.1", "eredivisie": "ned.1" };
+  const COMP_TEAM_W = /\b(women|vrouwen|dames|femmes|femen[ií]|femin|féminin|frauen|damen|ladies)\b|\((?:w|f)\)|\sW$|\bU-?\d{2}\b|\bII$/i;
   const COMP_SLUG_W = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies|\.2$|\.3$|\.cup|\.fa|\.league_cup|\.u\d/i;
   function compStrict(slug, m, raw) {
     if (!COMP_STRICT[slug]) return true;
