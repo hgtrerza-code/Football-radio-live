@@ -1097,6 +1097,20 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             for (let i = offsetFrom; i <= offsetTo; i++) { const x = new Date(t); x.setDate(t.getDate() + i); out.push(ymd(x)); }
             return out;
         }
+        // Page de compétition : prochaines journées (jusqu'à 90 jours) via le calendrier de la compétition, au-delà de la fenêtre J-2 / J+4
+        const UP_SLUG = ({ "premier-league": "eng.1", "laliga": "esp.1", "serie-a": "ita.1", "bundesliga": "ger.1", "ligue-1": "fra.1", "liga-portugal": "por.1", "eredivisie": "ned.1", "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "botola-pro": "mar.1" })[document.documentElement.dataset.comp] || "";
+        async function loadUpcoming() {
+            if (!UP_SLUG) return;
+            try {
+                const a = new Date(), b = new Date(a); b.setDate(a.getDate() + 90);
+                const r = await fetch(lgUrl(UP_SLUG, ymd(a) + "-" + ymd(b)));
+                if (!r.ok) return;
+                const j = await r.json();
+                const evs = (j.events || []).map(ev => normalize(ev, j, UP_SLUG)).filter(Boolean);
+                evs.forEach(m => { m.lg = cleanLg(m.lg); });
+                byDay["x-up"] = evs.filter(m => !isBlockedMatch(m));
+            } catch (e) { }
+        }
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
         const goalOn = () => { try { return localStorage.getItem("fl_goal_alerts") !== "false"; } catch (e) { return true; } };
@@ -2366,6 +2380,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         let searchT; document.getElementById("search").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(() => renderMatches(true), 250); });
 
         refresh(allDays(0, 0), "light").then(() => {
+            loadUpcoming().then(() => { try { renderAll(); } catch (e) { } });
             // les autres jours et les sources complémentaires (GitHub…) ne se chargent qu'à la première interaction, ou après 20 s
             let done = false; const evs = ["pointerdown", "keydown", "scroll", "touchstart"];
             const go = () => { if (done) return; done = true; evs.forEach(x => removeEventListener(x, go)); refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); };
@@ -2376,7 +2391,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         let hidTick = 0;
         let liveBusy = 0;
         setInterval(() => { if (document.hidden && ++hidTick % 4) return; if (liveBusy && Date.now() - liveBusy < 12000) return; liveBusy = Date.now(); refresh(allDays(0, 0), "light").then(refreshOpen).catch(() => { }).finally(() => { liveBusy = 0; }); }, CFG.LIVE_REFRESH_MS);
-        setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); }, CFG.OTHER_REFRESH_MS);
+        setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); loadUpcoming().then(() => { try { renderAll(); } catch (e) { } }); }, CFG.OTHER_REFRESH_MS);
         document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0), "light"); });
     </script>
 <script>
