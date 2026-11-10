@@ -775,6 +775,52 @@ if(!window.__ads)document.documentElement.className+=' ads-off';})();
 #cookie-banner button{cursor:pointer;border-radius:20px;padding:9px 18px;font-weight:700;font-size:.85rem;border:1px solid #3b4a63;background:transparent;color:#e8edf5}
 #cookie-banner button.cb-yes{background:#22c55e;border-color:#22c55e;color:#06210f}
 </style>
+<style id="direct-mobile">
+/* Badge « DIRECT » : petit et collé à « Pro » (mobile et ordinateur) */
+#net-badge{font-size:.55rem;letter-spacing:.5px;gap:4px;margin-left:-8px}
+#net-badge .pulse{width:6px;height:6px}
+</style>
+<style id="app-nav">
+/* Mobile : menu du bas façon application (4 onglets + « Plus ») */
+.more-btn,.more-sheet{display:none}
+@media (max-width:700px){
+  :root{--tbh:60px}
+  body{padding-bottom:calc(var(--tbh) + var(--sab,0px))}
+  body.radio-on{padding-bottom:calc(var(--tbh) + 76px + var(--sab,0px))}
+  #tabbar{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:1000;min-height:0;border-top:1px solid var(--border);background:rgba(7,11,22,.98);padding-bottom:var(--sab,0px);box-shadow:0 -6px 20px rgba(0,0,0,.4)}
+  #tabbar .container{display:flex;gap:0;overflow:visible;padding:0 6px;max-width:none;justify-content:space-evenly}
+  #tabbar .container>a,#tabbar .container>.more-btn{flex:0 0 auto;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:var(--tbh);padding:6px 2px 4px;font-size:0;border:0;border-radius:0;background:none;color:var(--text-muted);cursor:pointer;position:relative;font-family:inherit;font-weight:700;text-decoration:none}
+  #tabbar .container>a::after,#tabbar .container>.more-btn::after{content:attr(data-short);font-size:.64rem;line-height:1;font-weight:700;white-space:nowrap}
+  #tabbar .container>a>span,#tabbar .container>.more-btn>span{font-size:1.2rem;line-height:1;display:flex}
+  #tabbar .container>a.on,#tabbar:has(.more-panel a.on) .container>.more-btn{color:var(--accent)}
+  #tabbar .container>a.on::before,#tabbar:has(.more-panel a.on) .container>.more-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+  #tabbar .container>.more-btn>span .svgi{width:1.3em;height:1.3em}
+  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none}
+  #tabbar .container>a[data-go="scores"]{order:1}
+  #tabbar .container>a[data-go="table"]{order:2}
+  #tabbar .container>a[data-go="tv"]{order:3}
+  #tabbar .container>a[data-go="radio"]{order:4}
+  #tabbar .container>.more-btn{order:5;display:flex}
+  .more-sheet:not([hidden]){display:block}
+  .more-bd{position:fixed;left:0;right:0;top:0;bottom:calc(var(--tbh) + var(--sab,0px));background:rgba(0,0,0,.55);z-index:1}
+  .more-panel{position:fixed;left:10px;right:10px;bottom:calc(var(--tbh) + var(--sab,0px) + 10px);z-index:2;background:#0d1524;border:1px solid var(--border);border-radius:18px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;box-shadow:0 -10px 40px rgba(0,0,0,.6);animation:more-up .2s ease}
+  #tabbar .more-panel a{display:flex;align-items:center;gap:10px;padding:14px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;color:var(--text-main);font-size:.9rem;font-weight:700;text-decoration:none}
+  #tabbar .more-panel a.on{border-color:var(--accent);color:var(--accent)}
+  #tabbar .more-panel a>span{font-size:1.3rem;line-height:1;display:flex}
+  /* mise en page fixe : même hauteur d'icône, même position du mot, pour tous les onglets (dont « Plus ») */
+  #tabbar .container>a,#tabbar .container>.more-btn{justify-content:flex-start;padding:10px 0 0;gap:4px;box-sizing:border-box}
+  #tabbar .container>a>span,#tabbar .container>.more-btn>span{width:26px;height:26px;flex:0 0 26px;align-items:center;justify-content:center;font-size:0;line-height:0}
+  #tabbar .container>a>span .svgi,#tabbar .container>.more-btn>span .svgi{width:24px;height:24px;vertical-align:baseline}
+  #tabbar .container>a::after,#tabbar .container>.more-btn::after{height:12px;line-height:12px;flex:0 0 12px}
+  @keyframes more-up{from{transform:translateY(14px);opacity:0}}
+  #radio-mini{bottom:calc(var(--tbh) + var(--sab,0px))}
+  #fab-top{bottom:calc(var(--tbh) + 28px + var(--sab,0px))}
+  body.radio-on #fab-top{bottom:calc(var(--tbh) + 90px + var(--sab,0px))}
+  .toast{bottom:calc(var(--tbh) + 20px + var(--sab,0px))}
+  body.more-open #fab-top{display:none}
+}
+@media (max-width:700px) and (prefers-reduced-motion:reduce){.more-panel{animation:none}}
+</style>
 <style id="fix-mobile-select">
 /* Mobile : les listes déroulantes ne dépassent jamais la largeur de l'écran (sinon la page se décale) */
 .region-select{box-sizing:border-box;width:100%;max-width:100%;min-width:0;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
@@ -832,6 +878,32 @@ document.getElementById('cb-yes').onclick=function(){set('yes');location.reload(
 document.getElementById('cb-no').onclick=function(){var was=window.__ads;set('no');b.hidden=true;if(was)location.reload();};
 var r=document.getElementById('cookie-reset');
 if(r)r.onclick=function(e){e.preventDefault();b.hidden=false;};
+})();
+</script>
+<script>
+/* Menu du bas (mobile) : bouton « Plus » + panneau Clubs / Buteurs / Actus / Women's Foot */
+(function(){
+  var bar=document.getElementById('tabbar'); if(!bar) return;
+  var box=bar.querySelector('.container'); if(!box||box.querySelector('.more-btn')) return;
+  var LB=({fr:['Scores','Classements','Guide TV','Radio','Plus','Plus de sections'],en:['Scores','Standings','TV guide','Radio','More','More sections'],es:['Resultados','Tablas','Guía TV','Radio','Más','Más secciones'],it:['Risultati','Classifica','Guida TV','Radio','Altro','Altre sezioni'],nl:['Uitslagen','Standen','TV-gids','Radio','Meer','Meer secties'],de:['Ergebnisse','Tabellen','TV-Guide','Radio','Mehr','Mehr Bereiche'],ar:['النتائج','الترتيب','التلفاز','الراديو','المزيد','المزيد من الأقسام']})[(document.documentElement.lang||'fr').slice(0,2)]||['Scores','Classements','Guide TV','Radio','Plus','Plus de sections'];
+  var SHORT={scores:LB[0],table:LB[1],tv:LB[2],radio:LB[3]};
+  box.querySelectorAll('a[data-go]').forEach(function(a){ if(SHORT[a.dataset.go]) a.setAttribute('data-short',SHORT[a.dataset.go]); });
+  var btn=document.createElement('button'); btn.type='button'; btn.className='more-btn'; btn.setAttribute('data-short',LB[4]); btn.setAttribute('aria-label',LB[5]); btn.setAttribute('aria-haspopup','true'); btn.setAttribute('aria-expanded','false');
+  btn.innerHTML='<span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></span>';
+  box.appendChild(btn);
+  var sheet=document.createElement('div'); sheet.className='more-sheet'; sheet.hidden=true;
+  sheet.innerHTML='<div class="more-bd"></div><div class="more-panel" role="menu"></div>';
+  var panel=sheet.querySelector('.more-panel');
+  ['clubs','buteurs','news','women'].forEach(function(k){
+    var o=box.querySelector('a[data-go="'+k+'"]'); if(!o) return;
+    var c=o.cloneNode(true); c.classList.remove('on'); c.removeAttribute('aria-current'); c.setAttribute('role','menuitem'); panel.appendChild(c);
+  });
+  bar.appendChild(sheet);
+  function set(open){ sheet.hidden=!open; btn.setAttribute('aria-expanded',open?'true':'false'); document.body.classList.toggle('more-open',open); }
+  btn.addEventListener('click',function(e){ e.stopPropagation(); set(sheet.hidden); });
+  sheet.addEventListener('click',function(e){ if(e.target.closest('a[data-go]')||e.target.closest('.more-bd')) set(false); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') set(false); });
+  window.addEventListener('resize',function(){ if(window.innerWidth>700) set(false); });
 })();
 </script>
 </body>
