@@ -1100,17 +1100,27 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         // Page de compétition : prochaines journées (jusqu'à 90 jours) via le calendrier de la compétition, au-delà de la fenêtre J-2 / J+4
         const UP_SLUG = ({ "premier-league": "eng.1", "laliga": "esp.1", "serie-a": "ita.1", "bundesliga": "ger.1", "ligue-1": "fra.1", "liga-portugal": "por.1", "eredivisie": "ned.1", "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "botola-pro": "mar.1" })[document.documentElement.dataset.comp] || "";
         async function loadUpcoming() {
-            if (!UP_SLUG) return;
-            const a = new Date(), b = new Date(a); b.setDate(a.getDate() + 90);
-            const rng = ymd(a) + "-" + ymd(b), now = Date.now();
-            const get = async u => { try { const r = await fetch(u); if (!r.ok) return []; const j = await r.json(); return (j.events || []).map(ev => normalize(ev, j, UP_SLUG)).filter(Boolean); } catch (e) { return []; } };
-            const fut = l => l.filter(m => m.state === "pre" && new Date(m.start).getTime() > now + 36 * 3600e3).length;
-            // 1) le service du site ; 2) si aucun match à venir n'est renvoyé (plage ignorée, erreur…), ESPN directement
-            let evs = await get(lgUrl(UP_SLUG, rng));
-            if (!fut(evs)) { const d = await get("https://site.api.espn.com/apis/site/v2/sports/soccer/" + UP_SLUG + "/scoreboard?dates=" + rng + "&limit=1000"); if (fut(d) >= fut(evs)) evs = d; }
-            if (!evs.length) return;
-            evs.forEach(m => { m.lg = cleanLg(m.lg); });
-            byDay["x-up"] = evs.filter(m => !isBlockedMatch(m));
+            if (!UP_SLUG || window.__upBusy) return;
+            window.__upBusy = 1;
+            try {
+                const out = new Map(), add = (a, n) => { const x = new Date(a); x.setDate(x.getDate() + n); return x; };
+                let budget = 110, cap = 14;
+                const publish = () => { byDay["x-up"] = [...out.values()].map(m => { m.lg = cleanLg(m.lg); return m; }).filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } };
+                // ESPN refuse parfois les longues plages (erreur 400) : tranche de 14 jours, coupée en deux si elle est refusée, jusqu'au jour seul ; la taille refusée est retenue pour les tranches suivantes (moins d'erreurs 400)
+                async function span(a, n) {
+                    if (budget-- <= 0) return;
+                    let j = null, refused = false;
+                    try { const r = await fetch(lgUrl(UP_SLUG, n > 1 ? ymd(a) + "-" + ymd(add(a, n - 1)) : ymd(a))); if (r.ok) j = await r.json(); else refused = true; } catch (e) { }
+                    if (j) { (j.events || []).forEach(ev => { const m = normalize(ev, j, UP_SLUG); if (m && !out.has(m.id)) out.set(m.id, m); }); return; }
+                    if (n <= 1) return;
+                    const h = Math.ceil(n / 2); if (refused) cap = Math.min(cap, h); await span(a, h); await span(add(a, h), n - h);
+                }
+                const t0 = new Date(), now = Date.now(), fut = () => [...out.values()].filter(m => m.state === "pre" && new Date(m.start).getTime() > now + 36 * 3600e3).length;
+                for (let o = 0; o < 84;) {
+                    const n = cap; await span(add(t0, o), n); o += n; publish();
+                    if (fut() >= 40) break;   // assez de matchs à venir : on s'arrête
+                }
+            } catch (e) { } finally { window.__upBusy = 0; }
         }
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
