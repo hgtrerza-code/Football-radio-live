@@ -276,6 +276,8 @@
         .standings td.tn img { width: 16px; height: 16px; object-fit: contain; vertical-align: middle; margin-right: 6px; background: #fff; border-radius: 50%; padding: 1px; }
         .standings tr.playing td { background: rgba(34,197,94,.16); font-weight: 700; }
         .competition-header .standings-btn { margin-left: 6px; }
+        .md-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 14px 2px 6px; padding: 7px 12px; border-left: 3px solid var(--accent); background: var(--bg-card); border-radius: 8px; font-weight: 700; font-size: .85rem; }
+        .md-head small { color: var(--text-muted); font-weight: 500; font-size: .72rem; }
         .d-formrow { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: .75rem; margin: 4px 0; }
         .d-lead { font-size: .75rem; padding: 3px 0; border-bottom: 1px solid rgba(128,128,128,.1); } .d-lead .tm { color: var(--text-muted); }
         .d-h2h { font-size: .75rem; padding: 3px 0; border-bottom: 1px solid rgba(128,128,128,.1); }
@@ -1081,6 +1083,39 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const out = [], t = new Date();
             for (let i = offsetFrom; i <= offsetTo; i++) { const x = new Date(t); x.setDate(t.getDate() + i); out.push(ymd(x)); }
             return out;
+        }
+        // Page de compétition : prochaines journées (jusqu'à 90 jours) via le calendrier de la compétition, au-delà de la fenêtre J-2 / J+4
+        const UP_SLUG = ({ "premier-league": "eng.1", "laliga": "esp.1", "serie-a": "ita.1", "bundesliga": "ger.1", "ligue-1": "fra.1", "liga-portugal": "por.1", "eredivisie": "ned.1", "ligue-des-champions": "uefa.champions", "europa-league": "uefa.europa", "conference-league": "uefa.europa.conf", "botola-pro": "mar.1" })[document.documentElement.dataset.comp] || "";
+        async function loadUpcoming() {
+            if (!UP_SLUG || window.__upBusy) return;
+            window.__upBusy = 1;
+            const CK = "fl_up_" + UP_SLUG;
+            // affichage immédiat du dernier programme connu (mémoire locale), remplacé dès que les données fraîches arrivent
+            if (!(byDay["x-up"] || []).length) { try { const c = JSON.parse(localStorage.getItem(CK) || "null"); if (c && c.d && Date.now() - c.t < 3 * 864e5) { byDay["x-up"] = c.d.filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } } } catch (e) { } }
+            loadGp();   // classement (numéros de journée) chargé en parallèle des matchs
+            try {
+                const out = new Map(), add = (a, n) => { const x = new Date(a); x.setDate(x.getDate() + n); return x; };
+                let budget = 110, cap = 14;
+                const publish = () => {
+                    if (!out.size && (byDay["x-up"] || []).length) return;
+                    byDay["x-up"] = [...out.values()].map(m => { m.lg = cleanLg(m.lg); return m; }).filter(m => !isBlockedMatch(m));
+                    try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), d: byDay["x-up"].filter(m => m.state === "pre").slice(0, 150) })); } catch (e) { }
+                    try { renderAll(); } catch (e) { }
+                };
+                // ESPN refuse parfois les longues plages (erreur 400) : tranche de 14 jours, coupée en deux si elle est refusée, jusqu'au jour seul ; la taille refusée est retenue pour les tranches suivantes (moins d'erreurs 400)
+                async function span(a, n) {
+                    if (budget-- <= 0) return;
+                    let j = null, refused = false;
+                    try { const r = await fetch(lgUrl(UP_SLUG, n > 1 ? ymd(a) + "-" + ymd(add(a, n - 1)) : ymd(a))); if (r.ok) j = await r.json(); else refused = true; } catch (e) { }
+                    if (j) { (j.events || []).forEach(ev => { const m = normalize(ev, j, UP_SLUG); if (m && !out.has(m.id)) out.set(m.id, m); }); return; }
+                    if (n <= 1) return;
+                    const h = Math.ceil(n / 2); if (refused) cap = Math.min(cap, h); await span(a, h); await span(add(a, h), n - h);
+                }
+                const t0 = new Date(), now = Date.now(), fut = () => [...out.values()].filter(m => m.state === "pre" && new Date(m.start).getTime() > now + 36 * 3600e3).length;
+                let o = 0;
+                { const n = cap; await Promise.all([span(add(t0, 0), n), span(add(t0, n), n)]); o = 2 * n; publish(); }   // 2 premières tranches en parallèle : le programme s'affiche plus vite
+                while (o < 84 && fut() < 40) { const n = cap; await span(add(t0, o), n); o += n; publish(); }   // assez de matchs à venir (40) : on s'arrête
+            } catch (e) { } finally { window.__upBusy = 0; window.__upDone = 1; }
         }
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
@@ -2051,15 +2086,67 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const first = k => g[k].reduce((t, m) => (t === "" || m.start < t) ? m.start : t, "");
             let out = Object.keys(g).sort((x, y) => { const px = mainPri(x, g[x]), py = mainPri(y, g[y]); if (byTime && px < 99 && py < 99) { const d = first(x).localeCompare(first(y)); if (d) return d; } if (byTime && px === 99 && py === 99) { const d = lgTier(x) - lgTier(y); if (d) return d; } return (px - py) || lgCmp(x, y); }).map(k => {
                 if (limit && used >= limit) { hidden += g[k].length; return ""; }
-                const room = limit ? limit - used : g[k].length, shown = g[k].length > room ? g[k].slice(0, room) : g[k]; hidden += g[k].length - shown.length; used += shown.length;
+                mdPrep(g[k], byTime); const room = limit ? limit - used : g[k].length, shown = g[k].length > room ? g[k].slice(0, room) : g[k]; hidden += g[k].length - shown.length; used += shown.length;
                 let pre = ""; if (!placed && lgRank(k) >= br) { pre = BOTOLA_BTN; placed = true; }
                 const sl = (g[k].find(m => m.slug && m.slug !== "all" && m.slug !== "tsdb") || {}).slug;
-                const sbtn = sl ? `<button class="standings-btn" data-std="${esc(sl)}">🏆 Classement</button>` : "";
+                const sbtn = "";
                 const sbox = sl && stdOpen.has(sl) && stdCache[sl] ? `<div class="standings std-box" data-slug="${esc(sl)}">${stdCache[sl].html}</div>` : "";
-                return pre + `<section class="competition-group"><div class="competition-header">${lgFlag(g[k], k)}<span class="flag">${lgIcon(g[k])}</span>${esc(lgDisp(k, g[k]))}${sbtn}<span class="count">${g[k].length} match(s)</span></div>${sbox}${shown.map(rowFn).join("")}</section>`;
+                return pre + `<section class="competition-group"><div class="competition-header">${lgFlag(g[k], k)}<span class="flag">${lgIcon(g[k])}</span>${esc(lgDisp(k, g[k]))}${sbtn}<span class="count">${g[k].length} match(s)</span></div>${sbox}${mdRows(shown, rowFn)}</section>`;
             }).join("");
             if (hidden) out += `<button class="btn-action btn-accent" id="more-matches" type="button" style="margin:8px auto 18px">Afficher plus de matchs (${hidden} restants)</button>`;
             return placed ? out : out + BOTOLA_BTN;
+        }
+                // ===== Journées (page de compétition, onglet « À venir ») : matchs regroupés et classés par numéro de journée =====
+        // ESPN ne donne pas la journée : elle est déduite du classement (matchs déjà joués par équipe + rang du match dans le calendrier restant).
+        const MD_SLUGS = ["eng.1", "esp.1", "ita.1", "ger.1", "fra.1", "por.1", "ned.1", "mar.1"], gpCache = {};
+        let gpBusy = 0, gpFail = 0;
+        async function loadGp() {
+            if (!MD_SLUGS.includes(UP_SLUG) || gpBusy || Date.now() - gpFail < 120000) return;
+            const pn = window.compFilter ? all().filter(m => m.state === "post" && window.compFilter.test(m)).length : 0, c = gpCache[UP_SLUG];
+            if (c && c.pn === pn && Date.now() - c.t < 600000) return;
+            gpBusy = 1;
+            try {
+                const url = CFG.PROXY_URL ? CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + UP_SLUG + "/standings" : "https://site.api.espn.com/apis/v2/sports/soccer/" + UP_SLUG + "/standings";
+                const r = await fetch(url); if (!r.ok) throw new Error("HTTP " + r.status);
+                const d = await r.json(), map = {}; let n = 0;
+                (d.children && d.children.length ? d.children : [d]).forEach(g => ((g.standings && g.standings.entries) || g.entries || []).forEach(e => {
+                    const t = e.team, name = t && typeof t === "object" ? (t.displayName || t.shortDisplayName || t.name || "") : String(t || ""), p = parseInt(sval(e, "gamesPlayed"), 10);
+                    if (name && p >= 0) { map[nk(name)] = p; n++; }
+                }));
+                if (n < 8) throw new Error("classement incomplet");
+                gpCache[UP_SLUG] = { t: Date.now(), pn, map, rounds: 2 * (n - 1) };
+                try { renderAll(); } catch (e) { }
+            } catch (e) { gpFail = Date.now(); } finally { gpBusy = 0; }
+        }
+        function mdPrep(arr, byTime) {
+            if (!byTime || !MD_SLUGS.includes(UP_SLUG)) return;
+            loadGp();
+            const g = gpCache[UP_SLUG], live = {}, cnt = {};
+            all().forEach(m => { if (m.state === "in" && (!window.compFilter || window.compFilter.test(m))) [m.home, m.away].forEach(t => { const k = nk(t); live[k] = (live[k] || 0) + 1; }); });
+            arr.sort((a, b) => a.start.localeCompare(b.start));
+            arr.forEach(m => {
+                m.md = 0;
+                const r = parseInt(String((m.raw && m.raw.intRound) || "").replace(/\D/g, ""), 10);   // Botola : TheSportsDB / 365Scores donnent déjà la journée
+                if (r > 0 && r < 70) { m.md = r; return; }
+                if (!g || m.off) return;
+                const kh = nk(m.home), ka = nk(m.away);
+                if (!(kh in g.map) || !(ka in g.map)) return;
+                const nh = g.map[kh] + (live[kh] || 0) + (cnt[kh] = (cnt[kh] || 0) + 1), na = g.map[ka] + (live[ka] || 0) + (cnt[ka] = (cnt[ka] || 0) + 1);
+                m.md = Math.max(nh, na); if (m.md > g.rounds) m.md = 0;
+            });
+            arr.sort((a, b) => ((a.md || 999) - (b.md || 999)) || a.start.localeCompare(b.start));
+        }
+        function mdRows(shown, rowFn) {
+            if (!shown.some(m => m.md)) return shown.map(rowFn).join("");
+            const rg = {}, fmt = s => new Date(s).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+            shown.forEach(m => { if (m.md) { const x = (rg[m.md] ||= [m.start, m.start]); if (m.start < x[0]) x[0] = m.start; if (m.start > x[1]) x[1] = m.start; } });
+            let last = null;
+            return shown.map(m => {
+                let pre = "";
+                if (m.md && m.md !== last) { last = m.md; const x = rg[m.md], a = fmt(x[0]), b = fmt(x[1]); pre = `<div class="md-head"><span><span>Journée</span> ${m.md}</span><small>${a === b ? a : a + " – " + b}</small></div>`; }
+                else if (!m.md && last !== 0) { last = 0; pre = '<div class="md-head"><span>Reportés / date à confirmer</span></div>'; }
+                return pre + rowFn(m);
+            }).join("");
         }
         let mLimit = 40, mSig = "";
         document.addEventListener("click", e => { if (e.target.closest("#more-matches")) { mLimit += 60; renderMatches(true); } });
@@ -2092,7 +2179,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mp(a) - mp(b) || b.start.localeCompare(a.start)).slice(0, 150);
             else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || tierM(a) - tierM(b) || a.start.localeCompare(b.start)).slice(0, 150);
             { const sg = tab + "|" + lgSel.value + "|" + q + "|" + window.dayPick + "|" + (window.compFilter ? window.compFilter.name : ""); if (sg !== mSig) { mSig = sg; mLimit = 40; } }
-            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`;
+            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${(!all().length || (tab === "next" && UP_SLUG && !window.__upDone)) ? "Chargement du calendrier…" : (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.")}</div>`;
             radPaint();
         }
         function updateTicker() {
@@ -2350,6 +2437,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         setInterval(vidFlush, 5000);
         let searchT; document.getElementById("search").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(() => renderMatches(true), 250); });
 
+        loadUpcoming().then(() => { try { renderAll(); } catch (e) { } });   // démarre tout de suite, en parallèle (sans attendre les matchs du jour)
         refresh(allDays(0, 0), "light").then(() => {
             // les autres jours et les sources complémentaires (GitHub…) ne se chargent qu'à la première interaction, ou après 20 s
             let done = false; const evs = ["pointerdown", "keydown", "scroll", "touchstart"];
@@ -2361,7 +2449,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         let hidTick = 0;
         let liveBusy = 0;
         setInterval(() => { if (document.hidden && ++hidTick % 4) return; if (liveBusy && Date.now() - liveBusy < 12000) return; liveBusy = Date.now(); refresh(allDays(0, 0), "light").then(refreshOpen).catch(() => { }).finally(() => { liveBusy = 0; }); }, CFG.LIVE_REFRESH_MS);
-        setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); }, CFG.OTHER_REFRESH_MS);
+        setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); loadUpcoming().then(() => { try { renderAll(); } catch (e) { } }); }, CFG.OTHER_REFRESH_MS);
         document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0), "light"); });
     </script>
 <script>
