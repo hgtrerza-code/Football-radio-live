@@ -1104,10 +1104,19 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         async function loadUpcoming() {
             if (!UP_SLUG || window.__upBusy) return;
             window.__upBusy = 1;
+            const CK = "fl_up_" + UP_SLUG;
+            // affichage immédiat du dernier programme connu (mémoire locale), remplacé dès que les données fraîches arrivent
+            if (!(byDay["x-up"] || []).length) { try { const c = JSON.parse(localStorage.getItem(CK) || "null"); if (c && c.d && Date.now() - c.t < 3 * 864e5) { byDay["x-up"] = c.d.filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } } } catch (e) { } }
+            loadGp();   // classement (numéros de journée) chargé en parallèle des matchs
             try {
                 const out = new Map(), add = (a, n) => { const x = new Date(a); x.setDate(x.getDate() + n); return x; };
                 let budget = 110, cap = 14;
-                const publish = () => { byDay["x-up"] = [...out.values()].map(m => { m.lg = cleanLg(m.lg); return m; }).filter(m => !isBlockedMatch(m)); try { renderAll(); } catch (e) { } };
+                const publish = () => {
+                    if (!out.size && (byDay["x-up"] || []).length) return;
+                    byDay["x-up"] = [...out.values()].map(m => { m.lg = cleanLg(m.lg); return m; }).filter(m => !isBlockedMatch(m));
+                    try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), d: byDay["x-up"].filter(m => m.state === "pre").slice(0, 150) })); } catch (e) { }
+                    try { renderAll(); } catch (e) { }
+                };
                 // ESPN refuse parfois les longues plages (erreur 400) : tranche de 14 jours, coupée en deux si elle est refusée, jusqu'au jour seul ; la taille refusée est retenue pour les tranches suivantes (moins d'erreurs 400)
                 async function span(a, n) {
                     if (budget-- <= 0) return;
@@ -1118,11 +1127,10 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                     const h = Math.ceil(n / 2); if (refused) cap = Math.min(cap, h); await span(a, h); await span(add(a, h), n - h);
                 }
                 const t0 = new Date(), now = Date.now(), fut = () => [...out.values()].filter(m => m.state === "pre" && new Date(m.start).getTime() > now + 36 * 3600e3).length;
-                for (let o = 0; o < 84;) {
-                    const n = cap; await span(add(t0, o), n); o += n; publish();
-                    if (fut() >= 40) break;   // assez de matchs à venir : on s'arrête
-                }
-            } catch (e) { } finally { window.__upBusy = 0; }
+                let o = 0;
+                { const n = cap; await Promise.all([span(add(t0, 0), n), span(add(t0, n), n)]); o = 2 * n; publish(); }   // 2 premières tranches en parallèle : le programme s'affiche plus vite
+                while (o < 84 && fut() < 40) { const n = cap; await span(add(t0, o), n); o += n; publish(); }   // assez de matchs à venir (40) : on s'arrête
+            } catch (e) { } finally { window.__upBusy = 0; window.__upDone = 1; }
         }
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
@@ -2186,7 +2194,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mp(a) - mp(b) || b.start.localeCompare(a.start)).slice(0, 150);
             else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || tierM(a) - tierM(b) || a.start.localeCompare(b.start)).slice(0, 150);
             { const sg = tab + "|" + lgSel.value + "|" + q + "|" + window.dayPick + "|" + (window.compFilter ? window.compFilter.name : ""); if (sg !== mSig) { mSig = sg; mLimit = 40; } }
-            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`;
+            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${(!all().length || (tab === "next" && UP_SLUG && !window.__upDone)) ? "Chargement du calendrier…" : (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.")}</div>`;
             radPaint();
         }
         function updateTicker() {
@@ -2444,8 +2452,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         setInterval(vidFlush, 5000);
         let searchT; document.getElementById("search").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(() => renderMatches(true), 250); });
 
+        loadUpcoming().then(() => { try { renderAll(); } catch (e) { } });   // démarre tout de suite, en parallèle (sans attendre les matchs du jour)
         refresh(allDays(0, 0), "light").then(() => {
-            loadUpcoming().then(() => { try { renderAll(); } catch (e) { } });
             // les autres jours et les sources complémentaires (GitHub…) ne se chargent qu'à la première interaction, ou après 20 s
             let done = false; const evs = ["pointerdown", "keydown", "scroll", "touchstart"];
             const go = () => { if (done) return; done = true; evs.forEach(x => removeEventListener(x, go)); refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); };
@@ -2958,6 +2966,11 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   const COMP_TEAM_W = /\b(women|femen[ií]|femin|féminin|frauen|damen|ladies)\b|\((?:w|f)\)|\sW$|\bU-?\d{2}\b|\bII$/i;
   const COMP_SLUG_W = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies|\.2$|\.3$|\.cup|\.fa|\.league_cup|\.u\d/i;
   function compStrict(slug, m, raw) {
+    // LaLiga : aucun match de 2e division (LaLiga 2 / Segunda División / Hypermotion) sur la page de la compétition
+    if (slug === "laliga") {
+      const s2 = String(m.fslug || m.slug || "");
+      if (/^esp\.[23]/i.test(s2) || /laliga ?2|la liga ?2|liga ?2\b|segunda|hypermotion|smartbank|primera federaci|\bII$/i.test(String(raw || "").replace(/\s*·\s*compétition\s+\d+\s*$/i, ""))) return false;
+    }
     if (!COMP_STRICT[slug]) return true;
     if (COMP_TEAM_W.test(String(m.home || "")) || COMP_TEAM_W.test(String(m.away || ""))) return false;
     const sl = String(m.fslug || (m.slug && m.slug !== "all" && m.slug !== "tsdb" ? m.slug : "") || "");
