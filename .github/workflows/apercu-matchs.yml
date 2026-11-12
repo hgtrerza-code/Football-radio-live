@@ -29,5 +29,6 @@ jobs:
           git add index.html matchs-du-jour.json
           if ! git diff --cached --quiet; then
             git commit -m "Aperçu des matchs du jour"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
