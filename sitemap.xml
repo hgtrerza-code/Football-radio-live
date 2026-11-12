@@ -1,118 +1,171 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.footlivepro.com/</loc>
-    <changefreq>hourly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.footlivepro.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.footlivepro.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.footlivepro.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.footlivepro.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://www.footlivepro.com/nl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.footlivepro.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/"/>
+  </url>
+  <url>
+    <loc>https://www.footlivepro.com/en/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.footlivepro.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.footlivepro.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.footlivepro.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.footlivepro.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://www.footlivepro.com/nl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.footlivepro.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/"/>
+  </url>
+  <url>
+    <loc>https://www.footlivepro.com/es/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.footlivepro.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.footlivepro.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.footlivepro.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.footlivepro.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://www.footlivepro.com/nl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.footlivepro.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/"/>
+  </url>
+  <url>
+    <loc>https://www.footlivepro.com/ar/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.footlivepro.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.footlivepro.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.footlivepro.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.footlivepro.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://www.footlivepro.com/nl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.footlivepro.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/"/>
+  </url>
+  <url>
+    <loc>https://www.footlivepro.com/de/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.footlivepro.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.footlivepro.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.footlivepro.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.footlivepro.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://www.footlivepro.com/nl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.footlivepro.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/"/>
+  </url>
+  <url>
+    <loc>https://www.footlivepro.com/nl/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.footlivepro.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.footlivepro.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.footlivepro.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.footlivepro.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://www.footlivepro.com/nl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.footlivepro.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/"/>
+  </url>
+  <url>
+    <loc>https://www.footlivepro.com/it/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.footlivepro.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.footlivepro.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.footlivepro.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.footlivepro.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.footlivepro.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://www.footlivepro.com/nl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.footlivepro.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.footlivepro.com/"/>
   </url>
   <url>
     <loc>https://www.footlivepro.com/ligue-des-champions.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/premier-league.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/laliga.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/serie-a.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/bundesliga.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/ligue-1.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/europa-league.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/conference-league.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/liga-portugal.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/eredivisie.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/botola-pro.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/radio.html</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/classements.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/actualites.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/programme-tv.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/football-feminin.html</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/clubs/</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/buteurs/</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://www.footlivepro.com/a-propos.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://www.footlivepro.com/contact.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.footlivepro.com/mentions-legales.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
   </url>
   <url>
     <loc>https://www.footlivepro.com/confidentialite.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
   </url>
 </urlset>
