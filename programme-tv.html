@@ -371,6 +371,7 @@ h1{font-size:1.45rem;letter-spacing:-.4px;color:#fff;text-shadow:none;animation:
 h1 .brand-mark{width:34px;height:34px;display:block;flex-shrink:0}
 h1 .brand-mark svg{width:100%;height:100%;display:block}
 h1 b{font-weight:800}h1 b span{color:var(--accent)}
+h1{gap:0}h1 .brand-mark{margin-right:-2px}h1 b{margin-left:0;letter-spacing:-.3px}
 .header-actions .btn-action{padding:6px 12px}
 .status-badge{font-size:.68rem}
 .ticker{border-radius:12px;background:#0d1524}
@@ -2166,7 +2167,26 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             if (/\b(2|ii|second|championship|segunda|serie b|ligue 2|division 2|league one|league two)\b/i.test(n)) return 200;
             return 100;
         }
-        const lgCmp = (a, b) => ((window.compFilter && window.compFilter.main && window.compFilter.main(a)) ? 0 : 1) - ((window.compFilter && window.compFilter.main && window.compFilter.main(b)) ? 0 : 1) || lgRank(a) - lgRank(b) || a.localeCompare(b, "fr");
+        // Grandes compétitions de sélections : toujours en tête de l'affichage (Coupe du monde, Euro, Copa América, CAN, Ligue des nations A…), avant les 10 compétitions de la barre
+        const TOP_NO = /women|feminin|f\u00e9minin|femenin|frauen|\bu-?\d{2}\b|youth|junior|club|beach|futsal|concacaf nations/i;
+        const TOP_INTL = [
+            /world cup(?!.*qualif)|coupe du monde(?!.*qualif)/i,
+            /euro(pean)? championship(?!.*qualif)|^uefa euro\b(?!.*qualif)|^euro 20\d\d(?!.*qualif)/i,
+            /copa am[e\u00e9]rica/i,
+            /africa cup of nations(?!.*qualif)|afcon(?!.*qualif)|coupe d.afrique des nations(?!.*qualif)/i,
+            /asian cup(?!.*qualif)|gold cup/i,
+            /nations league(?!.*\b(b|c|d)\b)|ligue des nations(?!.*\b(b|c|d)\b)/i,   // Ligue des nations A (ou « UEFA Nations League » sans lettre)
+            /nations league|ligue des nations/i,   // Ligue des nations B, C, D
+            /qualif.*(world cup|coupe du monde|euro|africa cup|afcon)|(world cup|coupe du monde|euro|africa cup|afcon).*qualif/i
+        ];
+        const _topMemo = Object.create(null);
+        function topPri(k) {
+            if (k in _topMemo) return _topMemo[k];
+            const raw = String(k || "").split(String.fromCharCode(8203))[0].trim(); let r = 99;
+            if (!TOP_NO.test(raw)) { const i = TOP_INTL.findIndex(x => x.test(raw)); if (i >= 0) r = i; }
+            return (_topMemo[k] = r);
+        }
+        const lgCmp = (a, b) => (topPri(a) - topPri(b)) || ((window.compFilter && window.compFilter.main && window.compFilter.main(a)) ? 0 : 1) - ((window.compFilter && window.compFilter.main && window.compFilter.main(b)) ? 0 : 1) || lgRank(a) - lgRank(b) || a.localeCompare(b, "fr");
         // Les 10 compétitions de la barre : toujours affichées en premier (Direct, Aujourd'hui, Résultats, À venir), dans l'ordre de la barre
         const MAIN10 = [
             ["Europe", /^(uefa )?champions league$/i, 0], ["Angleterre", /^(english )?premier league$/i, 1], ["Espagne", /^(spanish )?(laliga|la liga|primera division)( ea sports)?$/i, 0],
@@ -2218,7 +2238,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             if (!ok && tvCupIdx(m) >= 0) ok = true;
             return (_tvMemo[k] = ok);
         }
-        const isMain10 = m => mp(m) < 99;   // vrai = match d'une des 10 compétitions de la barre
+        const isMain10 = m => mp(m) < 99 || topPri(m.lg) < 99;
+        const mpx = m => { const t = topPri(m.lg); return t < 99 ? t - 100 : mp(m); };   // vrai = match d'une des 10 compétitions de la barre
         // Niveau d'une compétition (bouton À venir) : 1 = 1re division / grands tournois, 2 = 2e division, 3 = coupes, qualifications, amicaux, féminines, jeunes
         const CUP_RE = /cup|copa|coupe|pokal|coppa|ta[cç]a|beker|trophy|trophée|shield|supercopa|supercoppa|play-?off|qualif|friendl|amical/i;
         const _tierMemo = Object.create(null);
@@ -2240,7 +2261,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             list.forEach(m => (g[m.lg] ||= []).push(m));
             const br = lgRank("Moroccan Botola Pro"); let placed = !withBtn;
             const first = k => g[k].reduce((t, m) => (t === "" || m.start < t) ? m.start : t, "");
-            let out = Object.keys(g).sort((x, y) => { const px = mainPri(x, g[x]), py = mainPri(y, g[y]); if (byTime && px < 99 && py < 99) { const d = first(x).localeCompare(first(y)); if (d) return d; } if (byTime && px === 99 && py === 99) { const d = lgTier(x) - lgTier(y); if (d) return d; } return (px - py) || lgCmp(x, y); }).map(k => {
+            let out = Object.keys(g).sort((x, y) => { const tx = topPri(x), ty = topPri(y); if (tx !== ty) return tx - ty; if (tx < 99) return first(x).localeCompare(first(y)) || lgCmp(x, y); const px = mainPri(x, g[x]), py = mainPri(y, g[y]); if (byTime && px < 99 && py < 99) { const d = first(x).localeCompare(first(y)); if (d) return d; } if (byTime && px === 99 && py === 99) { const d = lgTier(x) - lgTier(y); if (d) return d; } return (px - py) || lgCmp(x, y); }).map(k => {
                 if (limit && used >= limit) { hidden += g[k].length; return ""; } used += g[k].length;
                 let pre = ""; if (!placed && lgRank(k) >= br) { pre = BOTOLA_BTN; placed = true; }
                 const sl = (g[k].find(m => m.slug && m.slug !== "all" && m.slug !== "tsdb") || {}).slug;
@@ -2253,6 +2274,23 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         }
         let mLimit = 40, mSig = "";
         document.addEventListener("click", e => { if (e.target.closest("#more-matches")) { mLimit += 60; renderMatches(true); } });
+        // Mise à jour DOUCE de la liste : rien n'est touché si rien n'a changé ; sinon seules les compétitions modifiées sont remplacées, et la position de défilement est conservée
+        function patchHTML(box, html) {
+            if (box._ph && box._ph.html === html) return;   // identique : aucun changement visible, aucun rechargement
+            const y = window.scrollY, tpl = document.createElement("template"); tpl.innerHTML = html;
+            const nu = Array.from(tpl.content.children), cur = nu.map(n => n.outerHTML), prev = box._ph && box._ph.kids;
+            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; }
+            else {
+                const old = Array.from(box.children);
+                for (let i = 0; i < Math.max(nu.length, old.length); i++) {
+                    if (i >= nu.length) old[i].remove();
+                    else if (i >= old.length) box.appendChild(nu[i]);
+                    else if (prev[i] !== cur[i]) old[i].replaceWith(nu[i]);
+                }
+            }
+            box._ph = { html, kids: cur, first: box.firstElementChild };
+            if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);   // la page reste à l'endroit où vous êtes
+        }
         function renderLive() {
             if (vidBusy()) { vidPending = true; return; }
             const box = document.getElementById("live-list"), meta = document.getElementById("live-meta");
@@ -2260,7 +2298,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const live = all().filter(m => m.state === "in");
             meta.textContent = lastOk ? `actualisé à ${new Date(lastOk).toLocaleTimeString("fr-FR")} · toutes les ${CFG.LIVE_REFRESH_MS / 1000} s · ${live.length} match(s)` : "";
             if (lastErr && !all().length) { box.innerHTML = `<div class="empty">⚠️ ${esc(lastErr)}</div>`; return; }
-            box.innerHTML = live.length ? grouped(live, liveRow) : `<div class="empty">${all().length ? "Aucun match en direct pour le moment." : "Chargement du direct…"}</div>`; radPaint();
+            patchHTML(box, live.length ? grouped(live, liveRow) : `<div class="empty">${all().length ? "Aucun match en direct pour le moment." : "Chargement du direct…"}</div>`); radPaint();
         }
         function renderMatches(userAction) {
             if (!userAction && vidBusy()) { vidPending = true; return; }
@@ -2279,10 +2317,10 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             else if (tab === "comp") { const rk = m => m.state === "in" ? 0 : m.state === "pre" ? 1 : 2; list = list.sort((a, b) => rk(a) - rk(b) || (rk(a) === 2 ? b.start.localeCompare(a.start) : a.start.localeCompare(b.start))); }
             else if (tab === "day") list = list.filter(m => localDay(m.start) === window.dayPick).sort((a, b) => a.start.localeCompare(b.start));
             else if (tab === "today") list = list.filter(m => localDay(m.start) === t).sort((a, b) => a.start.localeCompare(b.start));
-            else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mp(a) - mp(b) || b.start.localeCompare(a.start)).slice(0, 150);
-            else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || tierM(a) - tierM(b) || a.start.localeCompare(b.start)).slice(0, 150);
+            else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mpx(a) - mpx(b) || b.start.localeCompare(a.start)).slice(0, 150);
+            else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mpx(a) - mpx(b) || tierM(a) - tierM(b) || a.start.localeCompare(b.start)).slice(0, 150);
             { const sg = tab + "|" + lgSel.value + "|" + q + "|" + window.dayPick + "|" + (window.compFilter ? window.compFilter.name : ""); if (sg !== mSig) { mSig = sg; mLimit = 40; } }
-            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`;
+            patchHTML(document.getElementById("matches"), list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${all().length ? (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.") : "Chargement du calendrier…"}</div>`);
             radPaint();
         }
         function updateTicker() {
@@ -2709,7 +2747,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   $("#filters").addEventListener("click", () => buildDays());
 
   // ---------- Carte « À la une » ----------
-  const heroPref = (a, b) => (isMain10(b) - isMain10(a)) || (window.isFavMatch(b) - window.isFavMatch(a)) || lgRank(a.lg) - lgRank(b.lg);
+  const heroPref = (a, b) => (topPri(a.lg) - topPri(b.lg)) || (isMain10(b) - isMain10(a)) || (window.isFavMatch(b) - window.isFavMatch(a)) || lgRank(a.lg) - lgRank(b.lg);
   function minOf(m) { const x = String(m.label || "").match(/(\d+)/); return x ? +x[1] : 0; }
   function heroScore(m) {
     const g = (m.h || 0) + (m.a || 0), d = Math.abs((m.h || 0) - (m.a || 0)), mn = minOf(m);
@@ -2721,7 +2759,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   }
   function pickHeroes() {
     const A = all().filter(m => !m.off && (!window.compFilter || window.compFilter.test(m))), now = Date.now(), T = m => new Date(m.start).getTime(), MAX = 5;   // page de compétition : uniquement cette compétition
-    const live = A.filter(m => m.state === "in").sort((x, y) => (isMain10(y) - isMain10(x)) || heroScore(y) - heroScore(x));
+    const live = A.filter(m => m.state === "in").sort((x, y) => (topPri(x.lg) - topPri(y.lg)) || (isMain10(y) - isMain10(x)) || heroScore(y) - heroScore(x));
     const liveTop = live.filter(isMain10), liveHero = liveTop.length ? liveTop : live;   // grandes compétitions seulement s'il y en a en direct
     const out = liveHero.slice(0, MAX).map(m => ({ m, kind: "live", n: (!window.compFilter && typeof liveN === "number" && liveN > 0) ? liveN : live.length }));   // même compteur que le bouton « En direct » (évite les valeurs différentes)
     if (out.length < 3) {
