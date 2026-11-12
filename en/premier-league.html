@@ -373,6 +373,7 @@ h1{font-size:1.45rem;letter-spacing:-.4px;color:#fff;text-shadow:none;animation:
 h1 .brand-mark{width:34px;height:34px;display:block;flex-shrink:0}
 h1 .brand-mark svg{width:100%;height:100%;display:block}
 h1 b{font-weight:800}h1 b span{color:var(--accent)}
+h1{gap:0}h1 .brand-mark{margin-right:-2px}h1 b{margin-left:0;letter-spacing:-.3px}
 .header-actions .btn-action{padding:6px 12px}
 .status-badge{font-size:.68rem}
 .ticker{border-radius:12px;background:#0d1524}
@@ -2155,6 +2156,23 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         }
         let mLimit = 40, mSig = "";
         document.addEventListener("click", e => { if (e.target.closest("#more-matches")) { mLimit += 60; renderMatches(true); } });
+        // Mise à jour DOUCE de la liste : rien n'est touché si rien n'a changé ; sinon seules les compétitions modifiées sont remplacées, et la position de défilement est conservée
+        function patchHTML(box, html) {
+            if (box._ph && box._ph.html === html) return;   // identique : aucun changement visible, aucun rechargement
+            const y = window.scrollY, tpl = document.createElement("template"); tpl.innerHTML = html;
+            const nu = Array.from(tpl.content.children), cur = nu.map(n => n.outerHTML), prev = box._ph && box._ph.kids;
+            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; }
+            else {
+                const old = Array.from(box.children);
+                for (let i = 0; i < Math.max(nu.length, old.length); i++) {
+                    if (i >= nu.length) old[i].remove();
+                    else if (i >= old.length) box.appendChild(nu[i]);
+                    else if (prev[i] !== cur[i]) old[i].replaceWith(nu[i]);
+                }
+            }
+            box._ph = { html, kids: cur, first: box.firstElementChild };
+            if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);   // la page reste à l'endroit où vous êtes
+        }
         function renderLive() {
             if (vidBusy()) { vidPending = true; return; }
             const box = document.getElementById("live-list"), meta = document.getElementById("live-meta");
@@ -2162,7 +2180,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const live = all().filter(m => m.state === "in");
             meta.textContent = lastOk ? `actualisé à ${new Date(lastOk).toLocaleTimeString("en-GB")} · toutes les ${CFG.LIVE_REFRESH_MS / 1000} s · ${live.length} match(s)` : "";
             if (lastErr && !all().length) { box.innerHTML = `<div class="empty">⚠️ ${esc(lastErr)}</div>`; return; }
-            box.innerHTML = live.length ? grouped(live, liveRow) : `<div class="empty">${all().length ? "Aucun match en direct pour le moment." : "Chargement du direct…"}</div>`; radPaint();
+            patchHTML(box, live.length ? grouped(live, liveRow) : `<div class="empty">${all().length ? "Aucun match en direct pour le moment." : "Chargement du direct…"}</div>`); radPaint();
         }
         function renderMatches(userAction) {
             if (!userAction && vidBusy()) { vidPending = true; return; }
@@ -2184,7 +2202,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             else if (tab === "results") list = list.filter(m => m.state === "post").sort((a, b) => mp(a) - mp(b) || b.start.localeCompare(a.start)).slice(0, 150);
             else list = list.filter(m => m.state === "pre" && localDay(m.start) >= t).sort((a, b) => mp(a) - mp(b) || tierM(a) - tierM(b) || a.start.localeCompare(b.start)).slice(0, 150);
             { const sg = tab + "|" + lgSel.value + "|" + q + "|" + window.dayPick + "|" + (window.compFilter ? window.compFilter.name : ""); if (sg !== mSig) { mSig = sg; mLimit = 40; } }
-            document.getElementById("matches").innerHTML = list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${(!all().length || (tab === "next" && UP_SLUG && !window.__upDone)) ? "Chargement du calendrier…" : (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.")}</div>`;
+            patchHTML(document.getElementById("matches"), list.length ? grouped(list, rowHTML, true, tab === "next", mLimit) : BOTOLA_BTN + `<div class="empty">${(!all().length || (tab === "next" && UP_SLUG && !window.__upDone)) ? "Chargement du calendrier…" : (tab === "live" ? "Aucun match en direct pour le moment." : "Aucun match pour ces critères.")}</div>`);
             radPaint();
         }
         function updateTicker() {
