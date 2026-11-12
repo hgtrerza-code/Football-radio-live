@@ -1,6 +1,59 @@
 {
- "date": "2026-11-11",
- "generated": "2026-11-11T13:01:53.495Z",
- "extra": 56,
- "matches": []
+ "date": "2026-11-12",
+ "generated": "2026-11-12T01:04:09.868Z",
+ "extra": 107,
+ "matches": [
+  {
+   "id": "401928506",
+   "lg": "Coupe du Roi",
+   "start": "2026-11-12T17:30Z",
+   "state": "pre",
+   "label": "0'",
+   "home": "CS Puertollano",
+   "away": "Albacete",
+   "h": 0,
+   "a": 0,
+   "venue": "Estadio Ciudad de Puertollano",
+   "place": "Ciudad Real, Spain"
+  },
+  {
+   "id": "401928551",
+   "lg": "Coupe du Roi",
+   "start": "2026-11-12T18:00Z",
+   "state": "pre",
+   "label": "0'",
+   "home": "CD Artistico Navalcarnero",
+   "away": "Real Betis",
+   "h": 0,
+   "a": 0,
+   "venue": "Municipal de Santo Domingo",
+   "place": "Madrid, Spain"
+  },
+  {
+   "id": "401928527",
+   "lg": "Coupe du Roi",
+   "start": "2026-11-12T18:00Z",
+   "state": "pre",
+   "label": "0'",
+   "home": "CD Tarancon",
+   "away": "Levante",
+   "h": 0,
+   "a": 0,
+   "venue": "Polideportivo Estadio Municipal Tarancón",
+   "place": "Cuenca, Spain"
+  },
+  {
+   "id": "401932846",
+   "lg": "Coupe de France",
+   "start": "2026-11-12T18:00Z",
+   "state": "pre",
+   "label": "0'",
+   "home": "Chambéry Savoie",
+   "away": "Grenoble",
+   "h": 0,
+   "a": 0,
+   "venue": "Stade Municipal de Chambéry",
+   "place": "Chambery, France"
+  }
+ ]
 }
