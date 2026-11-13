@@ -4247,5 +4247,27 @@ if(r)r.onclick=function(e){e.preventDefault();b.hidden=false;};
 })();
 </script>
 <script>(function(){var b=document.getElementById('lang-btn'),m=document.getElementById('lang-menu');if(!b||!m)return;function c(){m.hidden=true;b.setAttribute('aria-expanded','false')}b.addEventListener('click',function(e){e.stopPropagation();var o=m.hidden;m.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false')});document.addEventListener('click',function(e){if(!m.contains(e.target))c()});document.addEventListener('keydown',function(e){if(e.key==='Escape')c()})})();</script>
+<script>
+/* Écran toujours allumé tant qu'un match est ouvert (Screen Wake Lock) : plus de verrouillage pendant qu'on suit un match */
+(function(){
+  if(!('wakeLock' in navigator)) return;
+  var lock=null, busy=false;
+  function wanted(){ return !document.hidden && !!document.querySelector('.m-wrap.open'); }
+  function release(){ if(lock){ try{ lock.release(); }catch(e){} lock=null; } }
+  function sync(){
+    if(!wanted()){ release(); return; }
+    if(lock||busy) return; busy=true;
+    navigator.wakeLock.request('screen').then(function(l){
+      busy=false; lock=l;
+      l.addEventListener('release',function(){ if(lock===l) lock=null; });
+      if(!wanted()) release();
+    }).catch(function(){ busy=false; });
+  }
+  document.addEventListener('click',function(){ setTimeout(sync,150); });
+  document.addEventListener('visibilitychange',sync);   /* le verrou est perdu quand l'onglet est masqué : on le reprend au retour */
+  setInterval(sync,3000);
+  sync();
+})();
+</script>
 </body>
 </html>
