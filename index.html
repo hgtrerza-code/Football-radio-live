@@ -664,6 +664,10 @@ body,button,input,select,textarea{font-family:'Inter','Inter Fallback',Arial,san
 #tv-seo.open{max-height:none;overflow:visible}
 #tv-seo.open::before{display:none}
 #tv-seo.open::after{content:"▲ Réduire";position:static;display:block;padding:.6rem 0 0}
+
+/* Match suivi : tailles réelles partout (le rendu différé faisait sauter la page) et légende du terrain à hauteur fixe */
+#matches:has(.m-wrap.open) .competition-group,#matches:has(.m-wrap.open) .m-wrap{content-visibility:visible}
+.pitch-cap{height:5.6em!important;min-height:0!important;overflow:hidden}
 </style>
 <style id="perf-css">
 /* Perf : animations composées (transform/opacity) au lieu de box-shadow/width/height/filter */
@@ -2341,6 +2345,9 @@ html[dir=rtl] .lf-ch svg{transform:none}
         let mLimit = 40, mSig = "";
         document.addEventListener("click", e => { if (e.target.closest("#more-matches")) { mLimit += 60; renderMatches(true); } });
         // Mise à jour DOUCE de la liste : rien n'est touché si rien n'a changé ; sinon seules les compétitions modifiées sont remplacées, et la position de défilement est conservée
+        // Ancrage : le match ouvert (suivi) garde la même position à l'écran après toute mise à jour de la page
+        window.anchorOf = function () { const w = [...document.querySelectorAll(".m-wrap.open")].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; }); return w ? { id: w.dataset.id, top: w.getBoundingClientRect().top } : null; };
+        window.anchorFix = function (a) { if (!a) return; const w = document.querySelector('.m-wrap.open[data-id="' + CSS.escape(a.id) + '"]'); if (!w) return; const dl = w.getBoundingClientRect().top - a.top; if (Math.abs(dl) > 1) window.scrollBy(0, dl); };
         function patchHTML(box, html) {
             if (box._ph && box._ph.html === html) return;   // identique : aucun changement visible, aucun rechargement
             const y = window.scrollY, tpl = document.createElement("template"); tpl.innerHTML = html;
@@ -2351,13 +2358,30 @@ html[dir=rtl] .lf-ch svg{transform:none}
                 if (!anc) { const r = w.getBoundingClientRect(); if (r.bottom > 0 && r.top < window.innerHeight) anc = { id: w.dataset.id, top: r.top }; }
             });
             const nu = Array.from(tpl.content.children), cur = nu.map(n => n.outerHTML), prev = box._ph && box._ph.kids;
-            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; }
+            nu.forEach(g => g.querySelectorAll && g.querySelectorAll(".m-wrap").forEach(w => { const r = w.querySelector(".m-row"); w._rs = r ? r.outerHTML : ""; }));
+            // Mise à jour match par match : on ne remplace que la ligne qui a changé (score, minute), jamais le groupe ni le bloc de détails
+            const syncGroup = (o, n) => {
+                if (!o.classList || !n.classList || !o.classList.contains("competition-group") || !n.classList.contains("competition-group")) return false;
+                const oc = Array.from(o.children), nc = Array.from(n.children); if (oc.length !== nc.length) return false;
+                for (let k = 0; k < oc.length; k++) {
+                    const c = oc[k], d = nc[k], cw = c.classList.contains("m-wrap"), dw = d.classList.contains("m-wrap");
+                    if (cw !== dw || (cw && c.dataset.id !== d.dataset.id) || (!cw && c.tagName !== d.tagName)) return false;
+                }
+                oc.forEach((c, k) => {
+                    const d = nc[k];
+                    if (c.classList.contains("m-wrap")) {
+                        if (c._rs !== d._rs) { const or = c.querySelector(".m-row"), nr = d.querySelector(".m-row"); if (or && nr) { or.replaceWith(nr); c._rs = d._rs; } }
+                    } else if (c.outerHTML !== d.outerHTML) c.replaceWith(d);
+                });
+                return true;
+            };
+            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; box.querySelectorAll(".m-wrap").forEach((w, i) => { const r = w.querySelector(".m-row"); w._rs = r ? r.outerHTML : ""; }); }
             else {
                 const old = Array.from(box.children);
                 for (let i = 0; i < Math.max(nu.length, old.length); i++) {
                     if (i >= nu.length) old[i].remove();
                     else if (i >= old.length) box.appendChild(nu[i]);
-                    else if (prev[i] !== cur[i]) old[i].replaceWith(nu[i]);
+                    else if (prev[i] !== cur[i]) { if (!syncGroup(old[i], nu[i])) old[i].replaceWith(nu[i]); }
                 }
             }
             // On remet les blocs de détails vivants (terrain animé inclus) à la place des blocs vides recréés : la hauteur ne s'effondre plus
@@ -3994,7 +4018,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
     raT = setTimeout(() => {
       raT = 0;
       const steps = [renderHero, renderTVIfOpen, baseRenderAll, decorate, buildDays, status, saveCache];
-      const run = i => { if (i >= steps.length) return; try { steps[i](); } catch (e) { console.warn(e); } setTimeout(() => run(i + 1), 0); };   // une étape par tâche : le thread principal respire entre chaque
+      const run = i => { if (i >= steps.length) return; const an = window.anchorOf(); try { steps[i](); } catch (e) { console.warn(e); } window.anchorFix(an); setTimeout(() => run(i + 1), 0); };   // une étape par tâche : le thread principal respire entre chaque
       run(0);
     }, 120);
   };
