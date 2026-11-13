@@ -1,17 +1,17 @@
 {
  "date": "2026-11-13",
- "generated": "2026-11-13T14:51:02.419Z",
+ "generated": "2026-11-13T20:51:23.446Z",
  "extra": 89,
  "matches": [
   {
    "id": "401883136",
    "lg": "LaLiga 2",
    "start": "2026-11-13T19:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "62'",
    "home": "Leganés",
    "away": "Burgos",
-   "h": 0,
+   "h": 3,
    "a": 0,
    "venue": "Estadio Municipal de Butarque",
    "place": "Leganés, Madrid, Spain"
@@ -20,12 +20,12 @@
    "id": "401928487",
    "lg": "Coupe du Roi",
    "start": "2026-11-13T20:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+2'",
    "home": "Salamanca UDS",
    "away": "Celta Vigo",
    "h": 0,
-   "a": 0,
+   "a": 3,
    "venue": "Estadio Helmántico",
    "place": "Villares de la Reina, Spain"
   },
