@@ -1401,7 +1401,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
             return { fr, code, emo: "" };
         }
         const n365Url = d => { const dd = d.slice(6) + "/" + d.slice(4, 6) + "/" + d.slice(0, 4), tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; return "https://webws.365scores.com/web/games/allscores/?appTypeId=5&langId=1&timezoneName=" + encodeURIComponent(tz) + "&userCountryId=-1&startDate=" + dd + "&endDate=" + dd + "&sports=1&showOdds=false"; };
-        const n365TTL = d => d === ymd(new Date()) ? 20000 : 90000;   // aujourd'hui : données 365Scores rafraîchies à chaque cycle (30 s) ; autres jours : 90 s
+        const n365TTL = d => d === ymd(new Date()) ? 5000 : 90000;   // aujourd'hui : données 365Scores rafraîchies à chaque cycle (30 s) ; autres jours : 90 s
         const n365Fresh = d => { const ck = n365Cache[d]; return !!ck && Date.now() - ck.t < n365TTL(d); };
         // Préchargement : 365Scores est interrogé EN MÊME TEMPS qu'ESPN (et non après), pour que le compteur soit juste dès le premier affichage
         function prefetch365(d) {
@@ -1424,7 +1424,11 @@ html[dir=rtl] .lf-ch svg{transform:none}
                 const lgl = "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2/v5/Competitions/light/" + g.competitionId;
                 const t0 = new Date(g.startTime).getTime();
                 const e = (baseT.find(p => Math.abs(p[1] - t0) < 4 * 3600e3 && sameTeam(p[0].home, hc.name) && sameTeam(p[0].away, ac.name)) || [])[0];
-                if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; if (tvOf.length) e.tv = tvOf; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
+                if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; if (tvOf.length) e.tv = tvOf;
+                    // 365Scores est souvent plus rapide qu'ESPN : si son score en direct est plus récent (plus de buts), on l'affiche tout de suite
+                    const s2 = v => (v === undefined || v === null || v < 0) ? null : Number(v), h2 = s2(hc.score), a2 = s2(ac.score);
+                    if ((g.statusGroup === 3 || (g.gameTime > 0 && g.gameTime < 150)) && h2 != null && a2 != null && h2 + a2 > (e.h ?? 0) + (e.a ?? 0)) { e.h = h2; e.a = a2; if (e.state === "pre") e.state = "in"; if (g.gameTimeDisplay) e.label = g.gameTimeDisplay; }
+                    fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
                 const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon|resum|interrupt|delay|reporte|annul/i.test(st);
                 const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
                 let state = "pre";
