@@ -2346,8 +2346,8 @@ html[dir=rtl] .lf-ch svg{transform:none}
         document.addEventListener("click", e => { if (e.target.closest("#more-matches")) { mLimit += 60; renderMatches(true); } });
         // Mise à jour DOUCE de la liste : rien n'est touché si rien n'a changé ; sinon seules les compétitions modifiées sont remplacées, et la position de défilement est conservée
         // Ancrage : le match ouvert (suivi) garde la même position à l'écran après toute mise à jour de la page
-        window.anchorOf = function () { const w = [...document.querySelectorAll(".m-wrap.open")].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; }); return w ? { id: w.dataset.id, top: w.getBoundingClientRect().top } : null; };
-        window.anchorFix = function (a) { if (!a) return; const w = document.querySelector('.m-wrap.open[data-id="' + CSS.escape(a.id) + '"]'); if (!w) return; const dl = w.getBoundingClientRect().top - a.top; if (Math.abs(dl) > 1) window.scrollBy(0, dl); };
+        window.anchorOf = function () { const all = [...document.querySelectorAll("#matches .m-wrap")], vis = x => { const r = x.getBoundingClientRect(); return r.bottom > 60 && r.top < window.innerHeight; }; const w = all.find(x => x.classList.contains("open") && vis(x)) || all.find(vis); return w ? { id: w.dataset.id, top: w.getBoundingClientRect().top } : null; };
+        window.anchorFix = function (a) { if (!a) return; const w = document.querySelector('#matches .m-wrap[data-id="' + CSS.escape(a.id) + '"]'); if (!w) return; const dl = w.getBoundingClientRect().top - a.top; if (Math.abs(dl) > 1) window.scrollBy(0, dl); };
         function patchHTML(box, html) {
             if (box._ph && box._ph.html === html) return;   // identique : aucun changement visible, aucun rechargement
             const y = window.scrollY, tpl = document.createElement("template"); tpl.innerHTML = html;
@@ -2357,6 +2357,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
                 const d = w.querySelector(".m-detail"); if (d && d.firstChild) keepDet.set(w.dataset.id, d);
                 if (!anc) { const r = w.getBoundingClientRect(); if (r.bottom > 0 && r.top < window.innerHeight) anc = { id: w.dataset.id, top: r.top }; }
             });
+            if (!anc) { const w = [...box.querySelectorAll(".m-wrap")].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 60 && r.top < window.innerHeight; }); if (w) anc = { id: w.dataset.id, top: w.getBoundingClientRect().top }; }
             const nu = Array.from(tpl.content.children), cur = nu.map(n => n.outerHTML), prev = box._ph && box._ph.kids;
             nu.forEach(g => g.querySelectorAll && g.querySelectorAll(".m-wrap").forEach(w => { const r = w.querySelector(".m-row"); w._rs = r ? r.outerHTML : ""; }));
             // Mise à jour match par match : on ne remplace que la ligne qui a changé (score, minute), jamais le groupe ni le bloc de détails
@@ -2393,7 +2394,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
             // La page reste calée sur le match suivi : on compense le décalage de ce match plutôt qu'un simple retour à l'ancienne position
             let done = false;
             if (anc) {
-                const w = [...box.querySelectorAll(".m-wrap.open")].find(x => x.dataset.id === anc.id);
+                const w = [...box.querySelectorAll(".m-wrap")].find(x => x.dataset.id === anc.id);
                 if (w) { const dl = w.getBoundingClientRect().top - anc.top; if (Math.abs(dl) > 1) window.scrollBy(0, dl); done = true; }
             }
             if (!done && Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
