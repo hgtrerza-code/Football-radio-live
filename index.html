@@ -1142,7 +1142,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
             KOORA_URL: "https://footlive3.hgtrerza.workers.dev",   // 3e Worker (worker-kooora.js) : chaînes de chaque match lues sur kooora.com
             ESPN: "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard",
             DAYS_BEFORE: 2, DAYS_AFTER: 6,           // fenêtre de jours chargée autour d'aujourd'hui
-            LIVE_REFRESH_MS: 15 * 1000,              // jour en cours (direct)
+            LIVE_REFRESH_MS: 8 * 1000,              // jour en cours (direct)
             OTHER_REFRESH_MS: 30 * 60 * 1000         // autres jours
         };
         // Bascule automatique : si le Worker PROXY_URL est en panne, ne connaît pas la route ou répond autre chose que du JSON,
@@ -1309,8 +1309,8 @@ html[dir=rtl] .lf-ch svg{transform:none}
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
         const goalOn = () => { try { return localStorage.getItem("fl_goal_alerts") !== "false"; } catch (e) { return true; } };
-        const goalCls = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";
-        const goalBadge = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
+        const goalCls = m => (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";   // clignotement toujours actif, même si le bouton Buts est désactivé
+        const goalBadge = m => (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
         function showGoal(m, team) {
             const box = document.getElementById("goal-toasts"), el = document.createElement("div");
             el.className = "goal-sonar";
@@ -1324,9 +1324,9 @@ html[dir=rtl] .lf-ch svg{transform:none}
             all().forEach(m => {
                 const p = prevScore[m.id], h = m.h ?? 0, a = m.a ?? 0;
                 if (p && m.state === "in" && (h > p.h || a > p.a)) {
-                    goalUntil[m.id] = Date.now() + 60000;
+                    goalUntil[m.id] = Date.now() + 30000;
                     showGoal(m, h > p.h ? m.home : m.away);
-                    setTimeout(() => { renderLive(); renderMatches(); }, 60500);
+                    setTimeout(() => { renderLive(); renderMatches(); }, 30500);
                 }
                 prevScore[m.id] = { h, a };
             });
