@@ -4,3 +4,4 @@ Allow: /
 Sitemap: https://www.footlivepro.com/sitemap.xml
 Sitemap: https://www.footlivepro.com/sitemap-seo.xml
 Sitemap: https://www.footlivepro.com/sitemap-langues-accueil.xml
+Sitemap: https://www.footlivepro.com/sitemap-langues-competitions.xml
