@@ -3436,6 +3436,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   const cbToday = () => { const o = {}; new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()).forEach(x => o[x.type] = x.value); return o.year + "-" + o.month + "-" + o.day; };
   const cbEXC = /women|\(w\)|\(f\)|\bu-?\d\d\b| ii$|reserves|femin|femen|femmin|frauen|damen|dames|ladies|lyonnes|\bw$/i;
   const cbWSLUG = /\.w\.|\.w$|\.w\d|nwsl|wchampions|\.wwc|weuro|women|femin|ladies/i;
+  // Libellés de compétition féminins / jeunes (ESPN nomme souvent l'équipe féminine « Real Madrid » tout court : seule la compétition la trahit)
+  const cbWSL = /women|femin|femen|\bliga f\b|frauen|damen|ladies|\bu-?\d\d\b|youth|reserve/i;
   function cbParse(j, re, out) {
     (j.events || []).forEach(ev => {
       const c = (ev.competitions && ev.competitions[0]) || {}, cp = c.competitors || [];
@@ -3444,7 +3446,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
       if (cbEXC.test(nh) || cbEXC.test(na)) return;
       const isH = re.test(nh), isA = re.test(na); if (!isH && !isA) return;
       const lid = ((ev.uid || "").match(/l:(\d+)/) || [])[1], top = (j.leagues || []).find(l => String(l.id) === lid);
-      if (cbWSLUG.test((top && top.slug) || (ev.league && ev.league.slug) || "") || cbEXC.test(String((top && top.name) || (ev.league && ev.league.name) || "")) ) return;
+      const tSlug = (top && top.slug) || (ev.league && ev.league.slug) || "", sSlug = String((ev.season && ev.season.slug) || "").replace(/-/g, " ");
+      if (cbWSLUG.test(tSlug) || cbWSL.test(sSlug) || cbWSL.test(String((top && top.name) || (ev.league && ev.league.name) || (c.league && c.league.name) || ""))) return;
       let lg = String((ev.league && ev.league.name) || (c.league && c.league.name) || (top && top.name) || "").replace(/\u200b.*$/, "");
       try { if (typeof cleanLg === "function") lg = cleanLg(lg); } catch (e) { }
       const st = (ev.status && ev.status.type) || {};
@@ -3463,6 +3466,18 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     });
     return Object.values(best);
   }
+  // Un club = une seule équipe : même nom ne veut pas dire même équipe (équipe féminine, homonyme).
+  // On garde l'identifiant ESPN de l'équipe vue dans une compétition masculine connue, mémorisé pour les fois suivantes.
+  function cbPin(cs, list) {
+    const ck = "fl_cbtid_" + cs; let pin = ""; try { pin = localStorage.getItem(ck) || ""; } catch (e) { }
+    if (!pin || !list.some(m => m.tid === pin)) {
+      const w = {}; let sure = false;
+      list.forEach(m => { if (!m.tid) return; const ok = m.slug && m.slug !== "all"; if (ok) sure = true; w[m.tid] = (w[m.tid] || 0) + (ok ? 10 : 1); });
+      pin = Object.keys(w).sort((a, b) => w[b] - w[a])[0] || "";
+      if (pin && sure) { try { localStorage.setItem(ck, pin); } catch (e) { } }
+    }
+    return pin ? list.filter(m => m.tid === pin) : list;
+  }
   async function cbLoad(slug) {
     const k = cbCache[slug]; if (k && Date.now() - k.t < 120000) return k.v;
     const re = new RegExp(clubOf(slug)[5], "i"), b = new Date(cbToday() + "T12:00:00Z"), f = new Date(b), t = new Date(b);
@@ -3473,7 +3488,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
       const reqs = []; for (let i = -3; i <= 7; i++) { const d = new Date(b); d.setUTCDate(d.getUTCDate() + i); reqs.push(cbSC("dates=" + cbYmd(d) + "&limit=1000").then(j => cbParse(j, re, found)).catch(() => { })); }
       await Promise.all(reqs);
     }
-    const v = cbDedupe(Object.values(found)); cbCache[slug] = { t: Date.now(), v }; return v;
+    const v = cbDedupe(cbPin(slug, Object.values(found))); cbCache[slug] = { t: Date.now(), v }; return v;
   }
   const cbDF = new Intl.DateTimeFormat("ar-u-nu-latn", { timeZone: "Europe/Paris", weekday: "short", day: "numeric", month: "short" });
   const cbDL = new Intl.DateTimeFormat("ar-u-nu-latn", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" });
