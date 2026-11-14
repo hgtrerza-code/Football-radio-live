@@ -21,6 +21,8 @@ import time
 import unicodedata
 import urllib.error
 import urllib.request
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -43,6 +45,9 @@ BT_TOP = ["eng.1", "esp.1", "ger.1", "ita.1", "fra.1", "mar.1", "por.1", "ned.1"
           "tur.1", "uefa.champions", "uefa.europa", "uefa.europa.conf"]
 BT_SKIP = re.compile(r"nwsl|charity|super_cup|^fifa\.world$|^uefa\.euro")
 NATIONAL = re.compile(r"^(uefa|conmebol|caf|concacaf|afc|fifa)\.", re.I)
+# Compétitions à écarter des pages clubs : féminines, jeunes / réserves, divisions inférieures (.2, .3...).
+# Une division inférieure reste autorisée pour un club qui y joue vraiment (ex. AS Saint-Étienne en Ligue 2).
+NOT_MEN_SLUG = re.compile(r"(?:^|\.)w(?:\.|$)|wchampions|wwc|nwsl|women|\.fem|\.u\d\d|youth|reserve|\.[2-9](?:\.|$)", re.I)
 
 
 # ----------------------------------------------------------------------------- utilitaires
@@ -123,24 +128,52 @@ def parse_index():
 
 
 # ----------------------------------------------------------------------------- matchs (ESPN scoreboard)
-def load_matches(days_back=10, days_fwd=14):
+def same_league(l, name):
+    a, b = norm(l["name"]), norm(name)
+    return a == b or a.startswith(b) or b.startswith(a)
+
+
+def men_slugs(clubs, leagues):
+    """Compétitions masculines à lire : championnats de 1re division, coupes nationales et européennes suivis par le site.
+    Féminines, jeunes, réserves et divisions inférieures sont exclues, sauf la division d'un club listé (ex. Ligue 2)."""
+    own = set()
+    for c in clubs:
+        lg = next((l for l in leagues if same_league(l, c["league"])), None)
+        if lg:
+            own.update(lg["slugs"])
+    out = {}
+    for l in leagues:
+        for sl in l["slugs"]:
+            if sl in own or not NOT_MEN_SLUG.search(sl):
+                out[sl] = l["name"]
+    return out
+
+
+def load_matches(slug_names, days_back=10, days_fwd=14):
+    """Un appel par compétition (période complète) : chaque match arrive avec sa compétition exacte,
+    donc jamais de match féminin ou de division inférieure mélangé aux clubs masculins."""
     today = datetime.now(PARIS).date()
+    d0 = (today - timedelta(days=days_back)).strftime("%Y%m%d")
+    d1 = (today + timedelta(days=days_fwd)).strftime("%Y%m%d")
+
+    def one(slug):
+        return slug, fetch_json(f"{ESPN}/{slug}/scoreboard?dates={d0}-{d1}&limit=1000")
+
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        results = list(ex.map(one, list(slug_names)))
+    ok = sum(1 for _, j in results if j)
+    print(f"{ok}/{len(results)} compétitions lues")
     seen = {}
-    for i in range(-days_back, days_fwd + 1):
-        d = (today + timedelta(days=i)).strftime("%Y%m%d")
-        j = fetch_json(f"{ESPN}/all/scoreboard?dates={d}&limit=1000")
+    for slug, j in results:
         if not j:
             continue
-        tops = {str(l.get("id")): l for l in j.get("leagues", [])}
         for ev in j.get("events", []):
             c = (ev.get("competitions") or [{}])[0]
             cp = c.get("competitors") or []
             h = next((x for x in cp if x.get("homeAway") == "home"), cp[0] if cp else None)
             a = next((x for x in cp if x.get("homeAway") == "away"), cp[1] if len(cp) > 1 else None)
-            if not h or not a:
+            if not h or not a or ev.get("id") in seen:
                 continue
-            lid = (re.search(r"l:(\d+)", ev.get("uid") or "") or [None, ""])[1]
-            top = tops.get(lid) or {}
             st = (ev.get("status") or {}).get("type") or {}
             ht, at = h.get("team") or {}, a.get("team") or {}
             seen[ev["id"]] = dict(
@@ -149,13 +182,12 @@ def load_matches(days_back=10, days_fwd=14):
                                    (st.get("name") or "") + " " + (st.get("description") or ""), re.I)),
                 home=ht.get("displayName") or ht.get("name") or "", away=at.get("displayName") or at.get("name") or "",
                 hs=h.get("score"), as_=a.get("score"), hid=str(ht.get("id") or ""), aid=str(at.get("id") or ""),
-                slug=top.get("slug") or (ev.get("league") or {}).get("slug") or "",
-                lg=re.sub(r"\u200b.*$", "", str((ev.get("league") or {}).get("name") or top.get("name") or "")),
+                slug=slug, lg=slug_names[slug],
             )
     return [m for m in seen.values() if m["start"]]
 
 
-def club_matches(club, matches, lg_names):
+def club_matches(club, matches, lg_names, own=()):
     pat = re.compile(club["pat"], re.I)
     out = []
     for m in matches:
@@ -169,6 +201,13 @@ def club_matches(club, matches, lg_names):
         mm["tid"] = m["hid"] if is_h else m["aid"]
         mm["lg"] = lg_names.get(m["slug"]) or m["lg"]
         out.append(mm)
+    # Une seule équipe par club : même nom ne veut pas dire même équipe (ex. équipe féminine, club homonyme).
+    # On garde l'identifiant ESPN le plus fréquent, en priorité dans le championnat du club.
+    ids = Counter(m["tid"] for m in out if m["tid"])
+    if len(ids) > 1:
+        in_own = Counter(m["tid"] for m in out if m["tid"] and m["slug"] in own)
+        keep = (in_own or ids).most_common(1)[0][0]
+        out = [m for m in out if m["tid"] == keep]
     return out
 
 
@@ -486,7 +525,7 @@ def main():
     for l in leagues:
         for s in l["slugs"]:
             lg_names[s] = l["name"]
-    matches = load_matches()
+    matches = load_matches(men_slugs(clubs, leagues))
     if not matches:
         print("Aucune donnée de matchs reçue : abandon, pages existantes conservées.")
         return 0
@@ -499,9 +538,8 @@ def main():
     # --- clubs
     for c in clubs:
         try:
-            ms = club_matches(c, matches, lg_names)
-            lg = next((l for l in bt_leagues if norm(l["name"]) == norm(c["league"])
-                       or norm(l["name"]).startswith(norm(c["league"])) or norm(c["league"]).startswith(norm(l["name"]))), None)
+            lg = next((l for l in bt_leagues if same_league(l, c["league"])), None)
+            ms = club_matches(c, matches, lg_names, set(lg["slugs"]) if lg else set())
             if not lg and ms:  # repli : compétition nationale la plus fréquente dans les matchs trouvés
                 cnt = {}
                 for m in ms:
