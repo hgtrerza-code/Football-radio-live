@@ -618,7 +618,7 @@ h1 .brand-mark{width:44px;height:44px}
 #compbar a .cl{width:20px;height:20px;object-fit:contain;background:rgba(255,255,255,.12);border-radius:50%;padding:2px;flex-shrink:0}
 #compbar a .cl.lt{background:#fff}
 @media(min-width:700px){#compbar .container{flex-wrap:wrap;justify-content:center;overflow:visible}}
-#compbar a .cl:not([src]),#compbar a .cl[data-err="1"]{display:none}
+#compbar a .cl:not([src]){display:none}
 </style>
 <style id="perf">
 /* Performance : pas de flou d'arrière-plan, rendu différé des lignes hors écran */
@@ -1036,7 +1036,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .lf-ch{position:absolute;inset-inline-end:12px;top:0;height:44px;display:flex;align-items:center;color:var(--text-muted);pointer-events:none}
 html[dir=rtl] .lf-ch svg{transform:none}
 </style>
-<style id="hdr-reserve">@media(max-width:600px){.hdr-capsule .header-actions{min-width:115px}}</style><link rel="manifest" href="/manifest.webmanifest">
+<style id="hdr-reserve">@media(max-width:600px){.hdr-capsule .header-actions{min-width:115px}}</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -1062,7 +1062,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
             </div>
         </div>
     </header>
-    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="eredivisie.html"><span>🇳🇱</span><img class="cl" alt="" data-lgre="eredivisie|dutch (?!eerste)" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/11.png&w=40&h=40" width="20" height="20" data-id="11">Eredivisie</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan" data-err="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" width="20" height="20">Botola Pro</a></div></nav>
+    <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="eredivisie.html"><span>🇳🇱</span><img class="cl" alt="" data-lgre="eredivisie|dutch (?!eerste)" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/11.png&w=40&h=40" width="20" height="20" data-id="11">Eredivisie</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
     <div class="container"><div class="ad-slot ad-320" aria-label="Publicité"><small>Publicité</small>
 <script>if(window.__ads){document.write("<script>atOptions={'key':'724d608874c57ab226af0bb850e5a691','format':'iframe','height':50,'width':320,'params':{}};<\/script><script src=\"https://czernik.org/22/724d608874c57ab226af0bb850e5a691\"><\/script>");}</script>
@@ -3633,7 +3633,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
   async function renderClubDetail(slug) {
     const c = clubOf(slug), box = $("#cb-det"); cbCur = slug;
     box.innerHTML = '<div class="sec-title">' + c[3] + " " + esc(c[1]) + ' <small>prochain match, résultats et calendrier</small></div><div class="toolbar"><button class="btn-action" id="cb-back">← Tous les clubs</button></div>' +
-      '<div class="cb-head"><img id="cb-logo" class="cb-logo" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo ' + esc(c[1]) + '" width="60" height="60" hidden onerror="this.hidden=true"><div><h2>' + esc(c[1]) + " : matchs et résultats</h2><p>" + esc(c[1]) + " (" + esc(c[2]) + ") · " + esc(c[4]) + "</p></div></div>" +
+      '<div class="cb-head"><img id="cb-logo" class="cb-logo" alt="Logo ' + esc(c[1]) + '" width="60" height="60" hidden onerror="this.hidden=true"><div><h2>' + esc(c[1]) + " : matchs et résultats</h2><p>" + esc(c[1]) + " (" + esc(c[2]) + ") · " + esc(c[4]) + "</p></div></div>" +
       '<div class="cb-next" id="cb-next"><small>Prochain match</small><div class="t">Chargement…</div></div>' +
       '<div class="sec-title">📅 Prochains matchs <small>heure de Paris</small></div><div id="cb-up"><div class="sk"></div><div class="sk"></div></div>' +
       '<div class="sec-title">✅ Derniers résultats</div><div id="cb-res"><div class="sk"></div><div class="sk"></div></div>' +
@@ -3807,7 +3807,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
     }
     if (u && img.isConnected) img.src = u; else img.remove();
   };
-  const plImg = (n, u, sz) => '<img src="' + esc(u || "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==") + '" data-n="' + esc(n) + '" alt="" width="' + sz + '" height="' + sz + '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="plFix(this)">';
+  const plImg = (n, u, sz) => '<img src="' + esc(u || "data:,") + '" data-n="' + esc(n) + '" alt="" width="' + sz + '" height="' + sz + '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="plFix(this)">';
   const btMedal = i => ["🥇", "🥈", "🥉"][i] || String(i + 1);
   function btRowHTML(r, i) {
     const sub = [r.t, r.p != null ? r.p + " match" + (r.p > 1 ? "s" : "") : "", r.a != null ? r.a + " passe" + (r.a > 1 ? "s" : "") + " déc." : ""].filter(Boolean).join(" · ");
@@ -4204,7 +4204,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
   function fix(){
     document.querySelectorAll('#compbar .cl').forEach(function(img){
       if(img.dataset.done) return;
-      if(!img.dataset.bound){ img.dataset.bound='1'; img.addEventListener('error',function(){ if(/\/500-dark\//.test(img.src)){ img.classList.add('lt'); img.src=img.src.replace('/500-dark/','/500/'); } else { img.src='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='; img.dataset.err='1'; } }); }
+      if(!img.dataset.bound){ img.dataset.bound='1'; img.addEventListener('error',function(){ if(/\/500-dark\//.test(img.src)){ img.classList.add('lt'); img.src=img.src.replace('/500-dark/','/500/'); } else { img.removeAttribute('src'); img.dataset.err='1'; } }); }
       if(img.getAttribute('src') && !img.dataset.err) { if(img.complete&&img.naturalWidth>0) img.dataset.done='1'; return; }
       try{
         var re=new RegExp(img.dataset.lgre,'i'), m=all().find(function(x){return !x.off&&re.test(x.lg||'');});
