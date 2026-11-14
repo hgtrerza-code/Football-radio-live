@@ -3518,10 +3518,16 @@ html[dir=rtl] .lf-ch svg{transform:none}
     });
     return Object.values(best);
   }
+  // Championnat du club dans LEAGUES (certains noms de la liste des clubs diffèrent de ceux de LEAGUES).
+  const CB_LG_ALIAS = { "pro league": "bel.1", "liga argentine": "arg.1", "premiership sud-africaine": "rsa.1", "super league grecque": "gre.1" };
+  function cbOwnLg(c) {
+    const cl = cbNorm(c[4]), al = CB_LG_ALIAS[cl];
+    return (al && LEAGUES.find(l => l[0].split("|")[0] === al)) || LEAGUES.find(l => cbNorm(l[2]) === cl) || LEAGUES.find(l => cbNorm(l[2]).indexOf(cl) === 0);
+  }
   // Identifiant ESPN de l'équipe MASCULINE du club (lu une fois dans sa 1re division, mémorisé) : écarte l'équipe féminine homonyme.
   async function cbMenTid(slug) {
     const ck = "fl_cbmen_" + slug; try { const k = localStorage.getItem(ck); if (k) return k; } catch (e) { }
-    const c = clubOf(slug), cl = cbNorm(c[4]); let lg = LEAGUES.find(l => cbNorm(l[2]) === cl) || LEAGUES.find(l => cbNorm(l[2]).indexOf(cl) === 0); if (!lg) return "";
+    const c = clubOf(slug), lg = cbOwnLg(c); if (!lg) return "";
     const re = new RegExp(c[5], "i");
     for (const sl of lg[0].split("|")) {
       try {
@@ -3537,30 +3543,32 @@ html[dir=rtl] .lf-ch svg{transform:none}
   // Plus fiable que le flux mondial « all », limité en nombre de matchs.
   const CB_CONT = ["uefa.champions", "uefa.europa", "uefa.europa.conf", "uefa.super_cup", "conmebol.libertadores", "conmebol.sudamericana", "caf.champions", "concacaf.champions", "afc.champions", "fifa.cwc"];
   async function cbByLeague(slug, men, f, t, re, found) {
-    const c = clubOf(slug), cl = cbNorm(c[4]);
-    const own = LEAGUES.find(l => cbNorm(l[2]) === cl) || LEAGUES.find(l => cbNorm(l[2]).indexOf(cl) === 0); if (!own) return;
+    const c = clubOf(slug), own = cbOwnLg(c); if (!own) return 0;
     const own0 = own[0].split("|"), pre = own0[0].split(".")[0], slugs = new Set(own0);
     LEAGUES.forEach(l => { const k = l[0].split("|")[0]; if (k.indexOf(pre + ".") === 0 && !/\.\d$/.test(k) && !cbBad(k)) slugs.add(k); });
     CB_CONT.forEach(k => slugs.add(k));
     const q = "dates=" + cbYmd(f) + "-" + cbYmd(t) + "&limit=300";
+    let okc = 0;
     await Promise.all([...slugs].map(sl => {
       const d = "https://site.api.espn.com/apis/site/v2/sports/soccer/" + sl + "/scoreboard?" + q;
       return (CFG.PROXY_URL ? cbJ(CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + sl + "/scoreboard?" + q).catch(() => cbJ(d)) : cbJ(d)).then(j => {
-        const tmp = {}; cbParse(j, re, tmp);
-        Object.values(tmp).forEach(m => { if (m.tid === men) { if (!m.slug || m.slug === "all") m.slug = sl; found[m.id] = m; } });
+        okc++; const tmp = {}; cbParse(j, re, tmp);
+        Object.values(tmp).forEach(m => { if (!men || m.tid === men) { if (!m.slug || m.slug === "all") m.slug = sl; found[m.id] = m; } });
       }).catch(() => { });
     }));
+    return okc;
   }
   async function cbLoad(slug) {
     const k = cbCache[slug]; if (k && Date.now() - k.t < 120000) return k.v;
-    cbOwn = new Set(); { const cl = cbNorm(clubOf(slug)[4]); LEAGUES.forEach(l => { if (cbNorm(l[2]).indexOf(cl) === 0) l[0].split("|").forEach(x => cbOwn.add(x)); }); }
+    cbOwn = new Set(); { const ol = cbOwnLg(clubOf(slug)); if (ol) ol[0].split("|").forEach(x => cbOwn.add(x)); }
     const re = new RegExp(clubOf(slug)[5], "i"), b = new Date(cbToday() + "T12:00:00Z"), f = new Date(b), t = new Date(b);
     f.setUTCDate(f.getUTCDate() - 6); t.setUTCDate(t.getUTCDate() + 14);
     const men = await cbMenTid(slug).catch(() => "");
     const found = {};
-    if (men) { try { await cbByLeague(slug, men, f, t, re, found); } catch (e) { } }
-    if (!Object.keys(found).length) { try { cbParse(await cbSC("dates=" + cbYmd(f) + "-" + cbYmd(t) + "&limit=1000"), re, found); } catch (e) { } }
-    if (!Object.keys(found).length) {
+    let okc = 0; try { okc = await cbByLeague(slug, men, f, t, re, found); } catch (e) { }
+    // Flux mondial « all » (sans compétition ni distinction masculin/féminin) : seulement si la lecture par compétition a échoué.
+    if (!okc && !Object.keys(found).length) { try { cbParse(await cbSC("dates=" + cbYmd(f) + "-" + cbYmd(t) + "&limit=1000"), re, found); } catch (e) { } }
+    if (!okc && !Object.keys(found).length) {
       const reqs = []; for (let i = -3; i <= 7; i++) { const d = new Date(b); d.setUTCDate(d.getUTCDate() + i); reqs.push(cbSC("dates=" + cbYmd(d) + "&limit=1000").then(j => cbParse(j, re, found)).catch(() => { })); }
       await Promise.all(reqs);
     }
