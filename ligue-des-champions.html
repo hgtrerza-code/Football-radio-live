@@ -285,6 +285,15 @@
         .radio-btn { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 6px 13px; border-radius: 20px; font-size: .75rem; font-weight: 700; text-decoration: none; cursor: pointer; font-family: inherit; }
         .radio-btn:hover, .radio-btn.on { border-color: var(--accent); background: rgba(34,197,94,.15); }
         .radio-player { flex: 1 0 100%; } .radio-player audio { width: 100%; margin-top: 4px; }
+        .sm-teams { display: flex; justify-content: space-between; font-size: .75rem; font-weight: 700; max-width: 640px; margin: 0 auto 4px; }
+        .sm-teams .sh { color: var(--accent); } .sm-teams .sa { color: #fb923c; }
+        .sm-svg { width: 100%; max-width: 640px; display: block; margin: 0 auto; }
+        .sm-svg .ln { stroke: var(--border); stroke-width: .35; fill: none; }
+        .sm-svg .sd { stroke-width: .5; } .sm-svg .sd.h { stroke: var(--accent); fill: var(--accent); } .sm-svg .sd.a { stroke: #fb923c; fill: #fb923c; }
+        .sm-svg .sd.goal { fill-opacity: .95; } .sm-svg .sd.saved { fill-opacity: .35; } .sm-svg .sd.blocked { fill-opacity: .12; stroke-dasharray: 1 .8; } .sm-svg .sd.miss { fill-opacity: 0; }
+        .sm-cnt { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; max-width: 640px; margin: 6px auto 0; font-size: .74rem; color: var(--text-muted); }
+        .sm-cnt b { color: var(--text); }
+        .sm-leg { text-align: center; font-size: .7rem; color: var(--text-muted); margin-top: 4px; }
         .pitch-box { margin: 6px 0 10px; }
         .pitch-teams { display: flex; justify-content: space-between; font-size: .7rem; font-weight: 700; max-width: 640px; margin: 0 auto 4px; color: var(--text-muted); }
         .pitch-teams .ph { color: #f87171; } .pitch-teams .pa { color: #60a5fa; }
@@ -1637,7 +1646,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             return raw.map(c => {
                 const text = String(c.text || (c.play && c.play.text) || ""); if (!text) return null;
                 const t = normName(text), h = hashStr(text);
-                const idx = k => { let b = -1; nm[k].forEach(n => { const j = t.indexOf(normName(n)); if (j >= 0 && (b < 0 || j < b)) b = j; }); return b; };
+                const ts = t.replace(/^[^.]*\d+,[^.]*\d+\./, ""), idx = k => { let b = -1; nm[k].forEach(n => { const j = ts.indexOf(normName(n)); if (j >= 0 && (b < 0 || j < b)) b = j; }); return b; };
                 const ih = idx("home"), ia = idx("away"); let side = null;
                 if (ih >= 0 || ia >= 0) side = (ih >= 0 && (ia < 0 || ih < ia)) ? "home" : "away";
                 else if (c.team && c.team.displayName) side = nm.home.includes(c.team.displayName) ? "home" : nm.away.includes(c.team.displayName) ? "away" : null;
@@ -1750,12 +1759,44 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             };
             step();
         }
+        // ===== Carte des tirs : tous les tirs du match, placés sur le terrain d'après la zone indiquée dans les commentaires (reste affichée après la fin des commentaires) =====
+        function shotMapHTML(s, m, nm) {
+            const SH = { home: [], away: [] }, N = { home: { n: 0, goal: 0, saved: 0, blocked: 0, miss: 0 }, away: { n: 0, goal: 0, saved: 0, blocked: 0, miss: 0 } };
+            parseComm(s, nm).forEach(ev => {
+                const t = normName(ev.text), h = hashStr(ev.text); let res = null;
+                if (ev.kind === "goal") res = "goal";
+                else if (ev.kind === "penalty") { if (/converts|scores/.test(t)) res = "goal"; else if (/saved/.test(t)) res = "saved"; else if (/miss|hits the|wide|over the|high/.test(t)) res = "miss"; }
+                else if (ev.kind === "shot" && /attempt|shot|header|volley|effort|saved|blocked|woodwork|hits the/.test(t)) res = /saved/.test(t) ? "saved" : /blocked/.test(t) ? "blocked" : "miss";
+                if (!res || !ev.side) return;
+                const dir = ev.side === "home" ? 1 : -1, sd = x => (/right/.test(x) ? 1 : -1) * dir; let f = .86, y = 34 + (h % 13) - 6, mm;
+                if (/very close range|six.?yard/.test(t)) { f = .95; y = 34 + (h % 9) - 4; }
+                else if (/penalty/.test(t) && ev.kind === "penalty") { f = .895; y = 34; }
+                else if (/centre of the box/.test(t)) { f = .9; y = 34 + (h % 13) - 6; }
+                else if ((mm = t.match(/(right|left) side of the (?:six yard )?box/))) { f = .9; y = 34 + sd(mm[1]) * (11 + h % 6); }
+                else if ((mm = t.match(/(right|left) (?:wing|flank)/))) { f = .8; y = 34 + sd(mm[1]) * (22 + h % 6); }
+                else if (/difficult angle|tight angle/.test(t)) { f = .92; y = 34 + (h % 2 ? 1 : -1) * (20 + h % 4); }
+                else if (/outside the box|long range|\d+ yards/.test(t)) { f = .74 + (h % 8) / 100; y = 34 + (h % 25) - 12; }
+                else if (/free kick/.test(t)) { f = .78; y = 34 + (h % 21) - 10; }
+                const x = dir > 0 ? 105 * f : 105 * (1 - f);
+                SH[ev.side].push({ x: +x.toFixed(1), y: Math.max(4, Math.min(64, +y.toFixed(1))), res, min: ev.min, text: ev.text });
+                N[ev.side].n++; N[ev.side][res]++;
+            });
+            const L = 'class="ln"', title = `<div class="section-title">🎯 Carte des tirs <span class="note">(position estimée d'après les commentaires)</span></div>`;
+            if (!N.home.n && !N.away.n) return title + `<div class="note">Aucun tir enregistré pour le moment : la carte se remplit au fil du match.</div>`;
+            const dots = ["home", "away"].map(sd => SH[sd].map(p => `<circle class="sd ${sd === "home" ? "h" : "a"} ${p.res}" cx="${p.x}" cy="${p.y}" r="${p.res === "goal" ? 2.6 : 1.9}"><title>${esc((p.min ? p.min + " — " : "") + p.text)}</title></circle>`).join("")).join("");
+            const cnt = (sd, nm2) => `<span class="${sd === "home" ? "sh" : "sa"}"><b>${esc(nm2)}</b> · ${N[sd].n} tirs · ⚽ ${N[sd].goal} · ${N[sd].saved} arrêtés · ${N[sd].blocked} contrés · ${N[sd].miss} ratés</span>`;
+            return title + `<div class="sm-box"><div class="sm-teams"><span class="sa">◀ ${esc(m.away)}</span><span class="sh">${esc(m.home)} ▶</span></div>
+                <svg class="sm-svg" viewBox="0 0 105 68" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Carte des tirs du match">
+                <rect ${L} x="0.3" y="0.3" width="104.4" height="67.4"/><line ${L} x1="52.5" y1="0" x2="52.5" y2="68"/><circle ${L} cx="52.5" cy="34" r="9.15"/>
+                <rect ${L} x="0.3" y="13.85" width="16.5" height="40.3"/><rect ${L} x="88.2" y="13.85" width="16.5" height="40.3"/><rect ${L} x="0.3" y="24.85" width="5.5" height="18.3"/><rect ${L} x="99.2" y="24.85" width="5.5" height="18.3"/>${dots}</svg>
+                <div class="sm-cnt">${cnt("away", m.away)}${cnt("home", m.home)}</div><div class="sm-leg">● but · ◐ arrêté · ┄ contré · ○ raté ou sur le montant</div></div>`;
+        }
         function detailHTML(s, m) {
             if (!s) return '<div class="note">Détails indisponibles pour ce match.</div>';
             const comp = (s.header && s.header.competitions && s.header.competitions[0]) || {}, cps = comp.competitors || [];
             const homeId = String(((cps.find(c => c.homeAway === "home") || {}).team || {}).id || ""), tname = {};
             cps.forEach(c => tname[String(c.team.id)] = c.team.displayName || c.team.name);
-            let out = "";
+            let out = scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
             // Infos générales
             const gi = s.gameInfo || {}, v = gi.venue || {}, ad = v.address || {}, info = [];
             const st = comp.status && comp.status.type;
@@ -1776,10 +1817,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             if (m.state !== "pre") {
                 const nm = { home: [m.home], away: [m.away] };
                 cps.forEach(c => { const t = c.team || {}; [t.displayName, t.shortDisplayName, t.name, t.location].filter(x => x && x.length >= 4).forEach(x => (nm[c.homeAway] || []).push(x)); });
-                pitchData[m.id] = parseComm(s, nm); lineData[m.id] = buildLineData(s, m);
-                out += `<div class="section-title">🎯 Animation du match <span class="note">(d'après les commentaires minute par minute)</span></div><div class="pitch-box" data-pid="${esc(m.id)}" data-state="${m.state}"></div>`;
+                out += shotMapHTML(s, m, nm);
             }
-            out += scorersHTML(s, tname, homeId, m);
             const scorerLasts = (s.keyEvents || []).filter(e => e.scoringPlay).map(e => ((e.participants || [])[0] || {}).athlete).filter(Boolean).map(at => vnorm(at.displayName).trim().split(" ").filter(w => w.length >= 3).pop()).filter(Boolean);
             const vids = (s.videos || []).map(vidInfo).filter(v => v.src).filter(v => { if (!YT_FILTER) return true; const t = vnorm(v.title); return !vidHas(t, VID_BAD) && !VID_GAME.test(t) && (vidHas(t, VID_GOOD) || scorerLasts.some(l => t.includes(" " + l + " "))); });
             // Événements clés
