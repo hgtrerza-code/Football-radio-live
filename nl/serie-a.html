@@ -861,6 +861,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .control-group,.control-group>*{min-width:0;max-width:100%}
 #scores-view,main.container{overflow-x:clip}
 </style>
+<script id="flp-ip">window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
+<script src="/install-app.js" defer></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -3135,7 +3137,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   } catch (e) { }
 })();
 </script>
-<script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
+<script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
 <script>
 /* Mobile : le score est affiché en face de chaque équipe (sépare « 1 - 0 » en deux valeurs, sans changer l'affichage sur ordinateur) */
