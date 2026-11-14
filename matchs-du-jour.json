@@ -1,6 +1,6 @@
 {
  "date": "2026-11-14",
- "generated": "2026-11-14T04:50:14.441Z",
+ "generated": "2026-11-14T14:40:00.523Z",
  "extra": 193,
  "matches": [
   {
@@ -20,12 +20,12 @@
    "id": "401883114",
    "lg": "LaLiga 2",
    "start": "2026-11-14T13:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "75'",
    "home": "Real Valladolid",
    "away": "Castellón",
    "h": 0,
-   "a": 0,
+   "a": 1,
    "venue": "Estadio José Zorrilla",
    "place": "Valladolid, Spain"
   },
