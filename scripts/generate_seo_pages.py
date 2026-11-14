@@ -38,7 +38,7 @@ CORE = "https://sports.core.api.espn.com/v2/sports/soccer/leagues/{sl}/seasons/{
 JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
         "septembre", "octobre", "novembre", "décembre"]
-EXC = re.compile(r"women|\(w\)|\bu-?\d\d\b| ii$|reserves")
+EXC = re.compile(r"women|\(w\)|\bu-?\d\d\b| ii$| b$|reserves")
 BT_TOP = ["eng.1", "esp.1", "ger.1", "ita.1", "fra.1", "mar.1", "por.1", "ned.1", "bel.1",
           "tur.1", "uefa.champions", "uefa.europa", "uefa.europa.conf"]
 BT_SKIP = re.compile(r"nwsl|charity|super_cup|^fifa\.world$|^uefa\.euro")
@@ -287,8 +287,9 @@ footer{border-top:1px solid var(--bd);margin-top:2.5rem;padding:1rem 0 2rem;colo
 TS_RE = re.compile(r"<!--TS-->.*?<!--/TS-->", re.S)
 
 
-def page(title, desc, path, body, ld):
+def page(title, desc, path, body, ld, noindex=False):
     url = BASE + path
+    ROBOTS = "noindex,follow" if noindex else "index,follow,max-image-preview:large"
     ld_json = "".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld)
     now = datetime.now(PARIS)
     ts = f"<!--TS-->Page mise à jour le {now.day} {MOIS[now.month - 1]} {now.year} à {now:%H:%M} (heure de Paris).<!--/TS-->"
@@ -298,9 +299,10 @@ def page(title, desc, path, body, ld):
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{url}">
-<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="robots" content="{ROBOTS}">
 <meta name="theme-color" content="#0a0f1e">
 <link rel="icon" href="/favicon.ico">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta property="og:type" content="website"><meta property="og:site_name" content="FootLive Pro">
 <meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{url}"><meta property="og:image" content="{BASE}/og-image.png">
@@ -371,18 +373,18 @@ def club_page(c, ms, scorers, league, same_league):
         n = up[0]
         nxt = (f"{n['home']} – {n['away']} le {fr_day(n['start'])}"
                + (f" à {n['start']:%H:%M} (heure de Paris)" if n["state"] == "pre" else " (en cours)")
-               + f", en {n['lg']}")
+               + (f", en {n['lg']}" if n["lg"] else ""))
         box = (f'<div class="next"><small>{"En direct" if n["state"] == "in" else "Prochain match"}</small>'
                f'<b>{e(n["home"])} – {e(n["away"])}</b><span>{e(fr_day(n["start"]))}'
                + (f" à {n['start']:%H:%M} (heure de Paris)" if n["state"] == "pre" else "")
-               + f" · {e(n['lg'])}</span></div>")
+               + (f" · {e(n['lg'])}" if n["lg"] else "") + "</span></div>")
     else:
         nxt = None
         box = '<div class="next"><small>Prochain match</small><b>Aucun match annoncé dans les prochains jours</b><span>Le calendrier est mis à jour automatiquement.</span></div>'
     q_next = f"Quand joue {name} ?"
     a_next = (f"Le prochain match de {name} : {nxt}." if nxt else f"Aucun match de {name} n’est annoncé pour le moment ; le calendrier est mis à jour plusieurs fois par jour.")
     q_last = f"Quel est le dernier résultat de {name} ?"
-    a_last = (f"Dernier résultat de {name} : {match_text(past[0])} ({past[0]['lg']}), le {fr_day(past[0]['start'])}." if past else f"Aucun résultat récent n’est disponible pour {name} pour le moment.")
+    a_last = (f"Dernier résultat de {name} : {match_text(past[0])}{(' (' + past[0]['lg'] + ')') if past[0]['lg'] else ''}, le {fr_day(past[0]['start'])}." if past else f"Aucun résultat récent n’est disponible pour {name} pour le moment.")
     faqs = [(q_next, a_next), (q_last, a_last)]
     sc_html = ""
     if scorers:
@@ -460,7 +462,7 @@ def scorers_page(lg, rows, others):
         ld.append({"@context": "https://schema.org", "@type": "ItemList", "name": f"Meilleurs buteurs {name}",
                    "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": f"{r['n']} : {plural(r['g'], 'but', 'buts')}"} for i, r in enumerate(rows[:10])]})
     desc = f"Meilleurs buteurs {name} : classement des buteurs avec le nombre de buts marqués" + (f". {rows[0]['n']} en tête avec {plural(rows[0]['g'], 'but', 'buts')}" if rows else "") + ". Mis à jour automatiquement sur FootLive Pro."
-    return page(f"Meilleurs buteurs {name} : classement des buteurs | FootLive Pro", desc, path, body, ld)
+    return page(f"Meilleurs buteurs {name} : classement des buteurs | FootLive Pro", desc, path, body, ld, noindex=not rows)
 
 
 def scorers_index(leagues):
@@ -519,14 +521,17 @@ def main():
 
     # --- buteurs
     done = []
+    empty = set()
     for l in bt_leagues:
         try:
             rows = league_scorers(l, pages=1)
             old = os.path.join(ROOT, f"buteurs/{l['key']}.html")
-            if not rows and os.path.exists(old):
-                written.append(f"buteurs/{l['key']}.html")  # données indisponibles : on garde la page existante
+            if not rows and os.path.exists(old) and "Classement indisponible" not in open(old, encoding="utf-8").read():
+                written.append(f"buteurs/{l['key']}.html")  # données indisponibles : on garde l'ancienne page qui, elle, a des données
                 done.append(l)
                 continue
+            if not rows:
+                empty.add(f"buteurs/{l['key']}.html")  # page vide : noindex et hors sitemap
             others = [by_key[k] for k in BT_TOP if k in by_key and k != l["key"]]
             changed += write_if_changed(f"buteurs/{l['key']}.html", scorers_page(l, rows, others), written)
             done.append(l)
@@ -536,7 +541,7 @@ def main():
 
     # --- sitemap
     today = datetime.now(PARIS).strftime("%Y-%m-%d")
-    urls = ["/clubs/", "/buteurs/"] + [f"/{p}" for p in written if p not in ("clubs/index.html", "buteurs/index.html")]
+    urls = ["/clubs/", "/buteurs/"] + [f"/{p}" for p in written if p not in ("clubs/index.html", "buteurs/index.html") and p not in empty]
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
            + "".join(f"  <url><loc>{BASE}{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
     sm = os.path.join(ROOT, "sitemap-seo.xml")
