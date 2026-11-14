@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ajoute le bouton « Installer l'app » (install-app.js) à toutes les pages qui ont le menu du bas.
+"""Ajoute le message « Installer l'app ? » (install-app.js) à toutes les pages qui ont le menu du bas.
 Usage (racine du dépôt) : python3 add-install-app.py
 Sans danger si relancé : une page déjà modifiée est ignorée. Corrige aussi register("sw.js") -> register("/sw.js")."""
 import os, re, sys
