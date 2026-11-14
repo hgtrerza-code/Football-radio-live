@@ -615,6 +615,7 @@ header{background:rgba(7,11,22,.97)!important}
 #fab-top{background:rgba(13,21,36,.95)!important}
 .m-wrap{content-visibility:auto;contain-intrinsic-size:auto 52px}
 .m-wrap.open{content-visibility:visible}
+#matches:has(.m-wrap.open) .competition-group,#matches:has(.m-wrap.open) .m-wrap{content-visibility:visible}
 .news-card{content-visibility:auto;contain-intrinsic-size:auto 280px}
 
 /* ===== Anti-CLS : police de secours aux métriques d'Inter + espace réservé aux blocs injectés par JS ===== */
@@ -1122,8 +1123,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         // ===== Alerte but =====
         const prevScore = {}, goalUntil = {};
         const goalOn = () => { try { return localStorage.getItem("fl_goal_alerts") !== "false"; } catch (e) { return true; } };
-        const goalCls = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";
-        const goalBadge = m => goalOn() && (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
+        const goalCls = m => (goalUntil[m.id] || 0) > Date.now() ? " goal-now" : "";   // clignotement toujours actif, même si le bouton Buts est désactivé
+        const goalBadge = m => (goalUntil[m.id] || 0) > Date.now() ? '<span class="goal-badge">⚽ BUT !</span><br>' : "";
         function showGoal(m, team) {
             const box = document.getElementById("goal-toasts"), el = document.createElement("div");
             el.className = "goal-sonar";
@@ -1137,9 +1138,9 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             all().forEach(m => {
                 const p = prevScore[m.id], h = m.h ?? 0, a = m.a ?? 0;
                 if (p && m.state === "in" && (h > p.h || a > p.a)) {
-                    goalUntil[m.id] = Date.now() + 60000;
+                    goalUntil[m.id] = Date.now() + 30000;
                     showGoal(m, h > p.h ? m.home : m.away);
-                    setTimeout(() => { renderLive(); renderMatches(); }, 60500);
+                    setTimeout(() => { renderLive(); renderMatches(); }, 30500);
                 }
                 prevScore[m.id] = { h, a };
             });
@@ -1214,7 +1215,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             return { fr, code, emo: "" };
         }
         const n365Url = d => { const dd = d.slice(6) + "/" + d.slice(4, 6) + "/" + d.slice(0, 4), tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; return "https://webws.365scores.com/web/games/allscores/?appTypeId=5&langId=1&timezoneName=" + encodeURIComponent(tz) + "&userCountryId=-1&startDate=" + dd + "&endDate=" + dd + "&sports=1&showOdds=false"; };
-        const n365TTL = d => d === ymd(new Date()) ? 20000 : 90000;   // aujourd'hui : données 365Scores rafraîchies à chaque cycle (30 s) ; autres jours : 90 s
+        const n365TTL = d => d === ymd(new Date()) ? 5000 : 90000;   // aujourd'hui : données 365Scores rafraîchies à chaque cycle (30 s) ; autres jours : 90 s
         const n365Fresh = d => { const ck = n365Cache[d]; return !!ck && Date.now() - ck.t < n365TTL(d); };
         // Préchargement : 365Scores est interrogé EN MÊME TEMPS qu'ESPN (et non après), pour que le compteur soit juste dès le premier affichage
         function prefetch365(d) {
@@ -1236,7 +1237,11 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                 const lgl = "https://imagecache.365scores.com/image/upload/f_png,w_48,h_48,c_limit,q_auto:eco,dpr_2/v5/Competitions/light/" + g.competitionId;
                 const t0 = new Date(g.startTime).getTime();
                 const e = (baseT.find(p => Math.abs(p[1] - t0) < 4 * 3600e3 && sameTeam(p[0].home, hc.name) && sameTeam(p[0].away, ac.name)) || [])[0];
-                if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl; fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
+                if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl;
+                    // 365Scores est souvent plus rapide qu'ESPN : si son score en direct est plus récent (plus de buts), on l'affiche tout de suite
+                    const s2 = v => (v === undefined || v === null || v < 0) ? null : Number(v), h2 = s2(hc.score), a2 = s2(ac.score);
+                    if ((g.statusGroup === 3 || (g.gameTime > 0 && g.gameTime < 150)) && h2 != null && a2 != null && h2 + a2 > (e.h ?? 0) + (e.a ?? 0)) { e.h = h2; e.a = a2; if (e.state === "pre") e.state = "in"; if (g.gameTimeDisplay) e.label = g.gameTimeDisplay; }
+                    fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
                 const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon/i.test(st);
                 const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
                 let state = "pre";
@@ -2152,22 +2157,59 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         }
         let mLimit = 40, mSig = "";
         document.addEventListener("click", e => { if (e.target.closest("#more-matches")) { mLimit += 60; renderMatches(true); } });
-        // Mise à jour DOUCE de la liste : rien n'est touché si rien n'a changé ; sinon seules les compétitions modifiées sont remplacées, et la position de défilement est conservée
+        // Ancrage : le match ouvert (suivi) garde la même position à l'écran après toute mise à jour de la page
+        window.anchorOf = function () { const all = [...document.querySelectorAll("#matches .m-wrap")], vis = x => { const r = x.getBoundingClientRect(); return r.bottom > 60 && r.top < window.innerHeight; }; const w = all.find(x => x.classList.contains("open") && vis(x)) || all.find(vis); return w ? { id: w.dataset.id, top: w.getBoundingClientRect().top } : null; };
+        window.anchorFix = function (a) { if (!a) return; const w = document.querySelector('#matches .m-wrap[data-id="' + CSS.escape(a.id) + '"]'); if (!w) return; const dl = w.getBoundingClientRect().top - a.top; if (Math.abs(dl) > 1) window.scrollBy(0, dl); };
         function patchHTML(box, html) {
             if (box._ph && box._ph.html === html) return;   // identique : aucun changement visible, aucun rechargement
             const y = window.scrollY, tpl = document.createElement("template"); tpl.innerHTML = html;
+            // Match ouvert (animation, stats…) : on mémorise son bloc de détails vivant et sa position à l'écran
+            const keepDet = new Map(); let anc = null;
+            box.querySelectorAll(".m-wrap.open").forEach(w => {
+                const d = w.querySelector(".m-detail"); if (d && d.firstChild) keepDet.set(w.dataset.id, d);
+                if (!anc) { const r = w.getBoundingClientRect(); if (r.bottom > 0 && r.top < window.innerHeight) anc = { id: w.dataset.id, top: r.top }; }
+            });
+            if (!anc) { const w = [...box.querySelectorAll(".m-wrap")].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 60 && r.top < window.innerHeight; }); if (w) anc = { id: w.dataset.id, top: w.getBoundingClientRect().top }; }
             const nu = Array.from(tpl.content.children), cur = nu.map(n => n.outerHTML), prev = box._ph && box._ph.kids;
-            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; }
+            nu.forEach(g => g.querySelectorAll && g.querySelectorAll(".m-wrap").forEach(w => { const r = w.querySelector(".m-row"); w._rs = r ? r.outerHTML : ""; }));
+            // Mise à jour match par match : on ne remplace que la ligne qui a changé (score, minute), jamais le groupe ni le bloc de détails
+            const syncGroup = (o, n) => {
+                if (!o.classList || !n.classList || !o.classList.contains("competition-group") || !n.classList.contains("competition-group")) return false;
+                const oc = Array.from(o.children), nc = Array.from(n.children); if (oc.length !== nc.length) return false;
+                for (let k = 0; k < oc.length; k++) {
+                    const c = oc[k], d = nc[k], cw = c.classList.contains("m-wrap"), dw = d.classList.contains("m-wrap");
+                    if (cw !== dw || (cw && c.dataset.id !== d.dataset.id) || (!cw && c.tagName !== d.tagName)) return false;
+                }
+                oc.forEach((c, k) => {
+                    const d = nc[k];
+                    if (c.classList.contains("m-wrap")) {
+                        if (c._rs !== d._rs) { const or = c.querySelector(".m-row"), nr = d.querySelector(".m-row"); if (or && nr) { or.replaceWith(nr); c._rs = d._rs; } }
+                    } else if (c.outerHTML !== d.outerHTML) c.replaceWith(d);
+                });
+                return true;
+            };
+            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; box.querySelectorAll(".m-wrap").forEach((w, i) => { const r = w.querySelector(".m-row"); w._rs = r ? r.outerHTML : ""; }); }
             else {
                 const old = Array.from(box.children);
                 for (let i = 0; i < Math.max(nu.length, old.length); i++) {
                     if (i >= nu.length) old[i].remove();
                     else if (i >= old.length) box.appendChild(nu[i]);
-                    else if (prev[i] !== cur[i]) old[i].replaceWith(nu[i]);
+                    else if (prev[i] !== cur[i]) { if (!syncGroup(old[i], nu[i])) old[i].replaceWith(nu[i]); }
                 }
             }
+            // On remet les blocs de détails vivants (terrain animé inclus) à la place des blocs vides recréés : la hauteur ne s'effondre plus
+            box.querySelectorAll(".m-wrap.open").forEach(w => {
+                const o = keepDet.get(w.dataset.id), d = w.querySelector(".m-detail");
+                if (o && d && o !== d) d.replaceWith(o);
+            });
             box._ph = { html, kids: cur, first: box.firstElementChild };
-            if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);   // la page reste à l'endroit où vous êtes
+            // La page reste calée sur le match suivi : on compense le décalage de ce match plutôt qu'un simple retour à l'ancienne position
+            let done = false;
+            if (anc) {
+                const w = [...box.querySelectorAll(".m-wrap")].find(x => x.dataset.id === anc.id);
+                if (w) { const dl = w.getBoundingClientRect().top - anc.top; if (Math.abs(dl) > 1) window.scrollBy(0, dl); done = true; }
+            }
+            if (!done && Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
         }
         function renderLive() {
             if (vidBusy()) { vidPending = true; return; }
@@ -2924,7 +2966,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     raT = setTimeout(() => {
       raT = 0;
       const steps = [renderHero, baseRenderAll, decorate, buildDays, status, saveCache];
-      const run = i => { if (i >= steps.length) return; try { steps[i](); } catch (e) { console.warn(e); } setTimeout(() => run(i + 1), 0); };   // une étape par tâche : le thread principal respire entre chaque
+      const run = i => { if (i >= steps.length) return; const an = window.anchorOf(); try { steps[i](); } catch (e) { console.warn(e); } window.anchorFix(an); setTimeout(() => run(i + 1), 0); };   // une étape par tâche : le thread principal respire entre chaque
       run(0);
     }, 120);
   };
@@ -3102,6 +3144,28 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   sheet.addEventListener('click',function(e){ if(e.target.closest('a[data-go]')||e.target.closest('.more-bd')) set(false); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') set(false); });
   window.addEventListener('resize',function(){ if(window.innerWidth>700) set(false); });
+})();
+</script>
+<script>
+/* Écran toujours allumé tant qu'un match est ouvert (Screen Wake Lock) : plus de verrouillage pendant qu'on suit un match */
+(function(){
+  if(!('wakeLock' in navigator)) return;
+  var lock=null, busy=false;
+  function wanted(){ return !document.hidden && !!document.querySelector('.m-wrap.open'); }
+  function release(){ if(lock){ try{ lock.release(); }catch(e){} lock=null; } }
+  function sync(){
+    if(!wanted()){ release(); return; }
+    if(lock||busy) return; busy=true;
+    navigator.wakeLock.request('screen').then(function(l){
+      busy=false; lock=l;
+      l.addEventListener('release',function(){ if(lock===l) lock=null; });
+      if(!wanted()) release();
+    }).catch(function(){ busy=false; });
+  }
+  document.addEventListener('click',function(){ setTimeout(sync,150); });
+  document.addEventListener('visibilitychange',sync);   /* le verrou est perdu quand l'onglet est masqué : on le reprend au retour */
+  setInterval(sync,3000);
+  sync();
 })();
 </script>
 </body>
