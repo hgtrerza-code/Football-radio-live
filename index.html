@@ -1037,23 +1037,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 html[dir=rtl] .lf-ch svg{transform:none}
 </style>
 <style id="hdr-reserve">@media(max-width:600px){.hdr-capsule .header-actions{min-width:115px}}</style><link rel="manifest" href="/manifest.webmanifest">
-<script>window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
-<style id="install-app">
-#tabbar .inst-btn{display:none}
-.inst-ov{position:fixed;left:0;right:0;top:0;bottom:0;z-index:2000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px}
-.inst-card{background:#0d1524;border:1px solid var(--border);border-radius:18px;padding:18px;width:100%;max-width:340px;color:var(--text-main)}
-.inst-card h3{margin:0 0 12px;font-size:1.05rem}
-.inst-card ol{margin:0 0 16px;padding-left:20px;line-height:1.7;font-size:.95rem}
-.inst-card ol svg{width:1.1em;height:1.1em;vertical-align:-.2em}
-.inst-ok{display:block;width:100%;padding:12px;border:0;border-radius:12px;background:var(--accent);color:#06101f;font-weight:700;font-size:1rem;font-family:inherit;cursor:pointer}
-@media (max-width:700px){
-  #tabbar .container>.inst-btn{order:5;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;height:var(--tbh);padding:10px 0 0;box-sizing:border-box;font-size:0;border:0;border-radius:0;background:none;color:var(--accent);cursor:pointer;position:relative;font-family:inherit;font-weight:700}
-  #tabbar .container>.inst-btn::after{content:attr(data-short);font-size:.64rem;line-height:12px;height:12px;flex:0 0 12px;font-weight:700;white-space:nowrap}
-  #tabbar .container>.inst-btn>span{width:26px;height:26px;flex:0 0 26px;display:flex;align-items:center;justify-content:center;font-size:0}
-  #tabbar .container>.inst-btn>span svg{width:24px;height:24px}
-  #tabbar .container>.more-btn{order:6}
-}
-</style>
+<script id="flp-ip">window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
+<script src="/install-app.js" defer></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -4330,46 +4315,6 @@ if(r)r.onclick=function(e){e.preventDefault();b.hidden=false;};
   document.addEventListener('visibilitychange',sync);   /* le verrou est perdu quand l'onglet est masqué : on le reprend au retour */
   setInterval(sync,3000);
   sync();
-})();
-</script>
-<script>
-/* Installer l'app : bouton dans le menu du bas (mobile), affiché une seule fois ; plus jamais après installation ou refus */
-(function(){
-  var KEY="flp_install_done";
-  function done(){try{return localStorage.getItem(KEY)==="1"}catch(e){return false}}
-  function mark(){try{localStorage.setItem(KEY,"1")}catch(e){}}
-  var standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
-  if(standalone||done())return;
-  var bar=document.getElementById("tabbar"),box=bar&&bar.querySelector(".container");
-  if(!box)return;
-  var ua=navigator.userAgent,ios=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
-  var btn=null;
-  function remove(){if(btn&&btn.parentNode)btn.parentNode.removeChild(btn);btn=null}
-  function make(onclick){
-    if(btn)return;
-    btn=document.createElement("button");btn.type="button";btn.className="inst-btn";btn.setAttribute("data-short","Installer");btn.setAttribute("aria-label","Installer l\u2019application");
-    btn.innerHTML='<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></span>';
-    btn.addEventListener("click",onclick);
-    box.appendChild(btn);
-  }
-  function iosHelp(){
-    var ov=document.createElement("div");ov.className="inst-ov";
-    ov.innerHTML='<div class="inst-card" role="dialog" aria-modal="true"><h3>Installer sur iPhone</h3><ol><li>Touchez <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> Partager</li><li>Choisissez \u00ab Sur l\u2019\u00e9cran d\u2019accueil \u00bb</li><li>Touchez Ajouter</li></ol><button type="button" class="inst-ok">Compris</button></div>';
-    function close(){mark();remove();if(ov.parentNode)ov.parentNode.removeChild(ov)}
-    ov.addEventListener("click",function(e){if(e.target===ov||e.target.closest(".inst-ok"))close()});
-    document.body.appendChild(ov);
-  }
-  function android(){
-    var ip=window.__flpIP;if(!ip)return;
-    make(function(){
-      var e=window.__flpIP;if(!e)return;
-      e.prompt();
-      e.userChoice.then(function(){mark();remove();window.__flpIP=null},function(){mark();remove()});
-    });
-  }
-  window.addEventListener("appinstalled",function(){mark();remove()});
-  if(ios){make(iosHelp)}
-  else{android();window.addEventListener("flp-ip",android)}
 })();
 </script>
 </body>

@@ -1028,6 +1028,8 @@ html[dir=rtl] .lf-ch svg{transform:none}
 </style>
 <style id="hdr-reserve">@media(max-width:600px){.hdr-capsule .header-actions{min-width:115px}}</style><style>html[data-start] #scores-view{display:none}</style>
 <link rel="manifest" href="/manifest.webmanifest">
+<script id="flp-ip">window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
+<script src="/install-app.js" defer></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -4215,7 +4217,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
   window.addEventListener('resize',function(){ if(window.innerWidth>700) set(false); });
 })();
 </script>
-<script>(function(){try{var V="2026-11-07";if(localStorage.getItem("fl_swv")===V)return;localStorage.setItem("fl_swv",V);var sw=navigator.serviceWorker;if(!sw||!sw.controller)return;if(/Lighthouse|PageSpeed|Chrome-Lighthouse/i.test(navigator.userAgent))return;var p=[sw.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))})];if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c)}))}));Promise.all(p).then(function(){location.reload()})}catch(e){}})();</script><script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(function(){});</script>
+<script>(function(){try{var V="2026-11-07";if(localStorage.getItem("fl_swv")===V)return;localStorage.setItem("fl_swv",V);var sw=navigator.serviceWorker;if(!sw||!sw.controller)return;if(/Lighthouse|PageSpeed|Chrome-Lighthouse/i.test(navigator.userAgent))return;var p=[sw.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))})];if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c)}))}));Promise.all(p).then(function(){location.reload()})}catch(e){}})();</script><script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
 <div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Choix des cookies publicitaires" hidden>
 <div class="cb-in"><p>FootLive Pro est gratuit grâce à la publicité. Nos partenaires publicitaires peuvent utiliser des cookies pour afficher des annonces. Acceptez-vous ? Vous pouvez changer d’avis à tout moment via « Gérer les cookies » en bas de page. <a href="confidentialite.html">En savoir plus</a></p>
