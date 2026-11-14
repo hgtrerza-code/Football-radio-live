@@ -3551,13 +3551,16 @@ html[dir=rtl] .lf-ch svg{transform:none}
     let okc = 0;
     await Promise.all([...slugs].map(sl => {
       const d = "https://site.api.espn.com/apis/site/v2/sports/soccer/" + sl + "/scoreboard?" + q;
-      return (CFG.PROXY_URL ? cbJ(CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + sl + "/scoreboard?" + q).catch(() => cbJ(d)) : cbJ(d)).then(j => {
+      // La réponse doit être celle de la compétition demandée (un proxy peut renvoyer le flux mondial : on l'ignore).
+      const chk = j => { const L = (j && j.leagues) || []; if (L.length !== 1 || L[0].slug !== sl) throw new Error("mauvaise compétition"); return j; };
+      return (CFG.PROXY_URL ? cbJ(CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + sl + "/scoreboard?" + q).then(chk).catch(() => cbJ(d).then(chk)) : cbJ(d).then(chk)).then(j => {
         okc++; const tmp = {}; cbParse(j, re, tmp);
         Object.values(tmp).forEach(m => { if (!men || m.tid === men) { if (!m.slug || m.slug === "all") m.slug = sl; found[m.id] = m; } });
       }).catch(() => { });
     }));
     return okc;
   }
+  let cbDbg = "";
   async function cbLoad(slug) {
     const k = cbCache[slug]; if (k && Date.now() - k.t < 120000) return k.v;
     cbOwn = new Set(); { const ol = cbOwnLg(clubOf(slug)); if (ol) ol[0].split("|").forEach(x => cbOwn.add(x)); }
@@ -3567,12 +3570,14 @@ html[dir=rtl] .lf-ch svg{transform:none}
     const found = {};
     let okc = 0; try { okc = await cbByLeague(slug, men, f, t, re, found); } catch (e) { }
     // Flux mondial « all » (sans compétition ni distinction masculin/féminin) : seulement si la lecture par compétition a échoué.
-    if (!okc && !Object.keys(found).length) { try { cbParse(await cbSC("dates=" + cbYmd(f) + "-" + cbYmd(t) + "&limit=1000"), re, found); } catch (e) { } }
-    if (!okc && !Object.keys(found).length) {
+    if (!okc && men && !Object.keys(found).length) { try { cbParse(await cbSC("dates=" + cbYmd(f) + "-" + cbYmd(t) + "&limit=1000"), re, found); } catch (e) { } }
+    if (!okc && men && !Object.keys(found).length) {
       const reqs = []; for (let i = -3; i <= 7; i++) { const d = new Date(b); d.setUTCDate(d.getUTCDate() + i); reqs.push(cbSC("dates=" + cbYmd(d) + "&limit=1000").then(j => cbParse(j, re, found)).catch(() => { })); }
       await Promise.all(reqs);
     }
-    const v = cbDedupe(Object.values(found).filter(m => !men || !m.tid || m.tid === men)); cbCache[slug] = { t: Date.now(), v }; return v;
+    const v = cbDedupe(Object.values(found).filter(m => !men || !m.tid || m.tid === men)); cbCache[slug] = { t: Date.now(), v };
+    cbDbg = "clubs v5 · équipe=" + (men || "?") + " · compét.=" + okc + " · " + v.map(m => m.id + ":" + (m.slug || "?") + ":" + m.tid).join(" ");
+    return v;
   }
   const cbDF = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "short", day: "numeric", month: "short" });
   const cbDL = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" });
@@ -3699,6 +3704,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
     $("#cb-up").innerHTML = up.length ? up.slice(0, 5).map(cbRow).join("") : '<div class="empty">Aucun match à venir pour le moment.</div>';
     $("#cb-res").innerHTML = past.length ? past.slice(0, 5).map(cbRow).join("") : '<div class="empty">Aucun résultat récent.</div>';
     cbScorers(slug, list); cbSeo(slug);
+    if (/[?&]debug/.test(location.search)) box.insertAdjacentHTML("beforeend", '<div style="font:11px monospace;opacity:.7;word-break:break-all;margin-top:8px">' + esc(cbDbg) + "</div>");
   }
   function renderClubs(slug) {
     if (!$("#cb-q")) renderHub();
