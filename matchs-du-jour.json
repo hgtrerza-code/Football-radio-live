@@ -1,18 +1,18 @@
 {
  "date": "2026-11-15",
- "generated": "2026-11-15T00:58:23.264Z",
+ "generated": "2026-11-15T02:49:03.325Z",
  "extra": 148,
  "matches": [
   {
    "id": "401841175",
    "lg": "Brasileirão",
    "start": "2026-11-14T23:30Z",
-   "state": "in",
-   "label": "68'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "Chapecoense",
    "away": "Vasco da Gama",
    "h": 0,
-   "a": 1,
+   "a": 2,
    "venue": "Arena Condá",
    "place": "Chapecó, Brazil"
   },
@@ -20,8 +20,8 @@
    "id": "401876988",
    "lg": "Liga MX",
    "start": "2026-11-14T23:00Z",
-   "state": "in",
-   "label": "90'+7'",
+   "state": "post",
+   "label": "90'+12'",
    "home": "Querétaro",
    "away": "Monterrey",
    "h": 0,
