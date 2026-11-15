@@ -3741,19 +3741,21 @@ html[dir=rtl] .lf-ch svg{transform:none}
     });
     return A;
   }
-  // Classement ESPN de la compétition : rang et points officiels
-  async function cbStand(sl, tid) {
-    const ck = "fl_cbstd1_" + sl + "_" + tid; let c = null; try { c = JSON.parse(localStorage.getItem(ck) || "null"); } catch (e) { }
-    if (c && Date.now() - c.t < 3 * 3600e3) return c.v;
+  // Classement ESPN de la compétition (même source que l'onglet Classements) : rang, points, bilan, buts
+  const cbStdRows = {};
+  function cbStandRows(sl) {
+    if (cbStdRows[sl] && Date.now() - cbStdRows[sl].t < 3 * 3600e3) return cbStdRows[sl].p;
     const u = CFG.PROXY_URL ? CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" + sl + "/standings" : "https://site.api.espn.com/apis/v2/sports/soccer/" + sl + "/standings";
-    const j = await cbJ(u); let ent = null;
-    (function walk(n) { if (!n || ent) return; ((n.standings && n.standings.entries) || []).forEach(x => { if (String((x.team || {}).id) === tid) ent = x; }); (n.children || []).forEach(walk); })(j);
-    if (!ent) return null;
-    const g = nm => { const s = (ent.stats || []).find(x => x.name === nm); return s ? cbNum(s.value != null ? s.value : s.displayValue) : null; };
-    const v = { rank: g("rank"), pts: g("points") }; if (!v.rank && v.pts == null) return null;
-    try { localStorage.setItem(ck, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { }
-    return v;
+    const p = cbJ(u).then(j => {
+      const rows = [];
+      (function walk(n) { if (!n) return; ((n.standings && n.standings.entries) || []).forEach(x => { const st = {}; (x.stats || []).forEach(z => { st[z.name] = cbNum(z.value != null ? z.value : z.displayValue); }); rows.push({ tid: String((x.team || {}).id || ""), name: (x.team || {}).displayName || (x.team || {}).name || "", st: st }); }); (n.children || []).forEach(walk); })(j);
+      return rows;
+    });
+    cbStdRows[sl] = { t: Date.now(), p: p }; p.catch(() => { delete cbStdRows[sl]; });
+    return p;
   }
+  const cbStVal = r => r ? { rank: r.st.rank, pts: r.st.points, gp: r.st.gamesPlayed, w: r.st.wins, d: r.st.ties, l: r.st.losses, gf: r.st.pointsFor, ga: r.st.pointsAgainst } : null;
+  async function cbStand(sl, tid) { const rows = await cbStandRows(sl); return cbStVal(rows.find(x => x.tid === tid)); }
   const cbTile = (lb, v, ac) => '<div class="cb-tile' + (ac ? " ac" : "") + '"><b>' + v + "</b><span>" + lb + "</span></div>";
   function cbStHTML(A, std, done, total, name) {
     const pm = x => cbFmt(x / A.P, 2), pts = std && std.pts != null ? std.pts : A.W * 3 + A.D, dg = A.GF - A.GA;
@@ -3781,41 +3783,43 @@ html[dir=rtl] .lf-ch svg{transform:none}
     if (pl) h += '<div class="cb-sub"><span>Joueurs</span></div><div class="cb-pcs">' + pl + "</div>";
     return h + '<p class="note"><span>Basé sur</span> ' + A.P + " <span>matchs analysés</span>" + (done < total ? " · <span>Calcul en cours…</span> " + done + "/" + total : "") + "</p>";
   }
+  function cbLiteHTML(t) {
+    const g = (k) => t[k] == null || isNaN(t[k]) ? null : t[k], dg = g("gf") != null && g("ga") != null ? g("gf") - g("ga") : null, gp = g("gp");
+    const T = (lb, v, ac) => v == null ? "" : cbTile(lb, v, ac);
+    return '<div class="cb-tiles">' + T("Classement", g("rank") ? "#" + t.rank : null, 1) + T("Points", g("pts"), 1) + T("Matchs joués", gp) + T("Victoires", g("w")) + T("Nuls", g("d")) + T("Défaites", g("l")) +
+      T("Buts marqués", g("gf")) + T("Buts encaissés", g("ga")) + T("Différence de buts", dg == null ? null : (dg > 0 ? "+" : "") + dg) +
+      T("Points par match", gp && g("pts") != null ? cbFmt(t.pts / gp, 2) : null) + T("Buts marqués / match", gp && g("gf") != null ? cbFmt(t.gf / gp, 2) : null) + T("Buts encaissés / match", gp && g("ga") != null ? cbFmt(t.ga / gp, 2) : null) +
+      T("Taux de victoire", gp && g("w") != null ? Math.round(t.w / gp * 100) + "%" : null) + "</div>";
+  }
   function cbPaintSt(slug, A, std, done, total) {
     if (cbCur !== slug || $("#clubs-view").hidden) return; const box = $("#cb-st"); if (!box) return;
-    if (!A || !A.P) { box.innerHTML = done < total ? '<div class="sk"></div><div class="sk"></div>' : '<div class="empty">Statistiques indisponibles pour le moment.</div>'; return; }
+    if (!A || !A.P) { box.innerHTML = std && std.gp && done >= total ? cbLiteHTML(std) : (done < total || std === undefined) ? '<div class="sk"></div><div class="sk"></div>' : '<div class="empty">Statistiques indisponibles pour le moment.</div>'; return; }
     box.innerHTML = cbStHTML(A, std, done, total, (clubOf(slug) || [])[1] || "");
   }
-  // Repli : si la liste de matchs ne donne ni compétition ni identifiant d'équipe (trêve internationale, etc.), on les retrouve via la ligue du club
+  // Repli : si la liste de matchs ne donne ni compétition ni identifiant d'équipe (trêve internationale, etc.), on les retrouve via la ligue du club (classement)
   async function cbGuess(slug) {
     const c = clubOf(slug); if (!c) return null;
     const re = new RegExp(c[5], "i"), n = cbNorm(c[4]);
     const l = btLeagues.find(x => cbNorm(x[2]) === n) || btLeagues.find(x => cbNorm(x[2]).indexOf(n) === 0 || n.indexOf(cbNorm(x[2])) === 0);
     if (!l) return null;
     for (const sl of l[0].split("|")) {
-      const ck = "fl_cbtid2_" + slug + "_" + sl; let id = ""; try { id = localStorage.getItem(ck) || ""; } catch (e) { }
-      if (!id) {
-        try {
-          const j = await cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/" + sl + "/teams?limit=200");
-          const ts = (((((j.sports || [])[0] || {}).leagues || [])[0] || {}).teams || []).map(x => x.team || x);
-          const t = ts.find(x => re.test(cbNorm(x.displayName || x.name)) && !cbEXC.test(cbNorm(x.displayName || x.name))); if (t) id = String(t.id);
-        } catch (e) { }
-        if (id) { try { localStorage.setItem(ck, id); } catch (e) { } }
-      }
-      if (id) return { slug: sl, tid: id, lg: l[2] };
+      try {
+        const r = (await cbStandRows(sl)).find(x => re.test(cbNorm(x.name)) && !cbEXC.test(cbNorm(x.name)));
+        if (r) return { slug: sl, tid: r.tid, lg: l[2] };
+      } catch (e) { }
     }
     return null;
   }
   async function cbScorers(slug, list) {
     const box = $("#cb-sc"); if (!box) return; let pk = cbPick(list);
-    const none = () => { if (cbCur !== slug) return; if ($("#cb-sc")) $("#cb-sc").innerHTML = '<div class="empty">Statistiques de buteurs indisponibles pour le moment.</div>'; if ($("#cb-st")) $("#cb-st").innerHTML = '<div class="empty">Statistiques indisponibles pour le moment.</div>'; };
+    let stv, cur = { A: null, done: 0, total: 1 }; const paintSt = () => cbPaintSt(slug, cur.A, stv, cur.done, cur.total);
+    const none = () => { if (cbCur !== slug) return; if ($("#cb-sc")) $("#cb-sc").innerHTML = '<div class="empty">Statistiques de buteurs indisponibles pour le moment.</div>'; cur = { A: null, done: 1, total: 1 }; paintSt(); };
     if (!pk) { try { pk = await cbGuess(slug); } catch (e) { } }
-    if (!pk) return none();
+    if (!pk) { stv = null; return none(); }
     const lgm = list.find(m => m.slug === pk.slug), lgName = (lgm && lgm.lg) || pk.lg || "";
     if (lgName && $("#cb-sct")) $("#cb-sct").innerHTML = "⚽ Meilleurs buteurs <small><span>buts marqués</span> · " + esc(lgName) + "</small>";
     if (lgName && $("#cb-stt")) $("#cb-stt").innerHTML = "📊 Statistiques de l’équipe <small>" + esc(lgName) + "</small>";
-    let stv = null, cur = null; const paintSt = () => { if (cur) cbPaintSt(slug, cur.A, stv, cur.done, cur.total); };
-    cbStand(pk.slug, pk.tid).then(v => { stv = v; paintSt(); }).catch(() => { });
+    cbStand(pk.slug, pk.tid).then(v => { stv = v || null; paintSt(); }).catch(() => { stv = null; paintSt(); });
     const ck = "fl_cbsc3_" + pk.slug + "_" + pk.tid; let cached = null; try { cached = JSON.parse(localStorage.getItem(ck) || "null"); } catch (e) { }
     if (cached && Date.now() - cached.t < 6 * 3600e3) { cbPaintSc(slug, cached.v, 1, 1, cached.i); cur = { A: cbAgg(cached.r), done: 1, total: 1 }; return paintSt(); }
     const fillRes = evs => {
