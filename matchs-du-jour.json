@@ -1,6 +1,6 @@
 {
  "date": "2026-11-15",
- "generated": "2026-11-15T04:52:48.056Z",
+ "generated": "2026-11-15T06:58:41.133Z",
  "extra": 148,
  "matches": [
   {
@@ -85,8 +85,8 @@
    "id": "401933039",
    "lg": "Coupe de France",
    "start": "2026-11-15T04:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "post",
+   "label": "90'",
    "home": "AS Tefana",
    "away": "Thionville",
    "h": 0,
