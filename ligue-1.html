@@ -859,7 +859,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .toolbar .region-select{width:auto;flex:1 1 160px}
 .control-group,.control-group>*{min-width:0;max-width:100%}
 #scores-view,main.container{overflow-x:clip}
-</style>
+.m-page{display:flex;align-items:center;gap:10px;margin:0 0 .8rem;padding:.7rem .85rem;border-radius:12px;border:1px solid #2ee59d;color:#2ee59d!important;font-weight:700;font-size:.9rem;text-decoration:none;background:transparent;-webkit-tap-highlight-color:transparent}.m-page span{flex:1;text-align:center}.m-page svg{width:18px;height:18px;flex:0 0 18px}.m-page:hover,.m-page:active{background:rgba(46,229,157,.12)}</style>
 <script id="flp-ip">window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
 <script src="/install-app.js" defer></script>
 </head>
@@ -1793,7 +1793,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const comp = (s.header && s.header.competitions && s.header.competitions[0]) || {}, cps = comp.competitors || [];
             const homeId = String(((cps.find(c => c.homeAway === "home") || {}).team || {}).id || ""), tname = {};
             cps.forEach(c => tname[String(c.team.id)] = c.team.displayName || c.team.name);
-            let out = scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
+            let out = (m.id && m.slug ? '<a class="m-page" href="/match.html?id=' + encodeURIComponent(m.id) + '&slug=' + encodeURIComponent(m.slug) + '&lang=fr" aria-label="Page du match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span>Page du match</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>' : "") + scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
             // Infos générales
             const gi = s.gameInfo || {}, v = gi.venue || {}, ad = v.address || {}, info = [];
             const st = comp.status && comp.status.type;
