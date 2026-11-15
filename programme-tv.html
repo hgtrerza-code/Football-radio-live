@@ -3706,18 +3706,46 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     if (!A || !A.P) { box.innerHTML = done < total ? '<div class="sk"></div><div class="sk"></div>' : '<div class="empty">Statistiques indisponibles pour le moment.</div>'; return; }
     box.innerHTML = cbStHTML(A, std, done, total, (clubOf(slug) || [])[1] || "");
   }
+  // Repli : si la liste de matchs ne donne ni compétition ni identifiant d'équipe (trêve internationale, etc.), on les retrouve via la ligue du club
+  async function cbGuess(slug) {
+    const c = clubOf(slug); if (!c) return null;
+    const re = new RegExp(c[5], "i"), n = cbNorm(c[4]);
+    const l = btLeagues.find(x => cbNorm(x[2]) === n) || btLeagues.find(x => cbNorm(x[2]).indexOf(n) === 0 || n.indexOf(cbNorm(x[2])) === 0);
+    if (!l) return null;
+    for (const sl of l[0].split("|")) {
+      const ck = "fl_cbtid2_" + slug + "_" + sl; let id = ""; try { id = localStorage.getItem(ck) || ""; } catch (e) { }
+      if (!id) {
+        try {
+          const j = await cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/" + sl + "/teams?limit=200");
+          const ts = (((((j.sports || [])[0] || {}).leagues || [])[0] || {}).teams || []).map(x => x.team || x);
+          const t = ts.find(x => re.test(cbNorm(x.displayName || x.name)) && !cbEXC.test(cbNorm(x.displayName || x.name))); if (t) id = String(t.id);
+        } catch (e) { }
+        if (id) { try { localStorage.setItem(ck, id); } catch (e) { } }
+      }
+      if (id) return { slug: sl, tid: id, lg: l[2] };
+    }
+    return null;
+  }
   async function cbScorers(slug, list) {
-    const box = $("#cb-sc"); if (!box) return; const pk = cbPick(list);
+    const box = $("#cb-sc"); if (!box) return; let pk = cbPick(list);
     const none = () => { if (cbCur !== slug) return; if ($("#cb-sc")) $("#cb-sc").innerHTML = '<div class="empty">Statistiques de buteurs indisponibles pour le moment.</div>'; if ($("#cb-st")) $("#cb-st").innerHTML = '<div class="empty">Statistiques indisponibles pour le moment.</div>'; };
+    if (!pk) { try { pk = await cbGuess(slug); } catch (e) { } }
     if (!pk) return none();
-    const lgm = list.find(m => m.slug === pk.slug);
-    if (lgm && $("#cb-sct")) $("#cb-sct").innerHTML = "⚽ Meilleurs buteurs <small><span>buts marqués</span> · " + esc(lgm.lg) + "</small>";
-    if (lgm && $("#cb-stt")) $("#cb-stt").innerHTML = "📊 Statistiques de l’équipe <small>" + esc(lgm.lg) + "</small>";
+    const lgm = list.find(m => m.slug === pk.slug), lgName = (lgm && lgm.lg) || pk.lg || "";
+    if (lgName && $("#cb-sct")) $("#cb-sct").innerHTML = "⚽ Meilleurs buteurs <small><span>buts marqués</span> · " + esc(lgName) + "</small>";
+    if (lgName && $("#cb-stt")) $("#cb-stt").innerHTML = "📊 Statistiques de l’équipe <small>" + esc(lgName) + "</small>";
     let stv = null, cur = null; const paintSt = () => { if (cur) cbPaintSt(slug, cur.A, stv, cur.done, cur.total); };
     cbStand(pk.slug, pk.tid).then(v => { stv = v; paintSt(); }).catch(() => { });
     const ck = "fl_cbsc3_" + pk.slug + "_" + pk.tid; let cached = null; try { cached = JSON.parse(localStorage.getItem(ck) || "null"); } catch (e) { }
     if (cached && Date.now() - cached.t < 6 * 3600e3) { cbPaintSc(slug, cached.v, 1, 1, cached.i); cur = { A: cbAgg(cached.r), done: 1, total: 1 }; return paintSt(); }
-    let ids = []; try { const j = await cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/" + pk.slug + "/teams/" + pk.tid + "/schedule"); ids = (j.events || []).filter(e => { const c = (e.competitions || [])[0] || {}, st = (c.status && c.status.type) || (e.status && e.status.type) || {}; return st.state === "post" || st.completed; }).map(e => e.id); } catch (e) { }
+    const fillRes = evs => {
+      const rb = $("#cb-res"); if (cbCur !== slug || !rb || !rb.querySelector(".empty")) return;
+      const sc = x => x.score && typeof x.score === "object" ? (x.score.displayValue != null ? x.score.displayValue : x.score.value) : x.score, lg0 = t => cbSm(t.logo || ((t.logos || [])[0] || {}).href);
+      const rows = evs.map(e => { const c = (e.competitions || [])[0] || {}, cp = c.competitors || [], h = cp.find(x => x.homeAway === "home") || cp[0], a = cp.find(x => x.homeAway === "away") || cp[1]; if (!h || !a) return null;
+        return { id: e.id, lg: lgName, start: e.date, state: "post", off: false, home: h.team.displayName || h.team.name, away: a.team.displayName || a.team.name, hs: sc(h), as: sc(a), isH: String(h.team.id) === pk.tid, hl: lg0(h.team), al: lg0(a.team) }; }).filter(Boolean).sort((x, y) => new Date(y.start) - new Date(x.start)).slice(0, 5);
+      if (rows.length) rb.innerHTML = rows.map(cbRow).join("");
+    };
+    let ids = []; try { const j = await cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/" + pk.slug + "/teams/" + pk.tid + "/schedule"); ids = (j.events || []).filter(e => { const c = (e.competitions || [])[0] || {}, st = (c.status && c.status.type) || (e.status && e.status.type) || {}; return st.state === "post" || st.completed; }).map(e => e.id); fillRes((j.events || []).filter(e => { const c = (e.competitions || [])[0] || {}, st = (c.status && c.status.type) || (e.status && e.status.type) || {}; return st.state === "post" || st.completed; })); } catch (e) { }
     if (!ids.length) return none();
     const goals = {}, pids = {}, recs = []; let done = 0; const q = ids.slice();
     async function worker() {
