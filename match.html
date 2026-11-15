@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#070b16">
+<meta name="robots" content="noindex, follow">
+<title>Match en direct | FootLive Pro</title>
+<meta name="description" content="Score, buts, compositions, statistiques et commentaires du match en direct sur FootLive Pro.">
+<link rel="icon" href="/favicon.ico?v=2">
+<link rel="apple-touch-icon" href="/favicon-192x192.png?v=2">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+:root{--bg:#070b16;--card:#111a2b;--card2:#0d1524;--border:#1f2c47;--txt:#f8fafc;--mut:#8b9bb4;--acc:#2ee59d;--red:#ef4444;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);color-scheme:dark}
+*{box-sizing:border-box}html{-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:calc(var(--sat) + 8px) 12px calc(var(--sab) + 24px)}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.top a,.top button{color:var(--txt);background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font:600 .8rem inherit;font-family:inherit;text-decoration:none;cursor:pointer}
+.hero{background:linear-gradient(160deg,#10203d,#0b1220);border:1px solid var(--border);border-radius:16px;padding:16px 12px;text-align:center}
+.comp{font-size:.72rem;color:var(--mut);margin-bottom:10px}
+.row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.tm{display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;font-size:.9rem;min-width:0}
+.tm img{width:56px;height:56px;object-fit:contain}.tm span{overflow-wrap:anywhere}
+.sc{font-size:2.4rem;font-weight:800;letter-spacing:2px;font-variant-numeric:tabular-nums}
+.st{margin-top:6px;font-size:.8rem;font-weight:700;color:var(--mut)}
+.st.live{color:var(--red)}.badge{display:inline-block;background:var(--red);color:#fff;border-radius:6px;padding:1px 6px;font-size:.65rem;margin-right:6px;letter-spacing:.5px}
+.fav{background:none;border:0;color:var(--mut);font-size:1.1rem;cursor:pointer}.fav.on{color:#facc15}
+.tabs{display:flex;gap:6px;margin:14px 0 10px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:0 0 auto;background:var(--card);border:1px solid var(--border);color:var(--mut);border-radius:999px;padding:8px 14px;font:700 .78rem inherit;font-family:inherit;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#04210f;border-color:var(--acc)}
+.box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
+.box h3{margin:0 0 10px;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
+.ev{display:grid;grid-template-columns:44px 24px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.85rem}.ev:last-child{border:0}
+.ev b{color:var(--acc)}.ev small{color:var(--mut)}
+.bar{margin:10px 0}.bar .l{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px}.bar .l span:nth-child(2){color:var(--mut)}
+.bar .t{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--card2);gap:2px}.bar .t i{display:block;background:#3b82f6}.bar .t i+i{background:var(--acc)}
+.lu{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lu h4{margin:0 0 6px;font-size:.8rem}.lu div div{font-size:.8rem;padding:3px 0;color:#dbe4f3}.lu em{color:var(--mut);font-style:normal;display:inline-block;width:22px}
+.cm div{font-size:.82rem;padding:6px 0;border-bottom:1px solid var(--border);color:#cbd5e5}.cm b{color:var(--acc);margin-right:6px}
+.empty,.err{color:var(--mut);text-align:center;padding:20px 8px;font-size:.88rem}
+.info{font-size:.8rem;color:var(--mut);line-height:1.6}
+[dir=rtl] .ev{direction:rtl}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="/" id="back">←</a><button id="share" type="button">↗</button></div>
+  <div id="app"><div class="empty" id="loading">…</div></div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var Q = new URLSearchParams(location.search), ID = (Q.get("id") || "").replace(/\D/g, ""), SLUG = (Q.get("slug") || "all").replace(/[^a-z0-9.\-_]/gi, "");
+  var PROXY = "https://footlive.hgtrerza.workers.dev/", ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/";
+  var LANGS = ["fr", "en", "es", "it", "nl", "de", "ar"], nav = (navigator.language || "fr").slice(0, 2);
+  var L = LANGS.indexOf(Q.get("lang")) >= 0 ? Q.get("lang") : (LANGS.indexOf(nav) >= 0 ? nav : "fr");
+  document.documentElement.lang = L; if (L === "ar") document.documentElement.dir = "rtl";
+  var D = {
+    fr: { back: "Accueil", share: "Partager", sum: "Résumé", lu: "Compos", stats: "Stats", comm: "Commentaires", info: "Infos", ev: "Événements du match", none: "Pas encore d'événement.", nolu: "Compositions pas encore disponibles.", nost: "Statistiques pas encore disponibles.", nocm: "Pas de commentaires pour ce match.", live: "DIRECT", ft: "Terminé", ko: "Coup d'envoi", err: "Impossible de charger ce match. Réessayez dans un instant.", venue: "Stade", att: "Affluence", ref: "Arbitre", date: "Date", poss: "Possession", shots: "Tirs", sot: "Tirs cadrés", corners: "Corners", fouls: "Fautes", yc: "Cartons jaunes", rc: "Cartons rouges", off: "Hors-jeu", saves: "Arrêts", pass: "Passes", start: "Titulaires", sub: "Remplaçants", fav: "Suivre cette équipe" },
+    en: { back: "Home", share: "Share", sum: "Summary", lu: "Lineups", stats: "Stats", comm: "Commentary", info: "Info", ev: "Match events", none: "No events yet.", nolu: "Lineups not available yet.", nost: "Stats not available yet.", nocm: "No commentary for this match.", live: "LIVE", ft: "Full time", ko: "Kick-off", err: "Could not load this match. Try again in a moment.", venue: "Venue", att: "Attendance", ref: "Referee", date: "Date", poss: "Possession", shots: "Shots", sot: "Shots on target", corners: "Corners", fouls: "Fouls", yc: "Yellow cards", rc: "Red cards", off: "Offsides", saves: "Saves", pass: "Passes", start: "Starting XI", sub: "Substitutes", fav: "Follow this team" },
+    es: { back: "Inicio", share: "Compartir", sum: "Resumen", lu: "Alineaciones", stats: "Estadísticas", comm: "Comentarios", info: "Info", ev: "Eventos del partido", none: "Aún sin eventos.", nolu: "Alineaciones aún no disponibles.", nost: "Estadísticas aún no disponibles.", nocm: "Sin comentarios para este partido.", live: "EN VIVO", ft: "Finalizado", ko: "Inicio", err: "No se pudo cargar el partido. Inténtalo de nuevo.", venue: "Estadio", att: "Asistencia", ref: "Árbitro", date: "Fecha", poss: "Posesión", shots: "Tiros", sot: "Tiros a puerta", corners: "Córners", fouls: "Faltas", yc: "Tarjetas amarillas", rc: "Tarjetas rojas", off: "Fuera de juego", saves: "Paradas", pass: "Pases", start: "Titulares", sub: "Suplentes", fav: "Seguir este equipo" },
+    it: { back: "Home", share: "Condividi", sum: "Riepilogo", lu: "Formazioni", stats: "Statistiche", comm: "Commento", info: "Info", ev: "Eventi della partita", none: "Ancora nessun evento.", nolu: "Formazioni non ancora disponibili.", nost: "Statistiche non ancora disponibili.", nocm: "Nessun commento per questa partita.", live: "LIVE", ft: "Finita", ko: "Calcio d'inizio", err: "Impossibile caricare la partita. Riprova tra poco.", venue: "Stadio", att: "Spettatori", ref: "Arbitro", date: "Data", poss: "Possesso", shots: "Tiri", sot: "Tiri in porta", corners: "Calci d'angolo", fouls: "Falli", yc: "Ammonizioni", rc: "Espulsioni", off: "Fuorigioco", saves: "Parate", pass: "Passaggi", start: "Titolari", sub: "Panchina", fav: "Segui questa squadra" },
+    nl: { back: "Home", share: "Delen", sum: "Samenvatting", lu: "Opstellingen", stats: "Statistieken", comm: "Commentaar", info: "Info", ev: "Wedstrijdgebeurtenissen", none: "Nog geen gebeurtenissen.", nolu: "Opstellingen nog niet beschikbaar.", nost: "Statistieken nog niet beschikbaar.", nocm: "Geen commentaar voor deze wedstrijd.", live: "LIVE", ft: "Afgelopen", ko: "Aftrap", err: "Wedstrijd laden mislukt. Probeer het zo opnieuw.", venue: "Stadion", att: "Toeschouwers", ref: "Scheidsrechter", date: "Datum", poss: "Balbezit", shots: "Schoten", sot: "Schoten op doel", corners: "Hoekschoppen", fouls: "Overtredingen", yc: "Gele kaarten", rc: "Rode kaarten", off: "Buitenspel", saves: "Reddingen", pass: "Passes", start: "Basis", sub: "Wissels", fav: "Volg dit team" },
+    de: { back: "Start", share: "Teilen", sum: "Überblick", lu: "Aufstellungen", stats: "Statistiken", comm: "Kommentar", info: "Infos", ev: "Spielereignisse", none: "Noch keine Ereignisse.", nolu: "Aufstellungen noch nicht verfügbar.", nost: "Statistiken noch nicht verfügbar.", nocm: "Kein Kommentar zu diesem Spiel.", live: "LIVE", ft: "Beendet", ko: "Anpfiff", err: "Spiel konnte nicht geladen werden. Bitte gleich erneut versuchen.", venue: "Stadion", att: "Zuschauer", ref: "Schiedsrichter", date: "Datum", poss: "Ballbesitz", shots: "Schüsse", sot: "Schüsse aufs Tor", corners: "Ecken", fouls: "Fouls", yc: "Gelbe Karten", rc: "Rote Karten", off: "Abseits", saves: "Paraden", pass: "Pässe", start: "Startelf", sub: "Bank", fav: "Diesem Team folgen" },
+    ar: { back: "الرئيسية", share: "مشاركة", sum: "الملخص", lu: "التشكيلات", stats: "الإحصائيات", comm: "التعليق", info: "معلومات", ev: "أحداث المباراة", none: "لا أحداث بعد.", nolu: "التشكيلات غير متاحة بعد.", nost: "الإحصائيات غير متاحة بعد.", nocm: "لا تعليق لهذه المباراة.", live: "مباشر", ft: "انتهت", ko: "صافرة البداية", err: "تعذّر تحميل المباراة. حاول مجدداً بعد قليل.", venue: "الملعب", att: "الحضور", ref: "الحكم", date: "التاريخ", poss: "الاستحواذ", shots: "التسديدات", sot: "على المرمى", corners: "ركنيات", fouls: "أخطاء", yc: "بطاقات صفراء", rc: "بطاقات حمراء", off: "تسلل", saves: "تصديات", pass: "تمريرات", start: "التشكيلة الأساسية", sub: "البدلاء", fav: "تابع هذا الفريق" }
+  }[L];
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  $("#back").textContent = "← " + D.back; $("#share").textContent = "↗ " + D.share;
+  var tab = "sum", data = null, timer = null;
+  function favs() { try { return JSON.parse(localStorage.getItem("fl_favs") || "[]"); } catch (e) { return []; } }
+  function toggleFav(n) { var f = favs(), i = f.indexOf(n); if (i >= 0) f.splice(i, 1); else f.push(n); try { localStorage.setItem("fl_favs", JSON.stringify(f)); } catch (e) { } render(); }
+
+  function getJSON(u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  function load() {
+    var q = "?event=" + ID, tries = [PROXY + "soccer/" + SLUG + "/summary" + q, ESPN + SLUG + "/summary" + q];
+    return getJSON(tries[0]).catch(function () { return getJSON(tries[1]); });
+  }
+  function teamLogo(t) { return (t && (t.logo || (t.logos && t.logos[0] && t.logos[0].href))) || ""; }
+  function render() {
+    var app = $("#app"); if (!data) return;
+    var h = data.header || {}, c = (h.competitions || [])[0] || {}, comps = c.competitors || [];
+    var home = comps.filter(function (x) { return x.homeAway === "home"; })[0] || comps[0] || {}, away = comps.filter(function (x) { return x.homeAway === "away"; })[0] || comps[1] || {};
+    var th = home.team || {}, ta = away.team || {}, st = (c.status && c.status.type) || (h.status && h.status.type) || {}, state = st.state || "pre";
+    var lg = (h.league && h.league.name) || (data.header && data.header.season && "") || "";
+    var title = (th.displayName || Q.get("h") || "") + " - " + (ta.displayName || Q.get("a") || "");
+    document.title = title + (state !== "pre" ? " " + (home.score || 0) + "-" + (away.score || 0) : "") + " | FootLive Pro";
+    var when = c.date ? new Date(c.date).toLocaleString(L, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+    var stTxt = state === "in" ? '<span class="badge">' + D.live + "</span>" + esc((c.status && c.status.displayClock) || st.shortDetail || "") : state === "post" ? esc(D.ft) : esc(D.ko + " · " + when);
+    var f = favs(), fh = f.indexOf(th.displayName) >= 0, fa = f.indexOf(ta.displayName) >= 0;
+    var out = '<div class="hero"><div class="comp">' + esc(lg) + '</div><div class="row">' +
+      '<div class="tm"><img alt="" src="' + esc(teamLogo(th)) + '"><span>' + esc(th.displayName) + '</span><button class="fav ' + (fh ? "on" : "") + '" data-t="' + esc(th.displayName) + '" title="' + esc(D.fav) + '">' + (fh ? "★" : "☆") + '</button></div>' +
+      '<div class="sc">' + (state === "pre" ? "–" : esc(home.score || 0) + " - " + esc(away.score || 0)) + '</div>' +
+      '<div class="tm"><img alt="" src="' + esc(teamLogo(ta)) + '"><span>' + esc(ta.displayName) + '</span><button class="fav ' + (fa ? "on" : "") + '" data-t="' + esc(ta.displayName) + '" title="' + esc(D.fav) + '">' + (fa ? "★" : "☆") + '</button></div>' +
+      '</div><div class="st ' + (state === "in" ? "live" : "") + '">' + stTxt + '</div></div>';
+    out += '<div class="tabs">' + [["sum", D.sum], ["lu", D.lu], ["stats", D.stats], ["comm", D.comm], ["info", D.info]].map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (tab === t[0] ? "on" : "") + '">' + esc(t[1]) + "</button>"; }).join("") + "</div>";
+    out += tab === "sum" ? tSum(th, ta) : tab === "lu" ? tLu() : tab === "stats" ? tStats(th, ta) : tab === "comm" ? tComm() : tInfo(c);
+    app.innerHTML = out;
+  }
+  function tSum(th, ta) {
+    var ev = (data.keyEvents || []).filter(function (e) { return e.type && !/kickoff|halftime|end/i.test(e.type.text || "") || e.scoringPlay; });
+    if (!ev.length) return '<div class="box"><h3>' + esc(D.ev) + '</h3><div class="empty">' + esc(D.none) + "</div></div>";
+    var icon = function (e) { var t = ((e.type && e.type.text) || "") + (e.scoringPlay ? " goal" : ""); return /goal|penalty - scored/i.test(t) ? "⚽" : /red/i.test(t) ? "🟥" : /yellow/i.test(t) ? "🟨" : /substitution/i.test(t) ? "🔁" : /var/i.test(t) ? "📺" : "•"; };
+    return '<div class="box"><h3>' + esc(D.ev) + "</h3>" + ev.map(function (e) {
+      var who = (e.participants || []).map(function (p) { return p.athlete && p.athlete.displayName; }).filter(Boolean).join(", ");
+      var tm = e.team ? (String(e.team.id) === String((th.id)) ? th.displayName : String(e.team.id) === String(ta.id) ? ta.displayName : e.team.displayName) : "";
+      return '<div class="ev"><b>' + esc((e.clock && e.clock.displayValue) || "") + "</b><span>" + icon(e) + "</span><span>" + esc(e.shortText || e.text || (e.type && e.type.text) || "") + (who && String(e.shortText || e.text || "").indexOf(who) < 0 ? " — " + esc(who) : "") + (tm ? " <small>(" + esc(tm) + ")</small>" : "") + "</span></div>";
+    }).join("") + "</div>";
+  }
+  function tLu() {
+    var r = data.rosters || []; if (!r.length) return '<div class="empty">' + esc(D.nolu) + "</div>";
+    var col = function (t) {
+      var pl = t.roster || [], s = pl.filter(function (p) { return p.starter; }), b = pl.filter(function (p) { return !p.starter; });
+      var line = function (p) { return "<div><em>" + esc(p.jersey || "") + "</em>" + esc((p.athlete && p.athlete.displayName) || "") + (p.position && p.position.abbreviation ? " <small style=\"color:var(--mut)\">" + esc(p.position.abbreviation) + "</small>" : "") + "</div>"; };
+      return "<div><h4>" + esc((t.team && t.team.displayName) || "") + (t.formation ? " · " + esc(t.formation) : "") + "</h4>" + s.map(line).join("") + (b.length ? '<h4 style="margin-top:10px;color:var(--mut)">' + esc(D.sub) + "</h4>" + b.map(line).join("") : "") + "</div>";
+    };
+    return '<div class="box"><div class="lu">' + r.map(col).join("") + "</div></div>";
+  }
+  function tStats(th, ta) {
+    var teams = (data.boxscore && data.boxscore.teams) || []; if (teams.length < 2) return '<div class="empty">' + esc(D.nost) + "</div>";
+    var get = function (t, n) { var s = (t.statistics || []).filter(function (x) { return x.name === n; })[0]; return s ? parseFloat(String(s.displayValue).replace("%", "")) || 0 : null; };
+    var rows = [["possessionPct", D.poss, "%"], ["totalShots", D.shots], ["shotsOnTarget", D.sot], ["wonCorners", D.corners], ["foulsCommitted", D.fouls], ["yellowCards", D.yc], ["redCards", D.rc], ["offsides", D.off], ["saves", D.saves], ["totalPasses", D.pass]];
+    var A = teams.filter(function (t) { return t.homeAway === "home"; })[0] || teams[0], B = teams.filter(function (t) { return t.homeAway === "away"; })[0] || teams[1];
+    var out = rows.map(function (r) {
+      var a = get(A, r[0]), b = get(B, r[0]); if (a == null || b == null) return ""; var tot = a + b || 1;
+      return '<div class="bar"><div class="l"><span>' + a + (r[2] || "") + "</span><span>" + esc(r[1]) + "</span><span>" + b + (r[2] || "") + '</span></div><div class="t" dir="ltr"><i style="width:' + (a / tot * 100) + '%"></i><i style="width:' + (b / tot * 100) + '%"></i></div></div>';
+    }).join("");
+    return out.trim() ? '<div class="box">' + out + "</div>" : '<div class="empty">' + esc(D.nost) + "</div>";
+  }
+  function tComm() {
+    var cm = data.commentary || []; if (!cm.length) return '<div class="empty">' + esc(D.nocm) + "</div>";
+    return '<div class="box cm">' + cm.slice(0, 80).map(function (c) { return "<div><b>" + esc((c.time && c.time.displayValue) || "") + "</b>" + esc(c.text || "") + "</div>"; }).join("") + "</div>";
+  }
+  function tInfo(c) {
+    var gi = data.gameInfo || {}, v = gi.venue || c.venue || {}, off = (gi.officials || [])[0];
+    var rows = [[D.venue, v.fullName], [D.att, gi.attendance ? gi.attendance.toLocaleString(L) : ""], [D.ref, off && off.fullName], [D.date, c.date ? new Date(c.date).toLocaleString(L) : ""]].filter(function (r) { return r[1]; });
+    return '<div class="box info">' + (rows.length ? rows.map(function (r) { return "<div><b>" + esc(r[0]) + " :</b> " + esc(r[1]) + "</div>"; }).join("") : "—") + "</div>";
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-tab]"); if (t) { tab = t.dataset.tab; render(); return; }
+    var f = e.target.closest(".fav"); if (f) toggleFav(f.dataset.t);
+  });
+  $("#share").addEventListener("click", function () {
+    var d = { title: document.title, url: location.href };
+    if (navigator.share) navigator.share(d).catch(function () { }); else if (navigator.clipboard) navigator.clipboard.writeText(location.href);
+  });
+  function tick() {
+    load().then(function (j) { data = j; render(); var st = ((((j.header || {}).competitions || [])[0] || {}).status || {}).type || {}; clearTimeout(timer); timer = setTimeout(tick, st.state === "in" ? 15000 : st.state === "pre" ? 60000 : 0); if (st.state === "post") clearTimeout(timer); })
+      .catch(function () { if (!data) $("#app").innerHTML = '<div class="err">' + esc(D.err) + "</div>"; clearTimeout(timer); timer = setTimeout(tick, 30000); });
+  }
+  if (!ID) $("#app").innerHTML = '<div class="err">' + esc(D.err) + "</div>"; else tick();
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) navigator.serviceWorker.register("/sw.js").catch(function () { });
+})();
+</script>
+</body>
+</html>
