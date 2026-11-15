@@ -1,6 +1,6 @@
 {
  "date": "2026-11-15",
- "generated": "2026-11-15T18:41:35.604Z",
+ "generated": "2026-11-15T20:37:39.569Z",
  "extra": 148,
  "matches": [
   {
@@ -59,12 +59,12 @@
    "id": "401883117",
    "lg": "LaLiga 2",
    "start": "2026-11-15T17:30Z",
-   "state": "in",
-   "label": "52'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "Eibar",
    "away": "Cádiz",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 1,
    "venue": "Ipurua",
    "place": "Eibar, Spain"
   },
@@ -72,8 +72,8 @@
    "id": "401883137",
    "lg": "LaLiga 2",
    "start": "2026-11-15T17:30Z",
-   "state": "in",
-   "label": "48'",
+   "state": "post",
+   "label": "90'+3'",
    "home": "Eldense",
    "away": "CD Sabadell",
    "h": 2,
