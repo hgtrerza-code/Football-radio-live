@@ -297,6 +297,80 @@ def league_scorers(league, pages=1):
     return rows
 
 
+# ----------------------------------------------------------------------------- statistiques d'équipe (classement ESPN)
+STANDINGS = "https://site.api.espn.com/apis/v2/sports/soccer/{sl}/standings"
+_STAND = {}
+
+
+def league_standings(lg):
+    """Lignes du classement d'une compétition (une seule requête par compétition)."""
+    if lg["key"] in _STAND:
+        return _STAND[lg["key"]]
+    rows = []
+
+    def walk(n):
+        if not isinstance(n, dict):
+            return
+        for en in ((n.get("standings") or {}).get("entries") or []):
+            st = {x.get("name"): x.get("value") for x in (en.get("stats") or []) if isinstance(x, dict)}
+            rows.append({"team": (en.get("team") or {}).get("displayName") or "", "st": st})
+        for ch in (n.get("children") or []):
+            walk(ch)
+
+    for sl in lg["slugs"]:
+        walk(fetch_json(STANDINGS.format(sl=sl)) or {})
+        if rows:
+            break
+    _STAND[lg["key"]] = rows
+    return rows
+
+
+def club_standing(c, rows):
+    pat = re.compile(c["pat"], re.I)
+    for r in rows:
+        t = norm(r["team"])
+        if pat.search(t) and not EXC.search(t):
+            return r["st"]
+    return None
+
+
+def _n(st, k):
+    try:
+        return float(st.get(k))
+    except (TypeError, ValueError):
+        return None
+
+
+def stats_html(c, st, league):
+    """Tableau des statistiques de la saison du club (rang, bilan, buts, points par match)."""
+    if not st:
+        return "", None
+    gp, w, d, l = _n(st, "gamesPlayed"), _n(st, "wins"), _n(st, "ties"), _n(st, "losses")
+    gf, ga, pts, rk = _n(st, "pointsFor"), _n(st, "pointsAgainst"), _n(st, "points"), _n(st, "rank")
+    if not gp:
+        return "", None
+    i = lambda v: "" if v is None else str(int(v))
+    f2 = lambda v: "" if v is None else f"{v:.2f}".replace(".", ",")
+    diff = (gf - ga) if gf is not None and ga is not None else None
+    rows = [("Classement", (("1er" if rk == 1 else f"{int(rk)}e") if rk else "")), ("Matchs joués", i(gp)), ("Victoires", i(w)), ("Nuls", i(d)), ("Défaites", i(l)),
+            ("Buts marqués", i(gf)), ("Buts encaissés", i(ga)),
+            ("Différence de buts", "" if diff is None else f"{int(diff):+d}"), ("Points", i(pts)),
+            ("Points par match", f2(pts / gp) if pts is not None else ""),
+            ("Buts marqués par match", f2(gf / gp) if gf is not None else ""),
+            ("Buts encaissés par match", f2(ga / gp) if ga is not None else ""),
+            ("Taux de victoire", f"{round(w / gp * 100)} %" if w is not None else "")]
+    rows = [r for r in rows if r[1] != ""]
+    lgn = league["name"] if league else c["league"]
+    html_ = (f"<h2>Statistiques de {e(c['name'])} · {e(lgn)}</h2><table><thead><tr><th>Statistique</th><th>Valeur</th></tr></thead><tbody>"
+             + "".join(f"<tr><td>{e(a)}</td><td class='g'>{e(b)}</td></tr>" for a, b in rows) + "</tbody></table>")
+    faq = None
+    if rk:
+        faq = (f"Où se classe {c['name']} ?",
+               f"{c['name']} est {'1er' if rk == 1 else str(int(rk)) + 'e'} de {lgn} avec {i(pts)} points en {i(gp)} matchs ({plural(int(w or 0), 'victoire', 'victoires')}, {plural(int(d or 0), 'nul', 'nuls')}, {plural(int(l or 0), 'défaite', 'défaites')}), "
+               f"{i(gf)} buts marqués et {i(ga)} encaissés.")
+    return html_, faq
+
+
 # ----------------------------------------------------------------------------- gabarit HTML
 CSS = """
 :root{--bg:#0a0f1e;--card:#111a2e;--bd:#1f2b45;--tx:#e8edf7;--mu:#93a1bd;--ac:#22c55e;--rd:#ef4444}
@@ -403,7 +477,7 @@ def match_text(m):
     return f"{m['home']} {sc} {m['away']}"
 
 
-def club_page(c, ms, scorers, league, same_league):
+def club_page(c, ms, scorers, league, same_league, stand=None):
     now = datetime.now(PARIS)
     up = sorted([m for m in ms if m["state"] != "post" and not m["off"]], key=lambda m: m["start"])
     past = sorted([m for m in ms if m["state"] == "post"], key=lambda m: m["start"], reverse=True)
@@ -425,6 +499,9 @@ def club_page(c, ms, scorers, league, same_league):
     q_last = f"Quel est le dernier résultat de {name} ?"
     a_last = (f"Dernier résultat de {name} : {match_text(past[0])}{(' (' + past[0]['lg'] + ')') if past[0]['lg'] else ''}, le {fr_day(past[0]['start'])}." if past else f"Aucun résultat récent n’est disponible pour {name} pour le moment.")
     faqs = [(q_next, a_next), (q_last, a_last)]
+    st_html, st_faq = stats_html(c, stand, league)
+    if st_faq:
+        faqs.append(st_faq)
     sc_html = ""
     if scorers:
         t = scorers[0]
@@ -442,7 +519,7 @@ def club_page(c, ms, scorers, league, same_league):
             f'<a class="cta" href="/#club-{c["slug"]}">▶ Suivre {e(name)} en direct</a>'
             + (f'<h2>Prochains matchs</h2><ul class="m">{"".join(match_li(m) for m in up[:5])}</ul>' if up else "")
             + (f'<h2>Derniers résultats</h2><ul class="m">{"".join(match_li(m) for m in past[:5])}</ul>' if past else "")
-            + sc_html
+            + st_html + sc_html
             + "<h2>Questions fréquentes</h2>" + "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in faqs)
             + (f"<h2>Autres clubs · {e(c['league'])}</h2><div class='chips'>{links}</div>" if links else "")
             + bt)
@@ -552,7 +629,8 @@ def main():
                 pat = re.compile(c["pat"], re.I)
                 scorers = [r for r in league_scorers(lg, pages=2) if r["t"] and pat.search(norm(r["t"])) and not EXC.search(norm(r["t"]))]
             same = [x for x in clubs if x["league"] == c["league"] and x["slug"] != c["slug"]]
-            changed += write_if_changed(f"clubs/{c['slug']}.html", club_page(c, ms, scorers, lg, same), written)
+            stand = club_standing(c, league_standings(lg)) if lg else None
+            changed += write_if_changed(f"clubs/{c['slug']}.html", club_page(c, ms, scorers, lg, same, stand), written)
         except Exception as ex:  # noqa : une erreur sur un club ne doit pas bloquer les autres
             print("  ! club", c["slug"], ex, file=sys.stderr)
     changed += write_if_changed("clubs/index.html", clubs_index(clubs), written)
