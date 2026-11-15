@@ -1064,6 +1064,10 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 <style id="hdr-reserve">@media(max-width:600px){.hdr-capsule .header-actions{min-width:123px}}</style><link rel="manifest" href="/manifest.webmanifest">
 <script id="flp-ip">window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
 <script src="/install-app.js" defer></script>
+<style>.fav-panel{max-width:1100px;margin:.2rem auto .8rem;padding:.7rem .9rem;background:var(--bg-card,#111a2b);border:1px solid var(--border,#1f2c47);border-radius:14px}
+.fav-panel h4{margin:0 0 .5rem;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted,#8b9bb4)}
+.fav-chips{display:flex;flex-wrap:wrap;gap:.4rem}.fav-chip{background:rgba(46,229,157,.1);border:1px solid rgba(46,229,157,.35);color:#e8fff6;border-radius:999px;padding:.35rem .7rem;font:600 .78rem inherit;font-family:inherit;cursor:pointer}
+.m-page{display:inline-block;margin:0 0 .7rem;padding:.4rem .8rem;border-radius:10px;border:1px solid var(--border,#1f2c47);background:rgba(46,229,157,.1);color:#2ee59d!important;font-weight:700;font-size:.78rem;text-decoration:none}</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -1965,7 +1969,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const comp = (s.header && s.header.competitions && s.header.competitions[0]) || {}, cps = comp.competitors || [];
             const homeId = String(((cps.find(c => c.homeAway === "home") || {}).team || {}).id || ""), tname = {};
             cps.forEach(c => tname[String(c.team.id)] = c.team.displayName || c.team.name);
-            let out = scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
+            let out = (m.id && m.slug ? '<a class="m-page" href="/match.html?id=' + encodeURIComponent(m.id) + '&slug=' + encodeURIComponent(m.slug) + '&lang=' + (document.documentElement.lang || "fr").slice(0, 2) + '">🔗 Página del partido</a>' : "") + scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
             // Infos générales
             const gi = s.gameInfo || {}, v = gi.venue || {}, ad = v.address || {}, info = [];
             const st = comp.status && comp.status.type;
@@ -2844,6 +2848,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   let favs = LS.get("fl_favs", []);
   const isFav = n => favs.includes(n);
   window.isFavMatch = m => isFav(m.home) || isFav(m.away);
+  window.flFavs = () => favs.slice(); window.flToggleFav = n => toggleFav(n);
   function toggleFav(n) {
     favs = isFav(n) ? favs.filter(x => x !== n) : favs.concat(n);
     LS.set("fl_favs", favs); if (favs.length && !cfg.notif && "Notification" in window && Notification.permission === "default") { try { Notification.requestPermission().then(p => { cfg.notif = p === "granted"; }); } catch (e) { } } else if ("Notification" in window && Notification.permission === "granted") cfg.notif = true; toast(isFav(n) ? "⭐ " + n + " ajouté aux favoris" : n + " retiré des favoris");
@@ -2862,7 +2867,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     });
     const box = $("#matches");
     if (tab === "fav" && !favs.length && !box.querySelector(".fav-hint"))
-      box.innerHTML = '<div class="empty fav-hint">⭐ Touchez l’étoile à côté d’une équipe pour la suivre.<br>Ses matchs apparaîtront ici avec alertes de but.</div>';
+      box.innerHTML = '<div class="empty fav-hint">⭐ Toca la estrella junto a un equipo para seguirlo.<br>Sus partidos aparecerán aquí con alertas de gol.</div>';
   }
   document.addEventListener("click", e => {
     const s = e.target.closest(".fav-star"); if (!s) return;
@@ -2870,7 +2875,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   }, true);
   let decQ = 0;
   new MutationObserver(() => { if (decQ) return; decQ = requestAnimationFrame(() => { decQ = 0; decorate(); }); }).observe($("#matches"), { childList: true });
-  $("#filters").insertAdjacentHTML("beforeend", '<button data-tab="fav"><span class="ic ic-today"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span> Favoris</button>');
+  $("#filters").insertAdjacentHTML("beforeend", '<button data-tab="fav"><span class="ic ic-today"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span> Mis partidos</button>');
 
   // ---------- Sélecteur de jour ----------
   window.dayPick = "";
@@ -4565,5 +4570,17 @@ if(r)r.onclick=function(e){e.preventDefault();b.hidden=false;};
   sync();
 })();
 </script>
+<script>(function(){var T='Equipos seguidos';
+function cur(){var b=document.querySelector("#filters button.active");return b&&b.dataset.tab}
+var last="";
+function paint(){var box=document.getElementById("matches");if(!box)return;var p=document.getElementById("fav-panel");
+ if(cur()!=="fav"){if(p)p.remove();last="";return}
+ if(!p){p=document.createElement("div");p.id="fav-panel";p.className="fav-panel";box.parentNode.insertBefore(p,box)}
+ var f=window.flFavs?window.flFavs():[],h="";
+ if(f.length){h='<h4>⭐ '+T+' ('+f.length+')</h4><div class="fav-chips">'+f.map(function(n){return '<button type="button" class="fav-chip" data-t="'+String(n).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")+'">'+String(n).replace(/&/g,"&amp;").replace(/</g,"&lt;")+' ×</button>'}).join("")+'</div>'}
+ if(h===last)return;last=h;p.innerHTML=h;p.style.display=h?"":"none"}
+document.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest(".fav-chip");if(c&&window.flToggleFav){window.flToggleFav(c.dataset.t);last="";setTimeout(paint,0)}else if(e.target.closest&&e.target.closest("#filters")){setTimeout(paint,30)}});
+var box=document.getElementById("matches");if(box)new MutationObserver(function(){requestAnimationFrame(paint)}).observe(box,{childList:true});
+window.addEventListener("load",function(){setTimeout(paint,300)});})();</script>
 </body>
 </html>
