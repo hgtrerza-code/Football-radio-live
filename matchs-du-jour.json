@@ -1,6 +1,6 @@
 {
  "date": "2026-11-15",
- "generated": "2026-11-15T06:58:41.133Z",
+ "generated": "2026-11-15T14:41:43.509Z",
  "extra": 148,
  "matches": [
   {
@@ -33,11 +33,11 @@
    "id": "401883113",
    "lg": "LaLiga 2",
    "start": "2026-11-15T13:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "78'",
    "home": "Tenerife",
    "away": "Ceuta",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Estadio Heliodoro Rodríguez López",
    "place": "Santa Cruz de Tenerife, Spain"
