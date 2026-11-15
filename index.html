@@ -1069,10 +1069,11 @@ html[dir=rtl] .lf-ch svg{transform:none}
 <style id="hdr-reserve">@media(max-width:600px){.hdr-capsule .header-actions{min-width:115px}}</style><link rel="manifest" href="/manifest.webmanifest">
 <script id="flp-ip">window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
 <script src="/install-app.js" defer></script>
-<style>.fav-panel{max-width:1100px;margin:.2rem auto .8rem;padding:.7rem .9rem;background:var(--bg-card,#111a2b);border:1px solid var(--border,#1f2c47);border-radius:14px}
+<style>.m-tabs{display:flex;gap:6px;padding:6px 2px 2px}.m-tabs a{flex:1;text-align:center;font-size:.74rem;font-weight:700;color:var(--text-main,#f8fafc);text-decoration:none;border:1px solid var(--border,#1f2c47);background:rgba(46,229,157,.08);border-radius:9px;padding:.42rem .2rem;white-space:nowrap}.m-tabs a:hover{border-color:#2ee59d;color:#2ee59d}.m-wrap.open .m-tabs{background:var(--bg-detail,#0d1524);border:1px solid var(--border,#1f2c47);border-top:0;border-bottom:0;padding:6px 12px 0}
+.fav-panel{max-width:1100px;margin:.2rem auto .8rem;padding:.7rem .9rem;background:var(--bg-card,#111a2b);border:1px solid var(--border,#1f2c47);border-radius:14px}
 .fav-panel h4{margin:0 0 .5rem;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted,#8b9bb4)}
 .fav-chips{display:flex;flex-wrap:wrap;gap:.4rem}.fav-chip{background:rgba(46,229,157,.1);border:1px solid rgba(46,229,157,.35);color:#e8fff6;border-radius:999px;padding:.35rem .7rem;font:600 .78rem inherit;font-family:inherit;cursor:pointer}
-.m-page{display:inline-block;margin:0 0 .7rem;padding:.4rem .8rem;border-radius:10px;border:1px solid var(--border,#1f2c47);background:rgba(46,229,157,.1);color:#2ee59d!important;font-weight:700;font-size:.78rem;text-decoration:none}</style>
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -1754,10 +1755,11 @@ html[dir=rtl] .lf-ch svg{transform:none}
         const phSpan = n => `<span class="m-ph" style="background:hsl(${phHue(n)},45%,32%)">${esc(phIni(n))}</span>`;
         const logo = (u, n) => u ? `<img class="m-logo" src="${esc(String(u).replace(/w=64&h=64/, "w=40&h=40"))}" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="${esc(n || "")}" onerror="window.flPh(this)">` : (n ? phSpan(n) : "");
         const open = new Set(), cache = {};   // cache[id] = { html, t, loading }
+        const miniTabs = m => { if (!m.id || !m.slug || m.state === "pre") return ""; const u = "/match.html?id=" + encodeURIComponent(m.id) + "&slug=" + encodeURIComponent(m.slug) + "&lang=" + (document.documentElement.lang || "fr").slice(0, 2) + "&tab="; return '<div class="m-tabs"><a href="' + u + 'lu">👥 Compos</a><a href="' + u + 'stats">📊 Stats</a><a href="' + u + 'comm">💬 Direct</a></div>'; };
         const chev = '<button type="button" class="chev" aria-label="Afficher les détails du match" aria-expanded="false"></button>';
         function wrap(m, row) {
             const c = cache[m.id];
-            if (open.has(m.id)) row = row.replace('aria-expanded="false"', 'aria-expanded="true"'); return `<div class="m-wrap ${open.has(m.id) ? "open" : ""}" data-id="${esc(m.id)}">${row}<div class="m-detail">${c ? c.html : ""}</div></div>`;
+            if (open.has(m.id)) row = row.replace('aria-expanded="false"', 'aria-expanded="true"'); return `<div class="m-wrap ${open.has(m.id) ? "open" : ""}" data-id="${esc(m.id)}">${row}${miniTabs(m)}<div class="m-detail">${c ? c.html : ""}</div></div>`;
         }
         function liveRow(m) {
             return wrap(m, `<div class="m-row live has-dl${goalCls(m)}"><div class="m-dl">${new Date(m.start).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}</div><div class="m-date">${goalBadge(m)}<span class="m-live"><b class="m-dir">DIRECT</b>${esc(m.label)}</span>${chev}</div><div class="m-home">${esc(m.home)}${logo(m.hl, m.home)}</div><div class="m-score">${m.h ?? 0} - ${m.a ?? 0}</div><div class="m-away">${logo(m.al, m.away)}${esc(m.away)}</div></div>`);
@@ -2013,7 +2015,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
             const comp = (s.header && s.header.competitions && s.header.competitions[0]) || {}, cps = comp.competitors || [];
             const homeId = String(((cps.find(c => c.homeAway === "home") || {}).team || {}).id || ""), tname = {};
             cps.forEach(c => tname[String(c.team.id)] = c.team.displayName || c.team.name);
-            let out = (m.id && m.slug ? '<a class="m-page" href="/match.html?id=' + encodeURIComponent(m.id) + '&slug=' + encodeURIComponent(m.slug) + '&lang=' + (document.documentElement.lang || "fr").slice(0, 2) + '">🔗 Page du match</a>' : "") + scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
+            let out = scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
             // Infos générales
             const gi = s.gameInfo || {}, v = gi.venue || {}, ad = v.address || {}, info = [];
             const st = comp.status && comp.status.type;
@@ -2440,7 +2442,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
             });
             if (!anc) { const w = [...box.querySelectorAll(".m-wrap")].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 60 && r.top < window.innerHeight; }); if (w) anc = { id: w.dataset.id, top: w.getBoundingClientRect().top }; }
             const nu = Array.from(tpl.content.children), cur = nu.map(n => n.outerHTML), prev = box._ph && box._ph.kids;
-            nu.forEach(g => g.querySelectorAll && g.querySelectorAll(".m-wrap").forEach(w => { const r = w.querySelector(".m-row"); w._rs = r ? r.outerHTML : ""; }));
+            nu.forEach(g => g.querySelectorAll && g.querySelectorAll(".m-wrap").forEach(w => { const r = w.querySelector(".m-row"), tb = w.querySelector(":scope > .m-tabs"); w._rs = (r ? r.outerHTML : "") + (tb ? tb.outerHTML : ""); }));
             // Mise à jour match par match : on ne remplace que la ligne qui a changé (score, minute), jamais le groupe ni le bloc de détails
             const syncGroup = (o, n) => {
                 if (!o.classList || !n.classList || !o.classList.contains("competition-group") || !n.classList.contains("competition-group")) return false;
@@ -2452,12 +2454,12 @@ html[dir=rtl] .lf-ch svg{transform:none}
                 oc.forEach((c, k) => {
                     const d = nc[k];
                     if (c.classList.contains("m-wrap")) {
-                        if (c._rs !== d._rs) { const or = c.querySelector(".m-row"), nr = d.querySelector(".m-row"); if (or && nr) { or.replaceWith(nr); c._rs = d._rs; } }
+                        if (c._rs !== d._rs) { const or = c.querySelector(".m-row"), nr = d.querySelector(".m-row"); if (or && nr) { const ot = c.querySelector(":scope > .m-tabs"), nt = d.querySelector(":scope > .m-tabs"); or.replaceWith(nr); if (ot && nt) ot.replaceWith(nt); else if (ot) ot.remove(); else if (nt) nr.after(nt); c._rs = d._rs; } }
                     } else if (c.outerHTML !== d.outerHTML) c.replaceWith(d);
                 });
                 return true;
             };
-            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; box.querySelectorAll(".m-wrap").forEach((w, i) => { const r = w.querySelector(".m-row"); w._rs = r ? r.outerHTML : ""; }); }
+            if (!prev || box._ph.first !== box.firstElementChild || box.children.length !== prev.length || tpl.content.childNodes.length !== nu.length) { box.innerHTML = html; box.querySelectorAll(".m-wrap").forEach((w, i) => { const r = w.querySelector(".m-row"), tb = w.querySelector(":scope > .m-tabs"); w._rs = (r ? r.outerHTML : "") + (tb ? tb.outerHTML : ""); }); }
             else {
                 const old = Array.from(box.children);
                 for (let i = 0; i < Math.max(nu.length, old.length); i++) {
@@ -2926,7 +2928,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
   }, true);
   let decQ = 0;
   new MutationObserver(() => { if (decQ) return; decQ = requestAnimationFrame(() => { decQ = 0; decorate(); }); }).observe($("#matches"), { childList: true });
-  $("#filters").insertAdjacentHTML("beforeend", '<button data-tab="fav"><span class="ic ic-today"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span> Mes matchs</button>');
+  $("#filters").insertAdjacentHTML("beforeend", '<button data-tab="fav"><span class="ic ic-today"><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span> Favoris</button>');
 
   // ---------- Sélecteur de jour ----------
   window.dayPick = "";
