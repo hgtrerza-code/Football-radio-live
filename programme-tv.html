@@ -3021,7 +3021,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     [/كاس العالم للاندييه/, "Coupe du monde des clubs"], [/كاس العالم/, "Coupe du monde"], [/وديات|ودي/, "Matchs amicaux"]];
   function koComp(c) {
     const raw = String(c || "").trim(), n = koN(raw), u = n.match(/تحت\s*(\d+)/), hit = KO_COMP_FR.find(r => r[0].test(n));
-    return hit ? hit[1] + (u ? " · U" + u[1] : "") : (raw || "Autres compétitions");
+    return hit ? hit[1] : "";   // "" = compétition sans traduction -> match écarté
   }
   const koShift = (day, o) => { const d = new Date(day + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + o); return d.toISOString().slice(0, 10); };
   function koDiag() {   // #tvdebug : état des 3 jours kooora chargés pour le jour affiché
@@ -3036,6 +3036,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
       const arr = koCache[koShift(tvDay, o)]; if (!Array.isArray(arr)) return;
       arr.forEach(k => {
         if (!k || !Array.isArray(k.ch) || !k.ch.length) return;
+        if (!koComp(k.c) || /للسيدات|تحت\s*\d|شباب|ناشئ|اولمبي/.test(koN(k.c) + " " + koN(k.h) + " " + koN(k.a))) return;   // compétition inconnue, jeunes, féminines : écartés
         let t = k.t ? new Date(k.t).getTime() : 0, noTime = false;
         if (!t) { if (o !== 0) return; t = new Date(tvDay + "T12:00:00Z").getTime(); noTime = true; }   // pas d'heure chez kooora : on garde le match sur le jour demandé
         else if (new Date(t).toLocaleDateString("sv-SE") !== tvDay) return;
@@ -3048,7 +3049,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
           return (ok(s1) && (sc(s1) >= 1 || kl === tvLi(m))) || (ok(s2) && (sc(s2) >= 1 || kl === tvLi(m)));
         });
         if (known) return;
-        const h = koTeam(k.h), a = koTeam(k.a);
+        const h = koTeam(k.h), a = koTeam(k.a); if (!h.l || !a.l) return;   // équipe sans traduction : écarté
         out.push({ id, home: h.n, away: a.n, hl: h.l, al: a.l, start: new Date(t).toISOString(), lg: koComp(k.c), state: "pre", h: null, a: null, ko: k, noTime });
       });
     });
