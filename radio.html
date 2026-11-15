@@ -2983,7 +2983,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
   function tvAllChannels(m, G) {   // uniquement les chaînes réellement annoncées (365Scores m.tv et TheSportsDB) ; Arryadia pour la Botola Pro ; aucune chaîne « par défaut » ni supposée
     const ko = koFind(m);   // kooora : liste complète et fiable des chaînes ; null = indisponible → chaînes fixes (beIN PL/LaLiga/Ligue 1, Arryadia)
     const out = ((ko && ko.length) ? [] : tvChannels(m)).map(c => ({ k: c.k, label: c.label, sub: c.sub, ini: c.ini, col: c.col }));
-    (ko || []).forEach(n => { const x = tvNorm(n, ""); x.logo = koLogoByName[tvKey(n)] || ""; if (tvKey(x.label) && !out.some(o => tvSig(o) === tvSig(x))) out.push(x); });
+    (ko || []).forEach(n => { const x = tvNorm(n, ""); x.logo = koLogoByName[tvKey(n)] || ""; x.ko = true; if (tvKey(x.label) && !out.some(o => tvSig(o) === tvSig(x))) out.push(x); });
     const own = (Array.isArray(m.tv) ? m.tv : []).flatMap(n => String(n).split(/\s*[|,;]\s*/)).map(n => n.trim()).filter(Boolean).map(n => tvNorm(n, "Diffusion"));
     own.concat(tvChannelsT(m, G) || []).forEach(x => {
       if (!tvKey(x.label)) return;
@@ -2997,7 +2997,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
       if (x.sub === "Diffusion" && out.some(o => tvKey(o.label) === tvKey(x.label))) return;
       out.push(x);
     });
-    return out.filter(c => !(/bein/i.test(c.label) && /mena/i.test(c.sub || '')));   // beIN MENA écartées
+    return out.filter(c => c.ko || !(/bein/i.test(c.label) && /mena/i.test(c.sub || '')));   // beIN MENA : gardées quand kooora les annonce
   }
   // ---------- kooora : toutes les chaînes annoncées pour chaque match (Worker footlive3 → CFG.KOORA_URL) ----------
   // Pour chaque match, on cherche le même match sur kooora (même compétition, même heure, noms d'équipes en arabe via un dictionnaire).
@@ -3031,6 +3031,81 @@ html[dir=rtl] .lf-ch svg{transform:none}
   ].forEach(([ar, en]) => ar.split("|").forEach(a => { KO_TEAMS[koN(a)] = en.split("|"); }));
   const koSame = (a, b) => { a = tvKey(a); b = tvKey(b); return !!a && !!b && (a === b || (a.length >= 5 && b.length >= 5 && (a.startsWith(b) || b.startsWith(a)))); };
   const koSide = (ar, name) => { const en = KO_TEAMS[koN(ar)]; if (!en) return 0; return en.some(e => koSame(e, name)) ? 1 : -1; };   // 1 = même équipe, 0 = inconnue, -1 = équipe différente
+
+  // ---------- kooora : matchs de sélections / compétitions hors barre (noms arabes -> français + drapeau) ----------
+  // [noms arabes séparés par |, noms anglais séparés par |, nom français, code drapeau]
+  const KO_NAT = [
+    ["إيطاليا","Italy","Italie","it"],["بلجيكا","Belgium","Belgique","be"],["فرنسا","France","France","fr"],["تركيا","Turkey|Turkiye|Türkiye","Turquie","tr"],
+    ["كرواتيا","Croatia","Croatie","hr"],["تشيكيا|التشيك","Czechia|Czech Republic","Tchéquie","cz"],["إسبانيا|اسبانيا","Spain","Espagne","es"],
+    ["إنجلترا|انجلترا","England","Angleterre","gb-eng"],["اسكتلندا|أسكتلندا","Scotland","Écosse","gb-sct"],["ويلز","Wales","Pays de Galles","gb-wls"],
+    ["أيرلندا الشمالية|ايرلندا الشمالية","Northern Ireland","Irlande du Nord","gb-nir"],["أيرلندا|ايرلندا|جمهورية أيرلندا","Ireland|Republic of Ireland","Irlande","ie"],
+    ["ألمانيا|المانيا","Germany","Allemagne","de"],["البرتغال","Portugal","Portugal","pt"],["هولندا","Netherlands|Holland","Pays-Bas","nl"],
+    ["سويسرا","Switzerland","Suisse","ch"],["النمسا","Austria","Autriche","at"],["بولندا","Poland","Pologne","pl"],["الدنمارك","Denmark","Danemark","dk"],
+    ["السويد","Sweden","Suède","se"],["النرويج","Norway","Norvège","no"],["فنلندا","Finland","Finlande","fi"],["أيسلندا|ايسلندا","Iceland","Islande","is"],
+    ["اليونان","Greece","Grèce","gr"],["صربيا","Serbia","Serbie","rs"],["سلوفاكيا","Slovakia","Slovaquie","sk"],["سلوفينيا","Slovenia","Slovénie","si"],
+    ["المجر","Hungary","Hongrie","hu"],["رومانيا","Romania","Roumanie","ro"],["بلغاريا","Bulgaria","Bulgarie","bg"],["أوكرانيا|اوكرانيا","Ukraine","Ukraine","ua"],
+    ["جورجيا","Georgia","Géorgie","ge"],["ألبانيا|البانيا","Albania","Albanie","al"],["البوسنة والهرسك","Bosnia and Herzegovina|Bosnia","Bosnie-Herzégovine","ba"],
+    ["مونتينيجرو|الجبل الأسود","Montenegro","Monténégro","me"],["مقدونيا الشمالية","North Macedonia","Macédoine du Nord","mk"],["كوسوفو","Kosovo","Kosovo","xk"],
+    ["إسرائيل|اسرائيل","Israel","Israël","il"],["أرمينيا|ارمينيا","Armenia","Arménie","am"],["أذربيجان|اذربيجان","Azerbaijan","Azerbaïdjan","az"],
+    ["كازاخستان","Kazakhstan","Kazakhstan","kz"],["لوكسمبورج|لوكسمبورغ","Luxembourg","Luxembourg","lu"],["مالطا","Malta","Malte","mt"],["قبرص","Cyprus","Chypre","cy"],
+    ["إستونيا|استونيا","Estonia","Estonie","ee"],["لاتفيا","Latvia","Lettonie","lv"],["ليتوانيا","Lithuania","Lituanie","lt"],["بيلاروسيا","Belarus","Biélorussie","by"],
+    ["مولدوفا","Moldova","Moldavie","md"],["جزر فارو","Faroe Islands","Îles Féroé","fo"],["جبل طارق","Gibraltar","Gibraltar","gi"],["ليختنشتاين","Liechtenstein","Liechtenstein","li"],
+    ["أندورا|اندورا","Andorra","Andorre","ad"],["سان مارينو","San Marino","Saint-Marin","sm"],
+    ["المغرب","Morocco","Maroc","ma"],["الجزائر","Algeria","Algérie","dz"],["تونس","Tunisia","Tunisie","tn"],["مصر","Egypt","Égypte","eg"],["ليبيا","Libya","Libye","ly"],
+    ["السنغال","Senegal","Sénégal","sn"],["نيجيريا","Nigeria","Nigeria","ng"],["الكاميرون","Cameroon","Cameroun","cm"],["غانا","Ghana","Ghana","gh"],
+    ["كوت ديفوار|ساحل العاج","Ivory Coast|Cote d'Ivoire","Côte d'Ivoire","ci"],["مالي","Mali","Mali","ml"],["جنوب أفريقيا|جنوب افريقيا","South Africa","Afrique du Sud","za"],
+    ["الرأس الأخضر|الرأس الاخضر","Cape Verde","Cap-Vert","cv"],["بوركينا فاسو","Burkina Faso","Burkina Faso","bf"],["الكونغو الديمقراطية|جمهورية الكونغو الديمقراطية","DR Congo","RD Congo","cd"],
+    ["السعودية|المملكة العربية السعودية","Saudi Arabia","Arabie saoudite","sa"],["قطر","Qatar","Qatar","qa"],["الإمارات|الامارات","UAE|United Arab Emirates","Émirats arabes unis","ae"],
+    ["العراق","Iraq","Irak","iq"],["الأردن|الاردن","Jordan","Jordanie","jo"],["سوريا","Syria","Syrie","sy"],["لبنان","Lebanon","Liban","lb"],["فلسطين","Palestine","Palestine","ps"],
+    ["عمان|سلطنة عمان","Oman","Oman","om"],["الكويت","Kuwait","Koweït","kw"],["البحرين","Bahrain","Bahreïn","bh"],["اليمن","Yemen","Yémen","ye"],["إيران|ايران","Iran","Iran","ir"],
+    ["اليابان","Japan","Japon","jp"],["كوريا الجنوبية","South Korea","Corée du Sud","kr"],["أستراليا|استراليا","Australia","Australie","au"],["أوزبكستان|اوزبكستان","Uzbekistan","Ouzbékistan","uz"],
+    ["الصين","China","Chine","cn"],["الهند","India","Inde","in"],["الولايات المتحدة|أمريكا|امريكا","United States|USA","États-Unis","us"],["كندا","Canada","Canada","ca"],
+    ["المكسيك","Mexico","Mexique","mx"],["كوستاريكا","Costa Rica","Costa Rica","cr"],["بنما","Panama","Panama","pa"],["جامايكا","Jamaica","Jamaïque","jm"],["هايتي","Haiti","Haïti","ht"],
+    ["هندوراس","Honduras","Honduras","hn"],["البرازيل","Brazil","Brésil","br"],["الأرجنتين|الارجنتين","Argentina","Argentine","ar"],["أوروجواي|اوروجواي","Uruguay","Uruguay","uy"],
+    ["كولومبيا","Colombia","Colombie","co"],["تشيلي","Chile","Chili","cl"],["الإكوادور|الاكوادور","Ecuador","Équateur","ec"],["باراجواي","Paraguay","Paraguay","py"],
+    ["بيرو","Peru","Pérou","pe"],["فنزويلا","Venezuela","Venezuela","ve"],["بوليفيا","Bolivia","Bolivie","bo"],["نيوزيلندا|نيوزيلاندا","New Zealand","Nouvelle-Zélande","nz"]
+  ];
+  const KO_NATD = {};   // nom arabe normalisé -> { n: nom français, l: drapeau }
+  KO_NAT.forEach(([ar, en, fr, iso]) => ar.split("|").forEach(a => {
+    const key = koN(a); if (!key) return;
+    KO_NATD[key] = { n: fr, l: "https://flagcdn.com/w40/" + iso + ".png" };
+    if (!KO_TEAMS[key]) KO_TEAMS[key] = en.split("|").concat([fr]);   // sert aussi au rapprochement avec les matchs déjà présents
+  }));
+  function koTeam(ar) {   // « اسكتلندا تحت 21 » -> « Écosse U21 » ; équipe inconnue -> nom arabe tel quel
+    const raw = String(ar || "").trim(), n = koN(raw), u = n.match(/^(.*?)\s+تحت\s*(\d+)$/), base = u ? u[1] : n, d = KO_NATD[base];
+    if (d) return { n: d.n + (u ? " U" + u[2] : ""), l: d.l };
+    return { n: raw, l: "" };
+  }
+  const KO_COMP_FR = [[/دوري الامم الاوروبيه/, "Ligue des nations UEFA"], [/دوري الامم الافريقيه|كاس امم افريقيا|كاس الامم الافريقيه/, "Coupe d'Afrique des nations"], [/كاس الامم الاسيويه|كاس اسيا/, "Coupe d'Asie"],
+    [/تصفيات كاس العالم/, "Éliminatoires Coupe du monde"], [/تصفيات (كاس امم اوروبا|يورو|بطوله اوروبا)/, "Éliminatoires Euro"], [/تصفيات/, "Éliminatoires"],
+    [/كاس العالم للاندييه/, "Coupe du monde des clubs"], [/كاس العالم/, "Coupe du monde"], [/وديات|ودي/, "Matchs amicaux"]];
+  function koComp(c) {
+    const raw = String(c || "").trim(), n = koN(raw), u = n.match(/تحت\s*(\d+)/), hit = KO_COMP_FR.find(r => r[0].test(n));
+    return hit ? hit[1] + (u ? " · U" + u[1] : "") : (raw || "Autres compétitions");
+  }
+  const koShift = (day, o) => { const d = new Date(day + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + o); return d.toISOString().slice(0, 10); };
+  function koExtra(L) {   // matchs kooora avec chaîne qui ne correspondent à aucun match déjà listé (Ligue des nations, éliminatoires, amicaux, autres championnats...)
+    const out = [], seen = new Set();
+    [-1, 0, 1].forEach(o => {
+      const arr = koCache[koShift(tvDay, o)]; if (!Array.isArray(arr)) return;
+      arr.forEach(k => {
+        if (!k || !Array.isArray(k.ch) || !k.ch.length || !k.t) return;
+        const t = new Date(k.t).getTime(); if (!t || new Date(t).toLocaleDateString("sv-SE") !== tvDay) return;
+        const id = "ko:" + (k.id || (koN(k.h) + "|" + koN(k.a) + "|" + t)); if (seen.has(id)) return; seen.add(id);
+        const kl = koLg(k.c);
+        const known = L.some(m => {   // même logique que koFind : si ce match est déjà dans la liste, on ne le double pas
+          if (Math.abs(new Date(m.start).getTime() - t) > 15 * 60e3) return false;
+          const s1 = [koSide(k.h, m.home), koSide(k.a, m.away)], s2 = [koSide(k.h, m.away), koSide(k.a, m.home)];
+          const ok = s => s[0] >= 0 && s[1] >= 0, sc = s => s[0] + s[1];
+          return (ok(s1) && (sc(s1) >= 1 || kl === tvLi(m))) || (ok(s2) && (sc(s2) >= 1 || kl === tvLi(m)));
+        });
+        if (known) return;
+        const h = koTeam(k.h), a = koTeam(k.a);
+        out.push({ id, home: h.n, away: a.n, hl: h.l, al: a.l, start: new Date(t).toISOString(), lg: koComp(k.c), state: "pre", h: null, a: null, ko: k });
+      });
+    });
+    return out.sort((x, y) => x.start.localeCompare(y.start));
+  }
   const koCache = {};   // date UTC → matchs kooora ; null = en cours ; false = indisponible
   const koUrl = () => (typeof CFG !== "undefined" && CFG.KOORA_URL ? String(CFG.KOORA_URL).replace(/\/+$/, "") : "");
   const koErr = {}, koT = {};   // koErr : raison de l'échec par jour ; koT : heure du dernier essai (un échec est retenté après 90 s)
@@ -3045,6 +3120,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
   const koDay = m => new Date(m.start).toISOString().slice(0, 10);
   const tvLi = m => { const i = mp(m); if (i < 99) return i; const j = tvCupIdx(m); return j >= 0 ? 10 + j : 99; };   // 0..9 : les 10 compétitions ; 10..15 : grandes coupes ; 99 : autre
   function koFind(m) {   // null = kooora indisponible (on retombe sur les autres sources) ; [] = aucune chaîne sûre ; sinon liste des chaînes
+    if (m.ko) return Array.isArray(m.ko.ch) ? m.ko.ch : [];
     const li = tvLi(m), t = new Date(m.start).getTime(); if (!koUrl() || li >= 99 || !t) return null;
     const arr = koCache[koDay(m)]; if (arr === null) return []; if (!Array.isArray(arr)) return null;
     const slot = all().filter(x => tvLi(x) === li && Math.abs(new Date(x.start).getTime() - t) <= 15 * 60e3).length;
@@ -3096,7 +3172,9 @@ html[dir=rtl] .lf-ch svg{transform:none}
     });
     tvLoad(tvDay); const KG = tvCache[tvDay] || null;
     L.forEach(m => koLoad(koDay(m)));
-    if (L.some(m => koCache[koDay(m)] === null)) { box.innerHTML = '<div class="empty">Chargement du programme…</div>'; return; }
+    [-1, 0, 1].forEach(o => koLoad(koShift(tvDay, o)));
+    if (L.some(m => koCache[koDay(m)] === null) || [-1, 0, 1].some(o => koCache[koShift(tvDay, o)] === null)) { box.innerHTML = '<div class="empty">Chargement du programme…</div>'; return; }
+    koExtra(L).forEach(m => L.push(m));
     for (let i = L.length - 1; i >= 0; i--) {   // on ne garde que les matchs avec une vraie chaîne : confirmée par kooora, ou Arryadia pour la Botola Pro
       const m = L[i], ko = koFind(m), c = tvAllChannels(m, KG).length;
       const real = Array.isArray(ko) && ko.length ? c > 0 : ko === null ? (c > 0 && tvLi(m) < 99) : (tvLi(m) === 9 && c > 0);
