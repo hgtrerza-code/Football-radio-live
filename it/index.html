@@ -1071,7 +1071,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 <style>.fav-panel{max-width:1100px;margin:.2rem auto .8rem;padding:.7rem .9rem;background:var(--bg-card,#111a2b);border:1px solid var(--border,#1f2c47);border-radius:14px}
 .fav-panel h4{margin:0 0 .5rem;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted,#8b9bb4)}
 .fav-chips{display:flex;flex-wrap:wrap;gap:.4rem}.fav-chip{background:rgba(46,229,157,.1);border:1px solid rgba(46,229,157,.35);color:#e8fff6;border-radius:999px;padding:.35rem .7rem;font:600 .78rem inherit;font-family:inherit;cursor:pointer}
-.m-page{display:inline-block;margin:0 0 .7rem;padding:.4rem .8rem;border-radius:10px;border:1px solid var(--border,#1f2c47);background:rgba(46,229,157,.1);color:#2ee59d!important;font-weight:700;font-size:.78rem;text-decoration:none}</style>
+.m-page{display:flex;align-items:center;gap:10px;margin:0 0 .8rem;padding:.7rem .85rem;border-radius:12px;border:1px solid #2ee59d;color:#2ee59d!important;font-weight:700;font-size:.9rem;text-decoration:none;background:transparent;-webkit-tap-highlight-color:transparent}.m-page span{flex:1;text-align:center}.m-page svg{width:18px;height:18px;flex:0 0 18px}.m-page:hover,.m-page:active{background:rgba(46,229,157,.12)}</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -1973,7 +1973,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             const comp = (s.header && s.header.competitions && s.header.competitions[0]) || {}, cps = comp.competitors || [];
             const homeId = String(((cps.find(c => c.homeAway === "home") || {}).team || {}).id || ""), tname = {};
             cps.forEach(c => tname[String(c.team.id)] = c.team.displayName || c.team.name);
-            let out = (m.id && m.slug ? '<a class="m-page" href="/match.html?id=' + encodeURIComponent(m.id) + '&slug=' + encodeURIComponent(m.slug) + '&lang=' + (document.documentElement.lang || "fr").slice(0, 2) + '">🔗 Pagina della partita</a>' : "") + scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
+            let out = (m.id && m.slug ? '<a class="m-page" href="/match.html?id=' + encodeURIComponent(m.id) + '&slug=' + encodeURIComponent(m.slug) + '&lang=' + (document.documentElement.lang || "fr").slice(0, 2) + '" aria-label="Pagina della partita"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span>Pagina della partita</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>' : "") + scorersHTML(s, tname, homeId, m);   // les buteurs d'abord
             // Infos générales
             const gi = s.gameInfo || {}, v = gi.venue || {}, ad = v.address || {}, info = [];
             const st = comp.status && comp.status.type;
