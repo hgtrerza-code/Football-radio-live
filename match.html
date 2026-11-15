@@ -67,7 +67,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   $("#back").textContent = "← " + D.back; $("#share").textContent = "↗ " + D.share;
-  var tab = ["sum", "lu", "stats", "comm", "info"].indexOf(Q.get("tab")) >= 0 ? Q.get("tab") : "sum", data = null, timer = null;
+  var tab = "sum", data = null, timer = null;
   function favs() { try { return JSON.parse(localStorage.getItem("fl_favs") || "[]"); } catch (e) { return []; } }
   function toggleFav(n) { var f = favs(), i = f.indexOf(n); if (i >= 0) f.splice(i, 1); else f.push(n); try { localStorage.setItem("fl_favs", JSON.stringify(f)); } catch (e) { } render(); }
 
