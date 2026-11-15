@@ -936,6 +936,10 @@ body{overflow-x:clip}
 .tv-card .tv-t.live{color:var(--live-red);font-size:.8rem;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.35);border-radius:999px;padding:2px 10px;white-space:nowrap}
 .tv-card.live{border-color:rgba(239,68,68,.45);background:linear-gradient(90deg,rgba(239,68,68,.10),var(--bg-card) 55%);box-shadow:inset 3px 0 0 var(--live-red)}
 .tv-card.live .tv-s{color:var(--accent)}
+.tv-card.live .tv-s,.tv-card.done .tv-s{min-width:26px;text-align:center;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-main)}
+.tv-card.live .tv-s{background:rgba(34,197,94,.12);border-color:rgba(46,229,157,.55);color:var(--accent);box-shadow:0 0 10px rgba(46,229,157,.2)}
+.tv-card.done{opacity:1}
+.tv-card.done .tv-t small{color:var(--text-muted)}
 /* PC : une seule ligne — heure | Équipe A (logo) vs (logo) Équipe B | chaînes */
 @media(min-width:601px){
   .tv-card .tv-line{grid-template-columns:128px minmax(0,1fr) auto;grid-template-areas:"t nm lgs";gap:0 16px;padding:10px 0;min-height:56px}
@@ -3198,7 +3202,8 @@ html[dir=rtl] .lf-ch svg{transform:none}
         if (!k || !Array.isArray(k.ch) || !k.ch.length) return;
         if ((!KO_AR && !koComp(k.c)) || /للسيدات|تحت\s*\d|شباب|ناشئ|اولمبي/.test(koN(k.c) + " " + koN(k.h) + " " + koN(k.a))) return;   // compétition inconnue (hors page AR), jeunes, féminines : écartés
         let t = k.t ? new Date(k.t).getTime() : 0, noTime = false;
-        if (!t) { const hm = koHome(k, o); if (hm) t = new Date(hm.start).getTime(); }   // pas d'heure chez kooora : heure de la page d'accueil
+        const hm = koHome(k, o);   // même match sur la page d'accueil : heure, score, état (en cours / terminé) et minute
+        if (!t && hm) t = new Date(hm.start).getTime();   // pas d'heure chez kooora : heure de la page d'accueil
         if (!t) { if (o !== 0) return; t = new Date(tvDay + "T12:00:00Z").getTime(); noTime = true; }   // pas d'heure chez kooora : on garde le match sur le jour demandé
         else if (new Date(t).toLocaleDateString("sv-SE") !== tvDay) return;
         const id = "ko:" + (k.id || (koN(k.h) + "|" + koN(k.a) + "|" + t)); if (seen.has(id)) return; seen.add(id);
@@ -3211,7 +3216,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
         });
         if (known) return;
         const h = koTeam(k.h), a = koTeam(k.a); if (!KO_AR && (!h.l || !a.l)) return;   // équipe sans traduction : écarté (sauf page AR)
-        out.push({ id, home: h.n, away: a.n, hl: h.l, al: a.l, start: new Date(t).toISOString(), lg: koComp(k.c), state: "pre", h: null, a: null, ko: k, noTime });
+        out.push({ id, home: h.n, away: a.n, hl: h.l, al: a.l, start: new Date(t).toISOString(), lg: koComp(k.c), state: hm ? hm.state : "pre", h: hm ? hm.h : null, a: hm ? hm.a : null, label: hm ? hm.label : "", ko: k, noTime });
       });
     });
     return out.sort((x, y) => x.start.localeCompare(y.start));
