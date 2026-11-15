@@ -3222,8 +3222,10 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   }
   function renderTV() {
     const box = $("#tv-list"), strip = $("#tv-days"); if (!box || !strip) return;
+    const tvPut = (h, keep) => { if (box._sig === h) return; if (keep && box.querySelector(".tv-card")) return; box.innerHTML = h; box._sig = h; };   // ne réécrit la liste que si son contenu a changé (évite le clignotement)
     const days = tvDays(); if (!tvDay) tvDay = days[0].k;
-    strip.innerHTML = days.map(d => '<button type="button" data-day="' + d.k + '" class="' + (d.k === tvDay ? "on" : "") + (d.o === 0 ? " today" : "") + '"><small>' + d.lb + '</small><b>' + d.n + '</b></button>').join("");
+    const stripH = days.map(d => '<button type="button" data-day="' + d.k + '" class="' + (d.k === tvDay ? "on" : "") + (d.o === 0 ? " today" : "") + '"><small>' + d.lb + '</small><b>' + d.n + '</b></button>').join("");
+    if (strip._sig !== stripH) { strip.innerHTML = stripH; strip._sig = stripH; }
     const L0 = all().filter(m => tvMain(m) && !m.off && new Date(m.start).toLocaleDateString("sv-SE") === tvDay).sort((a, b) => a.start.localeCompare(b.start) || mp(a) - mp(b));
     // anti-doublons : même match sous deux orthographes (« Hamburger SV » / « Hamburg SV », « Mönchengladbach » / « Monchengladbach »…)
     const dk = n => String(n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|afc|sc|ac|as|ssc|cd|ud|rc|fk|sk|sv|vfl|vfb|bsc|1|the)\b/g, " ").replace(/[^a-z0-9]/g, "");
@@ -3238,14 +3240,14 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     tvLoad(tvDay); const KG = tvCache[tvDay] || null;
     L.forEach(m => koLoad(koDay(m)));
     [-1, 0, 1].forEach(o => koLoad(koShift(tvDay, o)));
-    if (L.some(m => koCache[koDay(m)] === null) || [-1, 0, 1].some(o => koCache[koShift(tvDay, o)] === null)) { box.innerHTML = '<div class="empty">Chargement du programme…</div>'; return; }
+    if (L.some(m => koCache[koDay(m)] === null) || [-1, 0, 1].some(o => koCache[koShift(tvDay, o)] === null)) { tvPut('<div class="empty">Chargement du programme…</div>', true); return; }
     koExtra(L).forEach(m => L.push(m));
     for (let i = L.length - 1; i >= 0; i--) {   // on ne garde que les matchs avec une vraie chaîne : confirmée par kooora, ou Arryadia pour la Botola Pro
       const m = L[i], ko = koFind(m), c = tvAllChannels(m, KG).length;
       const real = Array.isArray(ko) && ko.length ? c > 0 : ko === null ? (c > 0 && tvLi(m) < 99) : (tvLi(m) === 9 && c > 0);
       if (!real) L.splice(i, 1);
     }
-    if (!L.length) { box.innerHTML = koDiag() + '<div class="empty">' + (all().length ? "Aucun match avec chaîne annoncée ce jour-là." + (koCache[tvDay] === false ? " (kooora indisponible : " + esc(koErr[tvDay] || "erreur") + ")" : "") : "Chargement du programme…") + '</div>'; return; }
+    if (!L.length) { tvPut(koDiag() + '<div class="empty">' + (all().length ? "Aucun match avec chaîne annoncée ce jour-là." + (koCache[tvDay] === false ? " (kooora indisponible : " + esc(koErr[tvDay] || "erreur") + ")" : "") : "Chargement du programme…") + '</div>'); return; }
     const crest = (l, n) => l ? '<img class="m-logo" src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     const rowFn = m => {
       const live = m.state === "in", done = m.state === "post";
@@ -3259,9 +3261,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
       const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
       return '<div class="tv-card' + (done ? " done" : "") + (live ? " live" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm"><span class="tv-tm">' + crest(m.hl, m.home) + '<span class="tv-n">' + esc(m.home) + '</span>' + sc(m.h) + '</span><span class="tv-vs" aria-hidden="true">vs</span><span class="tv-tm">' + crest(m.al, m.away) + '<span class="tv-n">' + esc(m.away) + '</span>' + sc(m.a) + '</span></span>' + logos + '</div>' + more + dbg + '</div>';
     };
-    box.innerHTML = koDiag() + grouped(L, rowFn, false, true);
     const kd = [...new Set(L.map(koDay))].filter(d => koCache[d] === false);
-    if (kd.length) box.insertAdjacentHTML("afterbegin", '<div class="note" style="font-size:.72rem;opacity:.7;padding:4px 6px">Détail des chaînes indisponible pour le moment (' + esc(kd.map(d => koErr[d] || "erreur").join(", ")) + ') — chaînes principales affichées.</div>');
+    tvPut((kd.length ? '<div class="note" style="font-size:.72rem;opacity:.7;padding:4px 6px">Détail des chaînes indisponible pour le moment (' + esc(kd.map(d => koErr[d] || "erreur").join(", ")) + ') — chaînes principales affichées.</div>' : "") + koDiag() + grouped(L, rowFn, false, true));
   }
   const TV_FAQ = [
     ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Le programme ne montre que les matchs des 10 compétitions de la barre (Ligue des champions, Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Europa League, Conference League, Liga Portugal, Botola Pro). Pour chaque match, il affiche ensemble beIN SPORTS, Arryadia ou Sport TV selon la compétition, puis toutes les autres chaînes annoncées par la source (Espagne, Italie, France, Europe…), quand elles sont disponibles. Vérifiez toujours la grille de la chaîne le jour du match."],
