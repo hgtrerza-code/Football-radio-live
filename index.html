@@ -2985,7 +2985,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
   // ---------- Chaînes TV : source TheSportsDB (programme TV par date, directement depuis le navigateur, sans proxy) ----------
   const TSDB_TV_URL = "https://www.thesportsdb.com/api/v1/json/3/eventstv.php";
   const TV_CTRY = { "Middle East": "MENA", MENA: "MENA", Arabia: "MENA", Morocco: "Maroc", Algeria: "Algérie", Tunisia: "Tunisie", Egypt: "Égypte", "Saudi Arabia": "Arabie saoudite", "United Arab Emirates": "Émirats", Qatar: "Qatar", Spain: "Espagne", Italy: "Italie", France: "France", England: "Angleterre", "United Kingdom": "Royaume-Uni", Germany: "Allemagne", Portugal: "Portugal", Netherlands: "Pays-Bas", Belgium: "Belgique", Switzerland: "Suisse", Austria: "Autriche", Greece: "Grèce", Turkey: "Turquie", Europe: "Europe", "United States": "États-Unis", USA: "États-Unis", Canada: "Canada", Brazil: "Brésil", Mexico: "Mexique", Argentina: "Argentine", Colombia: "Colombie", Australia: "Australie", India: "Inde", Nigeria: "Nigéria", "South Africa": "Afrique du Sud", Poland: "Pologne", Sweden: "Suède", Norway: "Norvège", Denmark: "Danemark", Ireland: "Irlande", Israel: "Israël", Africa: "Afrique" };   // pays dont on affiche les chaînes : MENA/Maghreb d'abord, puis Espagne, Italie, Europe… toutes ensemble
-  const tvKey = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|afc|sc|ac|as|ssc|cd|ud|rc|fk|sk|the)\b/g, " ").replace(/[^a-z0-9]/g, "");
+  const tvKey = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|afc|sc|ac|as|ssc|cd|ud|rc|fk|sk|the)\b/g, " ").replace(/[^a-z0-9\u0600-\u06FF]/g, "");
   const tvSame = (a, b) => { a = tvKey(a); b = tvKey(b); return !!a && !!b && (a === b || (Math.min(a.length, b.length) >= 4 && (a.includes(b) || b.includes(a)))); };
   const tvTeams = e => { if (e.strHomeTeam && e.strAwayTeam) return [e.strHomeTeam, e.strAwayTeam]; const x = String(e.strEvent || "").split(/\s+vs\.?\s+|\s+v\s+|\s+-\s+/i); return x.length === 2 ? x : null; };
   const tvCache = {};
@@ -3102,7 +3102,27 @@ html[dir=rtl] .lf-ch svg{transform:none}
     ["المكسيك","Mexico","Mexique","mx"],["كوستاريكا","Costa Rica","Costa Rica","cr"],["بنما","Panama","Panama","pa"],["جامايكا","Jamaica","Jamaïque","jm"],["هايتي","Haiti","Haïti","ht"],
     ["هندوراس","Honduras","Honduras","hn"],["البرازيل","Brazil","Brésil","br"],["الأرجنتين|الارجنتين","Argentina","Argentine","ar"],["أوروجواي|اوروجواي","Uruguay","Uruguay","uy"],
     ["كولومبيا","Colombia","Colombie","co"],["تشيلي","Chile","Chili","cl"],["الإكوادور|الاكوادور","Ecuador","Équateur","ec"],["باراجواي","Paraguay","Paraguay","py"],
-    ["بيرو","Peru","Pérou","pe"],["فنزويلا","Venezuela","Venezuela","ve"],["بوليفيا","Bolivia","Bolivie","bo"],["نيوزيلندا|نيوزيلاندا","New Zealand","Nouvelle-Zélande","nz"]
+    ["بيرو","Peru","Pérou","pe"],["فنزويلا","Venezuela","Venezuela","ve"],["بوليفيا","Bolivia","Bolivie","bo"],["نيوزيلندا|نيوزيلاندا","New Zealand","Nouvelle-Zélande","nz"],
+    ["ماليزيا","Malaysia","Malaisie","my"],["فيتنام","Vietnam","Vietnam","vn"],["قيرغيزستان|قرغيزستان","Kyrgyzstan","Kirghizistan","kg"],["سنغافورة","Singapore","Singapour","sg"],
+    ["بالاو","Palau","Palaos","pw"],["جزر كوك","Cook Islands","Îles Cook","ck"],["طاجيكستان","Tajikistan","Tadjikistan","tj"],["تركمانستان","Turkmenistan","Turkménistan","tm"],
+    ["تايلاند","Thailand","Thaïlande","th"],["إندونيسيا|اندونيسيا","Indonesia","Indonésie","id"],["الفلبين","Philippines","Philippines","ph"],["ميانمار","Myanmar","Birmanie","mm"],
+    ["كمبوديا","Cambodia","Cambodge","kh"],["لاوس","Laos","Laos","la"],["هونج كونج|هونغ كونغ","Hong Kong","Hong Kong","hk"],["تايبيه الصينية|تايوان","Chinese Taipei|Taiwan","Taïwan","tw"],
+    ["كوريا الشمالية","North Korea","Corée du Nord","kp"],["منغوليا","Mongolia","Mongolie","mn"],["أفغانستان|افغانستان","Afghanistan","Afghanistan","af"],["باكستان","Pakistan","Pakistan","pk"],
+    ["بنجلاديش|بنغلاديش","Bangladesh","Bangladesh","bd"],["نيبال","Nepal","Népal","np"],["سريلانكا","Sri Lanka","Sri Lanka","lk"],["المالديف|جزر المالديف","Maldives","Maldives","mv"],
+    ["بوتان","Bhutan","Bhoutan","bt"],["بروناي","Brunei","Brunei","bn"],["تيمور الشرقية","Timor-Leste|East Timor","Timor oriental","tl"],["ماكاو","Macau","Macao","mo"],
+    ["فيجي","Fiji","Fidji","fj"],["بابوا غينيا الجديدة","Papua New Guinea","Papouasie-Nouvelle-Guinée","pg"],["جزر سليمان","Solomon Islands","Îles Salomon","sb"],["فانواتو","Vanuatu","Vanuatu","vu"],
+    ["تاهيتي","Tahiti","Tahiti","pf"],["كاليدونيا الجديدة","New Caledonia","Nouvelle-Calédonie","nc"],["ساموا","Samoa","Samoa","ws"],["تونجا","Tonga","Tonga","to"],
+    ["الجابون|غابون","Gabon","Gabon","ga"],["غينيا","Guinea","Guinée","gn"],["زامبيا","Zambia","Zambie","zm"],["زيمبابوي","Zimbabwe","Zimbabwe","zw"],["أنجولا|انجولا","Angola","Angola","ao"],
+    ["موزمبيق","Mozambique","Mozambique","mz"],["أوغندا|اوغندا","Uganda","Ouganda","ug"],["كينيا","Kenya","Kenya","ke"],["تنزانيا","Tanzania","Tanzanie","tz"],["إثيوبيا|اثيوبيا","Ethiopia","Éthiopie","et"],
+    ["السودان","Sudan","Soudan","sd"],["جنوب السودان","South Sudan","Soudan du Sud","ss"],["موريتانيا","Mauritania","Mauritanie","mr"],["النيجر","Niger","Niger","ne"],["توجو","Togo","Togo","tg"],
+    ["بنين","Benin","Bénin","bj"],["الكونغو|الكونجو|جمهورية الكونغو","Congo","Congo","cg"],["مدغشقر","Madagascar","Madagascar","mg"],["ناميبيا","Namibia","Namibie","na"],["بوتسوانا","Botswana","Botswana","bw"],
+    ["مالاوي","Malawi","Malawi","mw"],["رواندا","Rwanda","Rwanda","rw"],["بوروندي","Burundi","Burundi","bi"],["سيراليون","Sierra Leone","Sierra Leone","sl"],["ليبيريا","Liberia","Liberia","lr"],
+    ["غامبيا","Gambia","Gambie","gm"],["غينيا بيساو","Guinea-Bissau","Guinée-Bissau","gw"],["غينيا الاستوائية","Equatorial Guinea","Guinée équatoriale","gq"],["جزر القمر","Comoros","Comores","km"],
+    ["جيبوتي","Djibouti","Djibouti","dj"],["الصومال","Somalia","Somalie","so"],["أفريقيا الوسطى|افريقيا الوسطى","Central African Republic","Centrafrique","cf"],["تشاد","Chad","Tchad","td"],
+    ["إسواتيني|سوازيلاند","Eswatini","Eswatini","sz"],["ليسوتو","Lesotho","Lesotho","ls"],["موريشيوس","Mauritius","Maurice","mu"],["سيشيل","Seychelles","Seychelles","sc"],
+    ["جواتيمالا|غواتيمالا","Guatemala","Guatemala","gt"],["السلفادور","El Salvador","Salvador","sv"],["نيكاراجوا|نيكاراغوا","Nicaragua","Nicaragua","ni"],["ترينيداد وتوباجو|ترينيداد وتوباغو","Trinidad and Tobago","Trinité-et-Tobago","tt"],
+    ["كوبا","Cuba","Cuba","cu"],["جمهورية الدومينيكان|الدومينيكان","Dominican Republic","République dominicaine","do"],["سورينام","Suriname","Suriname","sr"],["جويانا|غيانا","Guyana","Guyana","gy"],
+    ["كوراساو","Curacao|Curaçao","Curaçao","cw"],["برمودا","Bermuda","Bermudes","bm"],["بربادوس","Barbados","Barbade","bb"],["مونتسيرات","Montserrat","Montserrat","ms"],["جرينادا|غرينادا","Grenada","Grenade","gd"]
   ];
   const KO_NATD = {};   // nom arabe normalisé -> { n: nom français, l: drapeau }
   KO_NAT.forEach(([ar, en, fr, iso]) => ar.split("|").forEach(a => {
@@ -3123,24 +3143,32 @@ html[dir=rtl] .lf-ch svg{transform:none}
     return hit ? hit[1] + (u ? " · U" + u[1] : "") : (raw || "Autres compétitions");
   }
   const koShift = (day, o) => { const d = new Date(day + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + o); return d.toISOString().slice(0, 10); };
+  function koDiag() {   // #tvdebug : état des 3 jours kooora chargés pour le jour affiché
+    if (location.hash !== "#tvdebug") return "";
+    const rows = [-1, 0, 1].map(o => { const d = koShift(tvDay, o), a = koCache[d];
+      return d + " : " + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC (" + (koErr[d] || "?") + ")" : a.length + " matchs, " + a.filter(x => x.ch && x.ch.length).length + " avec chaîne, " + a.filter(x => x.t).length + " avec heure"); });
+    return '<div style="font:11px monospace;color:#fbbf24;padding:6px 8px;border:1px dashed #fbbf24;margin-bottom:6px">url=' + esc(koUrl() || "VIDE") + "<br>" + rows.map(esc).join("<br>") + "</div>";
+  }
   function koExtra(L) {   // matchs kooora avec chaîne qui ne correspondent à aucun match déjà listé (Ligue des nations, éliminatoires, amicaux, autres championnats...)
     const out = [], seen = new Set();
     [-1, 0, 1].forEach(o => {
       const arr = koCache[koShift(tvDay, o)]; if (!Array.isArray(arr)) return;
       arr.forEach(k => {
-        if (!k || !Array.isArray(k.ch) || !k.ch.length || !k.t) return;
-        const t = new Date(k.t).getTime(); if (!t || new Date(t).toLocaleDateString("sv-SE") !== tvDay) return;
+        if (!k || !Array.isArray(k.ch) || !k.ch.length) return;
+        let t = k.t ? new Date(k.t).getTime() : 0, noTime = false;
+        if (!t) { if (o !== 0) return; t = new Date(tvDay + "T12:00:00Z").getTime(); noTime = true; }   // pas d'heure chez kooora : on garde le match sur le jour demandé
+        else if (new Date(t).toLocaleDateString("sv-SE") !== tvDay) return;
         const id = "ko:" + (k.id || (koN(k.h) + "|" + koN(k.a) + "|" + t)); if (seen.has(id)) return; seen.add(id);
         const kl = koLg(k.c);
         const known = L.some(m => {   // même logique que koFind : si ce match est déjà dans la liste, on ne le double pas
-          if (Math.abs(new Date(m.start).getTime() - t) > 15 * 60e3) return false;
+          if (!noTime && Math.abs(new Date(m.start).getTime() - t) > 15 * 60e3) return false;
           const s1 = [koSide(k.h, m.home), koSide(k.a, m.away)], s2 = [koSide(k.h, m.away), koSide(k.a, m.home)];
           const ok = s => s[0] >= 0 && s[1] >= 0, sc = s => s[0] + s[1];
           return (ok(s1) && (sc(s1) >= 1 || kl === tvLi(m))) || (ok(s2) && (sc(s2) >= 1 || kl === tvLi(m)));
         });
         if (known) return;
         const h = koTeam(k.h), a = koTeam(k.a);
-        out.push({ id, home: h.n, away: a.n, hl: h.l, al: a.l, start: new Date(t).toISOString(), lg: koComp(k.c), state: "pre", h: null, a: null, ko: k });
+        out.push({ id, home: h.n, away: a.n, hl: h.l, al: a.l, start: new Date(t).toISOString(), lg: koComp(k.c), state: "pre", h: null, a: null, ko: k, noTime });
       });
     });
     return out.sort((x, y) => x.start.localeCompare(y.start));
@@ -3219,12 +3247,12 @@ html[dir=rtl] .lf-ch svg{transform:none}
       const real = Array.isArray(ko) && ko.length ? c > 0 : ko === null ? (c > 0 && tvLi(m) < 99) : (tvLi(m) === 9 && c > 0);
       if (!real) L.splice(i, 1);
     }
-    if (!L.length) { box.innerHTML = '<div class="empty">' + (all().length ? "Aucun match avec chaîne annoncée ce jour-là." : "Chargement du programme…") + '</div>'; return; }
+    if (!L.length) { box.innerHTML = koDiag() + '<div class="empty">' + (all().length ? "Aucun match avec chaîne annoncée ce jour-là." + (koCache[tvDay] === false ? " (kooora indisponible : " + esc(koErr[tvDay] || "erreur") + ")" : "") : "Chargement du programme…") + '</div>'; return; }
     const crest = (l, n) => l ? '<img class="m-logo" src="' + esc(String(l).replace(/w=\d+&h=\d+/, "w=48&h=48")) + '" alt="" width="20" height="20" loading="lazy" decoding="async" data-n="' + esc(n) + '" onerror="window.flPh(this)">' : '<span class="m-ph" style="background:hsl(' + hue(n) + ',45%,32%)">' + esc(initials(n)) + '</span>';
     const rowFn = m => {
       const live = m.state === "in", done = m.state === "post";
       const sc = v => m.state === "pre" ? "" : '<b class="tv-s">' + (v ?? 0) + '</b>';
-      const when = live ? '<span class="tv-t live"><b class=m-dir>DIRECT</b>' + esc(m.label || "") + '</span>' : '<span class="tv-t">' + esc(hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
+      const when = live ? '<span class="tv-t live"><b class=m-dir>DIRECT</b>' + esc(m.label || "") + '</span>' : '<span class="tv-t">' + esc(m.noTime ? "–" : hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
       const lgo = c => '<span class="tv-lg" title="' + esc(c.label) + '"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i></span>';
       const badge = c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + (c.sub ? '<small>' + esc(c.sub) + '</small>' : '') + '</span></span>';
       const chl = tvAllChannels(m, KG), TV_VIS = 2, isOpen = tvOpen.has(m.id);
@@ -3233,7 +3261,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
       const dbg = location.hash === "#tvdebug" ? (() => { const a = koCache[koDay(m)]; return '<div style="font:11px monospace;color:#fbbf24;padding:2px 8px">kooora=' + (a === undefined ? "non demandé" : a === null ? "en cours" : a === false ? "ÉCHEC" : a.length + " matchs") + " | url=" + (koUrl() || "VIDE") + " | koFind=" + JSON.stringify(koFind(m)) + " | lg=" + esc(m.lg) + " | mp=" + mp(m) + "</div>"; })() : "";
       return '<div class="tv-card' + (done ? " done" : "") + (live ? " live" : "") + '"><div class="tv-line"' + (chl.length ? ' data-id="' + esc(m.id) + '" role="button" tabindex="0" aria-expanded="' + isOpen + '" aria-label="Voir les chaînes"' : '') + '>' + when + '<span class="tv-nm"><span class="tv-tm">' + crest(m.hl, m.home) + '<span class="tv-n">' + esc(m.home) + '</span>' + sc(m.h) + '</span><span class="tv-vs" aria-hidden="true">vs</span><span class="tv-tm">' + crest(m.al, m.away) + '<span class="tv-n">' + esc(m.away) + '</span>' + sc(m.a) + '</span></span>' + logos + '</div>' + more + dbg + '</div>';
     };
-    box.innerHTML = grouped(L, rowFn, false, true);
+    box.innerHTML = koDiag() + grouped(L, rowFn, false, true);
     const kd = [...new Set(L.map(koDay))].filter(d => koCache[d] === false);
     if (kd.length) box.insertAdjacentHTML("afterbegin", '<div class="note" style="font-size:.72rem;opacity:.7;padding:4px 6px">Détail des chaînes indisponible pour le moment (' + esc(kd.map(d => koErr[d] || "erreur").join(", ")) + ') — chaînes principales affichées.</div>');
   }
