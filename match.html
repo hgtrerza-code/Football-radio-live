@@ -10,6 +10,8 @@
 <link rel="icon" href="/favicon.ico?v=2">
 <link rel="apple-touch-icon" href="/favicon-192x192.png?v=2">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://footlive.hgtrerza.workers.dev" crossorigin>
+<link rel="dns-prefetch" href="https://site.api.espn.com">
 <style>
 :root{--bg:#070b16;--card:#111a2b;--card2:#0d1524;--border:#1f2c47;--txt:#f8fafc;--mut:#8b9bb4;--acc:#2ee59d;--red:#ef4444;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);color-scheme:dark}
 *{box-sizing:border-box}html{-webkit-tap-highlight-color:transparent}
@@ -69,7 +71,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple
   $("#back").textContent = "← " + D.back; $("#share").textContent = "↗ " + D.share;
   var tab = "sum", data = null, timer = null;
   function favs() { try { return JSON.parse(localStorage.getItem("fl_favs") || "[]"); } catch (e) { return []; } }
-  function toggleFav(n) { var f = favs(), i = f.indexOf(n); if (i >= 0) f.splice(i, 1); else f.push(n); try { localStorage.setItem("fl_favs", JSON.stringify(f)); } catch (e) { } render(); }
+  function toggleFav(n) { var f = favs(), i = f.indexOf(n); if (i >= 0) f.splice(i, 1); else f.push(n); try { localStorage.setItem("fl_favs", JSON.stringify(f)); } catch (e) { } paintHero(); }
 
   function getJSON(u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
   function load() {
@@ -77,26 +79,66 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple
     return getJSON(tries[0]).catch(function () { return getJSON(tries[1]); });
   }
   function teamLogo(t) { return (t && (t.logo || (t.logos && t.logos[0] && t.logos[0].href))) || ""; }
-  function render() {
-    var app = $("#app"); if (!data) return;
-    var h = data.header || {}, c = (h.competitions || [])[0] || {}, comps = c.competitors || [];
-    var home = comps.filter(function (x) { return x.homeAway === "home"; })[0] || comps[0] || {}, away = comps.filter(function (x) { return x.homeAway === "away"; })[0] || comps[1] || {};
-    var th = home.team || {}, ta = away.team || {}, st = (c.status && c.status.type) || (h.status && h.status.type) || {}, state = st.state || "pre";
-    var lg = (h.league && h.league.name) || (data.header && data.header.season && "") || "";
-    var title = (th.displayName || Q.get("h") || "") + " - " + (ta.displayName || Q.get("a") || "");
-    document.title = title + (state !== "pre" ? " " + (home.score || 0) + "-" + (away.score || 0) : "") + " | FootLive Pro";
-    var when = c.date ? new Date(c.date).toLocaleString(L, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
-    var stTxt = state === "in" ? '<span class="badge">' + D.live + "</span>" + esc((c.status && c.status.displayClock) || st.shortDetail || "") : state === "post" ? esc(D.ft) : esc(D.ko + " · " + when);
-    var f = favs(), fh = f.indexOf(th.displayName) >= 0, fa = f.indexOf(ta.displayName) >= 0;
-    var out = '<div class="hero"><div class="comp">' + esc(lg) + '</div><div class="row">' +
-      '<div class="tm"><img alt="" src="' + esc(teamLogo(th)) + '"><span>' + esc(th.displayName) + '</span><button class="fav ' + (fh ? "on" : "") + '" data-t="' + esc(th.displayName) + '" title="' + esc(D.fav) + '">' + (fh ? "★" : "☆") + '</button></div>' +
-      '<div class="sc">' + (state === "pre" ? "–" : esc(home.score || 0) + " - " + esc(away.score || 0)) + '</div>' +
-      '<div class="tm"><img alt="" src="' + esc(teamLogo(ta)) + '"><span>' + esc(ta.displayName) + '</span><button class="fav ' + (fa ? "on" : "") + '" data-t="' + esc(ta.displayName) + '" title="' + esc(D.fav) + '">' + (fa ? "★" : "☆") + '</button></div>' +
-      '</div><div class="st ' + (state === "in" ? "live" : "") + '">' + stTxt + '</div></div>';
-    out += '<div class="tabs">' + [["sum", D.sum], ["lu", D.lu], ["stats", D.stats], ["comm", D.comm], ["info", D.info]].map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (tab === t[0] ? "on" : "") + '">' + esc(t[1]) + "</button>"; }).join("") + "</div>";
-    out += tab === "sum" ? tSum(th, ta) : tab === "lu" ? tLu() : tab === "stats" ? tStats(th, ta) : tab === "comm" ? tComm() : tInfo(c);
-    app.innerHTML = out;
+  /* ===== Score immédiat : l'en-tête s'affiche tout de suite (lien de l'accueil ou dernier état connu),
+     puis le score est rafraîchi par le tableau des scores léger (comme l'accueil), et le détail arrive après ===== */
+  var S = null, CK = "fl_mx_" + ID;
+  function qn(k) { var v = Q.get(k); return v == null || v === "" ? null : v; }
+  function rank(x) { return x === "post" ? 2 : x === "in" ? 1 : 0; }
+  function tot(x) { return x ? (parseInt(x.home.score, 10) || 0) + (parseInt(x.away.score, 10) || 0) : 0; }
+  function fromURL() {
+    var hn = qn("hn") || qn("h"), an = qn("an") || qn("a"); if (!hn && !an) return null;
+    return { home: { name: hn || "", logo: qn("hl") || "", score: qn("hs") }, away: { name: an || "", logo: qn("al") || "", score: qn("as") }, state: qn("stt") || "pre", clock: qn("clk") || "", lg: qn("lg") || "", date: qn("dt") || "" };
   }
+  function fromCache() { try { return JSON.parse(sessionStorage.getItem(CK)); } catch (e) { return null; } }
+  function saveCache() { try { sessionStorage.setItem(CK, JSON.stringify(S)); } catch (e) { } }
+  function build(c, ev, lgName) {
+    var cps = c.competitors || [], st = (c.status && c.status.type) || (ev && ev.status && ev.status.type) || {};
+    var h = cps.filter(function (x) { return x.homeAway === "home"; })[0] || cps[0], a = cps.filter(function (x) { return x.homeAway === "away"; })[0] || cps[1];
+    if (!h || !a) return null;
+    var ht = /half/i.test(st.description || "") && !/second|first/i.test(st.description || "") || /halftime/i.test(st.name || "");
+    var stat = c.status || (ev && ev.status) || {};
+    var sc = function (x) { return x.score === undefined || x.score === "" ? null : x.score; };
+    return { home: { name: (h.team || {}).displayName || (h.team || {}).name || "", logo: teamLogo(h.team), score: sc(h) }, away: { name: (a.team || {}).displayName || (a.team || {}).name || "", logo: teamLogo(a.team), score: sc(a) },
+      state: st.state || "pre", clock: ht ? "HT" : (stat.displayClock || st.shortDetail || ""), lg: lgName || "", date: c.date || (ev && ev.date) || "" };
+  }
+  function applyS(n) {
+    if (!n) return;
+    if (S) {
+      if (rank(n.state) < rank(S.state)) return;
+      if (rank(n.state) === rank(S.state) && n.state === "in" && tot(n) < tot(S)) return;
+      ["home", "away"].forEach(function (k) { if (!n[k].name) n[k].name = S[k].name; if (!n[k].logo) n[k].logo = S[k].logo; });
+      if (!n.lg) n.lg = S.lg; if (!n.date) n.date = S.date;
+    }
+    S = n; saveCache(); paintHero();
+  }
+  function paintHero() {
+    var el = $("#hero"); if (!el || !S) return;
+    var state = S.state, th = S.home.name, ta = S.away.name;
+    document.title = th + " - " + ta + (state !== "pre" ? " " + (S.home.score || 0) + "-" + (S.away.score || 0) : "") + " | FootLive Pro";
+    var when = S.date ? new Date(S.date).toLocaleString(L, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+    var stTxt = state === "in" ? '<span class="badge">' + D.live + "</span>" + esc(S.clock || "") : state === "post" ? esc(D.ft) : esc(D.ko + (when ? " · " + when : ""));
+    var f = favs(), fh = f.indexOf(th) >= 0, fa = f.indexOf(ta) >= 0;
+    var img = function (u) { return u ? '<img alt="" src="' + esc(u) + '">' : '<img alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">'; };
+    el.innerHTML = '<div class="hero"><div class="comp">' + esc(S.lg || "") + '</div><div class="row">' +
+      '<div class="tm">' + img(S.home.logo) + '<span>' + esc(th) + '</span><button class="fav ' + (fh ? "on" : "") + '" data-t="' + esc(th) + '" title="' + esc(D.fav) + '">' + (fh ? "★" : "☆") + '</button></div>' +
+      '<div class="sc">' + (state === "pre" ? "–" : esc(S.home.score || 0) + " - " + esc(S.away.score || 0)) + '</div>' +
+      '<div class="tm">' + img(S.away.logo) + '<span>' + esc(ta) + '</span><button class="fav ' + (fa ? "on" : "") + '" data-t="' + esc(ta) + '" title="' + esc(D.fav) + '">' + (fa ? "★" : "☆") + '</button></div>' +
+      '</div><div class="st ' + (state === "in" ? "live" : "") + '">' + stTxt + '</div></div>';
+  }
+  function paintBody() {
+    var el = $("#body"); if (!el) return;
+    var tabs = '<div class="tabs">' + [["sum", D.sum], ["lu", D.lu], ["stats", D.stats], ["comm", D.comm], ["info", D.info]].map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (tab === t[0] ? "on" : "") + '">' + esc(t[1]) + "</button>"; }).join("") + "</div>";
+    var content = "";
+    if (!data) content = '<div class="empty">…</div>';
+    else {
+      var h = data.header || {}, c = (h.competitions || [])[0] || {}, comps = c.competitors || [];
+      var home = comps.filter(function (x) { return x.homeAway === "home"; })[0] || comps[0] || {}, away = comps.filter(function (x) { return x.homeAway === "away"; })[0] || comps[1] || {};
+      var th = home.team || {}, ta = away.team || {};
+      content = tab === "sum" ? tSum(th, ta) : tab === "lu" ? tLu() : tab === "stats" ? tStats(th, ta) : tab === "comm" ? tComm() : tInfo(c);
+    }
+    el.innerHTML = tabs + content;
+  }
+  function render() { paintHero(); paintBody(); }
   function tSum(th, ta) {
     var ev = (data.keyEvents || []).filter(function (e) { return e.type && !/kickoff|halftime|end/i.test(e.type.text || "") || e.scoringPlay; });
     if (!ev.length) return '<div class="box"><h3>' + esc(D.ev) + '</h3><div class="empty">' + esc(D.none) + "</div></div>";
@@ -137,18 +179,44 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple
     return '<div class="box info">' + (rows.length ? rows.map(function (r) { return "<div><b>" + esc(r[0]) + " :</b> " + esc(r[1]) + "</div>"; }).join("") : "—") + "</div>";
   }
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-tab]"); if (t) { tab = t.dataset.tab; render(); return; }
+    var t = e.target.closest("[data-tab]"); if (t) { tab = t.dataset.tab; paintBody(); return; }
     var f = e.target.closest(".fav"); if (f) toggleFav(f.dataset.t);
   });
   $("#share").addEventListener("click", function () {
     var d = { title: document.title, url: location.href };
     if (navigator.share) navigator.share(d).catch(function () { }); else if (navigator.clipboard) navigator.clipboard.writeText(location.href);
   });
-  function tick() {
-    load().then(function (j) { data = j; render(); var st = ((((j.header || {}).competitions || [])[0] || {}).status || {}).type || {}; clearTimeout(timer); timer = setTimeout(tick, st.state === "in" ? 15000 : st.state === "pre" ? 60000 : 0); if (st.state === "post") clearTimeout(timer); })
-      .catch(function () { if (!data) $("#app").innerHTML = '<div class="err">' + esc(D.err) + "</div>"; clearTimeout(timer); timer = setTimeout(tick, 30000); });
+  /* Tableau des scores léger (même source que l'accueil) : rapide et mis en cache par le Worker */
+  function getScore() {
+    var dt = S && S.date ? S.date.slice(0, 10).replace(/-/g, "") : "", today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    var q = dt && dt !== today ? "?dates=" + dt : "", path = SLUG + "/scoreboard" + q;
+    return getJSON(PROXY + "soccer/" + path).catch(function () { return getJSON(ESPN + path); }).then(function (j) {
+      var evs = (j && j.events) || []; for (var i = 0; i < evs.length; i++) if (String(evs[i].id) === ID) return evs[i]; return null;
+    });
   }
-  if (!ID) $("#app").innerHTML = '<div class="err">' + esc(D.err) + "</div>"; else tick();
+  var qTimer = null, sTimer = null;
+  function quick() {
+    clearTimeout(qTimer);
+    getScore().then(function (ev) { if (ev) { var c = (ev.competitions || [])[0] || {}; applyS(build(c, ev, "")); } }).catch(function () { })
+      .then(function () { if (S && S.state === "post") return; qTimer = setTimeout(quick, S && S.state === "in" ? 8000 : S && S.state === "pre" ? 45000 : 15000); });
+  }
+  function tick() {
+    clearTimeout(sTimer);
+    load().then(function (j) {
+      data = j; var h = j.header || {}, c = (h.competitions || [])[0] || {};
+      applyS(build(c, null, (h.league && h.league.name) || "")); paintBody();
+      var st = (c.status && c.status.type) || {};
+      if (st.state !== "post") sTimer = setTimeout(tick, st.state === "in" ? 20000 : 60000);
+    }).catch(function () { if (!data && !S) $("#app").innerHTML = '<div class="err">' + esc(D.err) + "</div>"; sTimer = setTimeout(tick, 30000); });
+  }
+  if (!ID) $("#app").innerHTML = '<div class="err">' + esc(D.err) + "</div>";
+  else {
+    $("#app").innerHTML = '<div id="hero"></div><div id="body"></div>';
+    var u = fromURL(), c0 = fromCache();
+    S = u && c0 ? ((rank(c0.state) > rank(u.state) || (rank(c0.state) === rank(u.state) && tot(c0) > tot(u))) ? c0 : u) : (u || c0);
+    paintHero(); paintBody();
+    quick(); tick();
+  }
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) navigator.serviceWorker.register("/sw.js").catch(function () { });
 })();
 </script>
