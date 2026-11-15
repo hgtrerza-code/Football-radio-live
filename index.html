@@ -3169,6 +3169,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
     KO_NATD[key] = { n: fr, l: "https://flagcdn.com/w40/" + iso + ".png" };
     if (!KO_TEAMS[key]) KO_TEAMS[key] = en.split("|").concat([fr]);   // sert aussi au rapprochement avec les matchs déjà présents
   }));
+  const KO_DONE = "Termin\u00e9";   // libellé « terminé » selon la langue
   const KO_AR = String(document.documentElement.lang || "fr").slice(0, 2).toLowerCase() === "ar";   // page arabe : les matchs sans traduction restent visibles
   function koTeam(ar) {   // « اسكتلندا تحت 21 » -> « Écosse U21 » ; équipe inconnue -> nom arabe tel quel
     const raw = String(ar || "").trim(), n = koN(raw), u = n.match(/^(.*?)\s+تحت\s*(\d+)$/), base = u ? u[1] : n, d = KO_NATD[base];
@@ -3300,7 +3301,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
     const rowFn = m => {
       const live = m.state === "in", done = m.state === "post";
       const sc = v => m.state === "pre" ? "" : '<b class="tv-s">' + (v ?? 0) + '</b>';
-      const when = live ? '<span class="tv-t live"><b class=m-dir>DIRECT</b>' + esc(m.label || "") + '</span>' : '<span class="tv-t">' + esc(m.noTime ? "–" : hhmm(m.start)) + (done ? '<small>Termin\u00e9</small>' : '') + '</span>';
+      const when = live ? '<span class="tv-t live"><b class=m-dir>DIRECT</b>' + esc(m.label || "") + '</span>' : '<span class="tv-t">' + esc(m.noTime ? "–" : hhmm(m.start)) + (done ? '<small>' + KO_DONE + '</small>' : '') + '</span>';
       const lgo = c => '<span class="tv-lg" title="' + esc(c.label) + '"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i></span>';
       const badge = c => '<span class="tv-badge"><i style="background:' + c.col + '">' + esc(c.ini) + (tvLogoUrl(c) ? '<img src="' + esc(tvLogoUrl(c)) + '" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</i><span>' + esc(c.label) + (c.sub ? '<small>' + esc(c.sub) + '</small>' : '') + '</span></span>';
       const chl = tvAllChannels(m, KG), TV_VIS = 2, isOpen = tvOpen.has(m.id);
