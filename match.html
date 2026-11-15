@@ -109,7 +109,9 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple
       ["home", "away"].forEach(function (k) { if (!n[k].name) n[k].name = S[k].name; if (!n[k].logo) n[k].logo = S[k].logo; });
       if (!n.lg) n.lg = S.lg; if (!n.date) n.date = S.date;
     }
-    S = n; saveCache(); paintHero();
+    var sig = function (x) { return x ? [x.home.score, x.away.score, x.state, x.clock, x.home.name, x.away.name, x.home.logo, x.away.logo, x.lg, x.date].join("|") : ""; };
+    var changed = sig(n) !== sig(S);
+    S = n; if (changed) { saveCache(); paintHero(); }
   }
   function paintHero() {
     var el = $("#hero"); if (!el || !S) return;
@@ -194,12 +196,23 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple
       var evs = (j && j.events) || []; for (var i = 0; i < evs.length; i++) if (String(evs[i].id) === ID) return evs[i]; return null;
     });
   }
+  /* Première lecture : exactement la même requête que l'accueil (déjà gardée au chaud par le CRON du Worker) → réponse immédiate.
+     Les lectures suivantes (toutes les 4 s) utilisent le petit tableau de la seule compétition, plus léger. */
+  function parisYmd(d) { return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(d).replace(/-/g, ""); }
+  function quickAll() {
+    if (!S || !S.date || S.state === "post" || parisYmd(new Date(S.date)) !== parisYmd(new Date())) return;
+    getJSON(PROXY + "soccer/all/scoreboard?dates=" + parisYmd(new Date()) + "&limit=1000").then(function (j) {
+      var evs = (j && j.events) || []; for (var i = 0; i < evs.length; i++) if (String(evs[i].id) === ID) { applyS(build((evs[i].competitions || [])[0] || {}, evs[i], "")); return; }
+    }).catch(function () { });
+  }
   var qTimer = null, sTimer = null;
   function quick() {
     clearTimeout(qTimer);
+    if (document.hidden) { qTimer = setTimeout(quick, 5000); return; }   /* onglet en arrière-plan : on ne sollicite pas le Worker */
     getScore().then(function (ev) { if (ev) { var c = (ev.competitions || [])[0] || {}; applyS(build(c, ev, "")); } }).catch(function () { })
-      .then(function () { if (S && S.state === "post") return; qTimer = setTimeout(quick, S && S.state === "in" ? 8000 : S && S.state === "pre" ? 45000 : 15000); });
+      .then(function () { if (S && S.state === "post") return; qTimer = setTimeout(quick, S && S.state === "in" ? 4000 : S && S.state === "pre" ? 45000 : 15000); });
   }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && !(S && S.state === "post")) quick(); });
   function tick() {
     clearTimeout(sTimer);
     load().then(function (j) {
@@ -215,7 +228,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple
     var u = fromURL(), c0 = fromCache();
     S = u && c0 ? ((rank(c0.state) > rank(u.state) || (rank(c0.state) === rank(u.state) && tot(c0) > tot(u))) ? c0 : u) : (u || c0);
     paintHero(); paintBody();
-    quick(); tick();
+    quickAll(); quick(); tick();
   }
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) navigator.serviceWorker.register("/sw.js").catch(function () { });
 })();
