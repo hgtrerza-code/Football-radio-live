@@ -1078,11 +1078,26 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 /* Page Sélections nationales : même habillage que l'accueil (variables, pastilles .filters, cartes .m-row, .cb-card, .news-card) */
 #sel-view .sel-lead{color:var(--text-muted);font-size:.85rem;margin:-.2rem 0 .9rem;line-height:1.5}
 #sel-view .filters{margin:.2rem 0 .6rem}
-#sel-comps{flex-wrap:wrap;overflow:visible;padding-bottom:0}
-#sel-comps button[data-empty]:not(.active){opacity:.6}
-#sel-tabs{margin:.2rem 0 .4rem}
+html[data-selpage] #compbar{display:none!important}
+#sel-comps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:.4rem 0 1rem}
+#sel-comps .sc{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-main);font-family:inherit;cursor:pointer;min-height:96px;transition:border-color .15s}
+#sel-comps .sc:hover,#sel-comps .sc:focus-visible{border-color:var(--accent)}
+#sel-comps .sc-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.92rem;line-height:1.25}
+#sel-comps .sc-h i{font-style:normal;font-size:1.2rem}
+#sel-comps .sc-b{align-self:flex-start;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--text-muted);letter-spacing:.2px}
+#sel-comps .sc-b.live{background:rgba(239,68,68,.18);color:#f87171}
+#sel-comps .sc-b.next{background:rgba(34,197,94,.15);color:#4ade80}
+#sel-comps .sc-l{font-size:.78rem;color:var(--text-muted);line-height:1.35}
+#sel-comps .sc[data-state="none"]{opacity:.55}
+#sel-comps .sc[data-state="load"] .sc-l{height:12px;border-radius:6px;background:rgba(255,255,255,.06)}
+#sel-sticky{position:sticky;top:var(--sel-top,0px);z-index:50;background:var(--bg-dark);padding:6px 0 4px;margin-bottom:4px;border-bottom:1px solid var(--border)}
+#sel-bar{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+#sel-back{border:1px solid var(--border);background:var(--bg-card);color:var(--text-main);border-radius:999px;padding:7px 14px;font:700 .8rem Inter,sans-serif;cursor:pointer;flex:0 0 auto}
+#sel-back:hover{border-color:var(--accent);color:var(--accent)}
+#sel-name{font-size:1rem;font-weight:800;line-height:1.2;min-width:0}
+#sel-tabs{margin:0}
 #sel-tabs button{min-width:96px}
-@media(max-width:700px){#sel-comps{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}#sel-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}#sel-tabs button{min-width:0;padding:8px 4px;font-size:.78rem}}
+@media(max-width:700px){#sel-comps{grid-template-columns:1fr 1fr;gap:8px}#sel-comps .sc{padding:10px;min-height:92px}#sel-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}#sel-tabs button{min-width:0;padding:8px 4px;font-size:.78rem}}
 #sel-view .m-row{cursor:default}
 #sel-view .m-row .m-live{display:block}
 #sel-view .cb-lgn{white-space:normal;overflow:visible;line-height:1.25}
@@ -1097,6 +1112,12 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 #sel-view .news-grid{padding-bottom:6px}
 #sel-view .empty{padding:2rem 1rem}
 #sel-view .cb-seo{margin-top:2.2rem}
+#sel-seo{position:relative;max-height:220px;overflow:hidden;cursor:pointer}
+#sel-seo::before{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(transparent,var(--bg-dark,#0a0f1e));pointer-events:none}
+#sel-seo::after{content:"▼ Alles anzeigen";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:.78rem;font-weight:700;color:var(--accent)}
+#sel-seo.open{max-height:none;overflow:visible}
+#sel-seo.open::before{display:none}
+#sel-seo.open::after{content:"▲ Einklappen";position:static;display:block;padding:.6rem 0 0}
 #sel-view .cb-seo h2{margin-top:1.3rem}#sel-view .cb-seo h2:first-child{margin-top:0}
 #sel-view .cb-seo p{margin-bottom:.5rem}#sel-view .cb-seo li{margin:.3rem 0}
 #sel-td{width:min(600px,94vw);max-height:88vh;margin:auto;background:var(--bg-dark);color:var(--text-main);border:1px solid var(--border);border-radius:18px;padding:16px;overflow:auto}
@@ -1148,9 +1169,12 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     <div id="sel-view">
 <h2 class="sec-title">🌍 Nationalteams</h2>
 <p class="sel-lead">Männliche A-Nationalmannschaften: kompletter Spielplan, Ergebnisse, Teams und News. Pariser Zeit.</p>
-<div class="filters" id="sel-comps" role="tablist" aria-label="Wettbewerbe der Nationalteams"></div>
-<div class="filters" id="sel-tabs" role="tablist"><button type="button" data-t="up" class="active">Spielplan</button><button type="button" data-t="past">Ergebnisse</button><button type="button" data-t="teams">Teams</button><button type="button" data-t="news">News</button></div>
+<div id="sel-home"><div id="sel-comps" aria-label="Wettbewerbe der Nationalteams"></div></div>
+<div id="sel-detail" hidden>
+<div id="sel-sticky"><div id="sel-bar"><button type="button" id="sel-back">← Wettbewerbe</button><b id="sel-name"></b></div>
+<div class="filters" id="sel-tabs" role="tablist"><button type="button" data-t="up" class="active">Spielplan</button><button type="button" data-t="past">Ergebnisse</button><button type="button" data-t="teams">Teams</button><button type="button" data-t="news">News</button></div></div>
 <div id="sel-pane" aria-live="polite"></div>
+</div>
 <noscript><p class="empty">Aktiviere JavaScript, um die Spiele der Nationalteams zu sehen.</p></noscript>
 <section class="cb-seo" id="sel-seo" aria-label="Nationalteams"><h2>Fußball der Nationalmannschaften: alle Wettbewerbe</h2>
 <p>FootLive Pro verfolgt die männlichen Nationalmannschaften: WM, UEFA Nations League, Europameisterschaft, Afrika-Cup, Copa América, Gold Cup, Asien-Cup, Qualifikationsspiele und Freundschaftsspiele. Wähle einen Wettbewerb, um den kompletten Spielplan, die bisherigen Ergebnisse, die Teams mit ihrem Kader und die neuesten News zu sehen. Schau auch auf die <a href="/de/#clubs">Ergebnisse der Top-Klubs</a>, die <a href="/de/#buteurs">Torjägerliste</a>, die <a href="/classements.html">Tabellen</a> und das <a href="/programme-tv.html">TV-Programm für Fußball</a>.</p>
@@ -4741,13 +4765,12 @@ function paint(){var p=$("#sel-pane");document.querySelectorAll("#sel-tabs butto
  if(data.err){p.innerHTML='<div class="empty">Daten können derzeit nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.</div>';return}
  if(tab==="news"){p.innerHTML=newsPane();loadNews(ticket);return}
  p.innerHTML=tab==="teams"?teamsPane():matchPane(tab)}
-function select(c,push){cur=c;ticket++;var my=ticket;data=null;slug="";if(!userTab)tab="up";shown={up:PAGE,past:PAGE};
- document.querySelectorAll("#sel-comps button").forEach(function(b){b.classList.toggle("active",b.dataset.k===c[0])});
+function select(c,push){showDetail(c);cur=c;ticket++;var my=ticket;data=null;slug="";if(!userTab)tab="up";shown={up:PAGE,past:PAGE};
  if(push)try{history.replaceState(null,"","#"+c[0].split("|")[0])}catch(e){}
  if(push)document.title=c[2]+" : Spielplan, Ergebnisse, Teams und News | FootLive Pro";paint();
  var cached=ls.get("m_"+c[0]);var go=cached?Promise.resolve(cached):resolve(c).then(function(r){if(r.m.length)ls.set("m_"+c[0],r);return r});
  go.then(function(r){if(my!==ticket)return;slug=r.slug;data=r;if(tab==="up"&&!userTab&&r.m.length&&!r.m.some(function(m){return m.s!=="post"}))tab="past";if(!r.m.length)markEmpty(c);paint()}).catch(function(){if(my!==ticket)return;data={m:[],err:1};markEmpty(c);paint()})}
-function markEmpty(c){var b=document.querySelector('#sel-comps button[data-k="'+c[0]+'"]');if(b)b.dataset.empty="1"}
+function markEmpty(c){}
 // ---- détails d'une équipe
 function teamDetail(id){var t=teams().filter(function(x){return x.id===id})[0];if(!t)return;var d=$("#sel-td");
  var mine=data.m.filter(function(m){return m.h.id===id||m.a.id===id}),nx=mine.filter(function(m){return m.s!=="post"}).sort(function(a,b){return new Date(a.t)-new Date(b.t)}).slice(0,5),rs=mine.filter(function(m){return m.s==="post"}).sort(function(a,b){return new Date(b.t)-new Date(a.t)}).slice(0,5);
@@ -4758,17 +4781,36 @@ function teamDetail(id){var t=teams().filter(function(x){return x.id===id})[0];i
   G.forEach(function(g){var l=a.filter(function(p){return g[1].test(p.p)});if(l.length)out+="<h4>"+g[0]+"</h4>"+l.map(function(p){return'<div class="pl"><i>'+esc(p.j)+"</i><span>"+esc(p.n)+"</span><small>"+(p.a?esc(p.a)+" J.":"")+"</small></div>"}).join("")});
   box.innerHTML=out||'<div class="empty">Kader noch nicht veröffentlicht.</div>'}).catch(function(){var box=$("#sel-ro");if(box)box.innerHTML='<div class="empty">Kader derzeit nicht verfügbar.</div>'})}
 // ---- initialisation
-$("#sel-comps").innerHTML=COMPS.map(function(c){return'<button type="button" role="tab" data-k="'+esc(c[0])+'">'+c[1]+" "+esc(c[2])+"</button>"}).join("");
+// ---- accueil : cartes de compétitions
+function showDetail(c){$("#sel-home").hidden=true;$("#sel-detail").hidden=false;$("#sel-name").textContent=c[2]}
+function showHome(){ticket++;cur=null;$("#sel-detail").hidden=true;$("#sel-home").hidden=false;document.title=T00;homeCards()}
+var ST={"back": "← Wettbewerbe", "live": "● {n} live", "next": "Nächstes Spiel", "past": "Beendet", "none": "Kein Spiel", "nodata": "Spielplan nicht veröffentlicht", "na": "Nicht verfügbar", "retry": "Später erneut versuchen", "show": "▼ Alles anzeigen", "hide": "▲ Einklappen"};var cards={},homeDone=false,T00=document.title;
+function cardHtml(c){return'<button type="button" class="sc" data-k="'+esc(c[0])+'" data-state="load"><span class="sc-h"><i>'+c[1]+"</i><span>"+esc(c[2])+'</span></span><span class="sc-b">…</span><span class="sc-l"></span></button>'}
+function summarize(evs){var l=evs.map(P).filter(Boolean),live=l.filter(function(m){return m.s==="in"}),pre=l.filter(function(m){return m.s==="pre"&&!m.off}).sort(function(a,b){return new Date(a.t)-new Date(b.t)}),post=l.filter(function(m){return m.s==="post"}).sort(function(a,b){return new Date(b.t)-new Date(a.t)});
+ if(live.length)return{st:"live",o:0,b:ST.live.replace("{n}",live.length),l:live[0].h.n+" "+(live[0].hs==null?0:live[0].hs)+" - "+(live[0].as==null?0:live[0].as)+" "+live[0].a.n};
+ if(pre.length){var m=pre[0],d=new Date(m.t);return{st:"next",o:1,t:+d,b:ST.next,l:m.h.n+" – "+m.a.n+" · "+SF.format(d)+" "+TF.format(d)}}
+ if(post.length){var q=post[0];return{st:"past",o:2,b:ST.past,l:q.h.n+" "+q.hs+" - "+q.as+" "+q.a.n}}
+ return{st:"none",o:3,b:ST.none,l:ST.nodata}}
+function loadCard(c){var k="c_"+c[0],cc=ls.get(k);if(cc)return Promise.resolve(cc);var alts=c[0].split("|"),i=0;
+ return(function next(){var sl=alts[i++];return J(API+sl+"/scoreboard").then(function(j){var r=summarize(j.events||[]);if(r.st==="none"&&i<alts.length)return next();return r}).catch(function(e){if(i<alts.length)return next();return{st:"none",o:3,b:ST.na,l:ST.retry}})})().then(function(r){ls.set(k,r);return r})}
+function homeCards(){var box=$("#sel-comps");if(!box.children.length)box.innerHTML=COMPS.map(cardHtml).join("");
+ if(homeDone)return;homeDone=true;
+ pool(COMPS,6,function(c){return loadCard(c).then(function(r){cards[c[0]]=r;var b=box.querySelector('button[data-k="'+c[0]+'"]');if(b){b.dataset.state=r.st;b.querySelector(".sc-b").textContent=r.b;b.querySelector(".sc-b").className="sc-b"+(r.st==="live"?" live":r.st==="next"?" next":"");b.querySelector(".sc-l").textContent=r.l}})}).then(function(){
+  var bs=Array.prototype.slice.call(box.children);bs.sort(function(a,b){var x=cards[a.dataset.k]||{o:4},y=cards[b.dataset.k]||{o:4};return x.o-y.o||(x.t||0)-(y.t||0)||COMPS.findIndex(function(c){return c[0]===a.dataset.k})-COMPS.findIndex(function(c){return c[0]===b.dataset.k})});bs.forEach(function(b){box.appendChild(b)})})}
+// onglets collants : décalage sous l'en-tête du site
+function setTop(){var hd=document.querySelector("header"),h=hd?hd.getBoundingClientRect().height:0;$("#sel-view").style.setProperty("--sel-top",Math.round(h)+"px")}
+setTop();window.addEventListener("resize",setTop);if(window.ResizeObserver){var hd0=document.querySelector("header");if(hd0)new ResizeObserver(setTop).observe(hd0)}
 document.addEventListener("click",function(e){var t=e.target,b;
- if(b=t.closest("#sel-comps button")){select(COMPS.filter(function(c){return c[0]===b.dataset.k})[0],true);return}
+ if(t.closest("#sel-back")){try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}showHome();window.scrollTo({top:0,behavior:"smooth"});return}
+ if(b=t.closest("#sel-comps button")){select(COMPS.filter(function(c){return c[0]===b.dataset.k})[0],true);window.scrollTo({top:0});return}
+ if((b=t.closest("#sel-seo"))&&!t.closest("a")){b.classList.toggle("open");return}
  if(b=t.closest("#sel-tabs button")){tab=b.dataset.t;userTab=1;paint();return}
  if(b=t.closest("[data-more]")){shown[b.dataset.more]+=PAGE;paint();return}
  if(b=t.closest("[data-team]")){teamDetail(b.dataset.team);return}
  var dl=$("#sel-td");if(t.closest("[data-close]")||(t===dl&&(e.clientX<dl.getBoundingClientRect().left||e.clientX>dl.getBoundingClientRect().right||e.clientY<dl.getBoundingClientRect().top||e.clientY>dl.getBoundingClientRect().bottom)))dl.close&&dl.close()});
 var h=(location.hash||"").slice(1),start=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0]||COMPS[0];
-select(start,!!h);
-window.addEventListener("hashchange",function(){var h=(location.hash||"").slice(1),c=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0];if(!c||c===cur)return;select(c,true);var b=document.querySelector('#sel-comps button[data-k="'+c[0]+'"]');if(b&&b.scrollIntoView)b.scrollIntoView({inline:"center",block:"nearest"});window.scrollTo({top:0,behavior:"smooth"})});
-var sb=document.querySelector('#sel-comps button[data-k="'+start[0]+'"]');if(sb&&sb.scrollIntoView)sb.scrollIntoView({inline:"center",block:"nearest"});
+var hc=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0];if(hc)select(hc,true);else showHome();
+window.addEventListener("hashchange",function(){var h=(location.hash||"").slice(1),c=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0];if(!c){if(cur&&!h)showHome();return}if(c===cur)return;select(c,true);window.scrollTo({top:0,behavior:"smooth"})});
 window.__selPick=function(h){return COMPS.some(function(c){return c[0].split("|")[0]===h})};
 })();
 
