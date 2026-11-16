@@ -49,6 +49,14 @@ NATIONAL = re.compile(r"^(uefa|conmebol|caf|concacaf|afc|fifa)\.", re.I)
 # Une division inférieure reste autorisée pour un club qui y joue vraiment (ex. AS Saint-Étienne en Ligue 2).
 NOT_MEN_SLUG = re.compile(r"(?:^|\.)w(?:\.|$)|wchampions|wwc|nwsl|women|\.fem|\.u\d\d|youth|reserve|\.[2-9](?:\.|$)", re.I)
 
+# Compétitions israéliennes : bloquées en permanence (aucune page générée, pages existantes supprimées).
+ISRAEL = re.compile(r"(?:^|\.)isr(?:\.|$)|isra[eë]l|ligat", re.I)
+# Compétition suivie -> page de compétition déjà présente à la racine du site.
+COMP_PAGES = {"eng.1": "premier-league", "esp.1": "laliga", "ger.1": "bundesliga", "ita.1": "serie-a",
+              "fra.1": "ligue-1", "uefa.champions": "ligue-des-champions", "uefa.europa": "europa-league",
+              "uefa.europa.conf": "conference-league", "por.1": "liga-portugal", "ned.1": "eredivisie",
+              "mar.1": "botola-pro"}
+
 
 # ----------------------------------------------------------------------------- utilitaires
 def fetch_json(url, tries=3):
@@ -110,6 +118,55 @@ def plural(n, one, many):
     return f"{n} {one if n <= 1 else many}"
 
 
+def slugify(s):
+    return re.sub(r"[^a-z0-9]+", "-", norm(s)).strip("-")[:40]
+
+
+def match_url(m):
+    """Adresse de la page d'un match (même règle dans generate_match_pages.py)."""
+    return f"/matchs/{slugify(m['home'])}-{slugify(m['away'])}-{m['id']}.html"
+
+
+def comp_link(lg):
+    """Lien vers la page de compétition (ligue-1.html...) si elle existe."""
+    page_ = COMP_PAGES.get((lg or {}).get("key"))
+    if page_ and os.path.exists(os.path.join(ROOT, page_ + ".html")):
+        return f'<p><a href="/{page_}.html">Scores et calendrier : {e(lg["name"])}</a></p>'
+    return ""
+
+
+def club_slug_for(team, clubs):
+    t = norm(team)
+    if not t or EXC.search(t):
+        return None
+    for c in clubs:
+        if re.search(c["pat"], t, re.I):
+            return c["slug"]
+    return None
+
+
+def scorer_table(rows, clubs=None, rich=False):
+    """Tableau des buteurs. Colonnes Matchs / Passes décisives masquées si ESPN ne les fournit pas.
+    rich=True : photo + équipe (liée à sa page club quand elle existe)."""
+    has_p = any(r["p"] is not None for r in rows)
+    has_a = any(r["a"] is not None for r in rows)
+    head = ("<th class='n'>#</th><th>Joueur</th>" + ("<th>Équipe</th>" if rich else "")
+            + ("<th>Matchs</th>" if has_p else "") + ("<th>Passes déc.</th>" if has_a else "") + "<th>Buts</th>")
+    body_rows = []
+    for i, r in enumerate(rows):
+        if rich:
+            cs = club_slug_for(r["t"], clubs or [])
+            team = f"<a href='/clubs/{cs}.html'>{e(r['t'])}</a>" if cs else e(r["t"])
+            who = f"<span class='pl'><span class='av' data-i='{e(initials(r['n']))}'>{av_img(r)}</span>{e(r['n'])}</span>"
+        else:
+            team, who = "", e(r["n"])
+        body_rows.append(f"<tr><td class='n'>{i + 1}</td><td>{who}</td>" + (f"<td>{team}</td>" if rich else "")
+                         + (f"<td>{'' if r['p'] is None else r['p']}</td>" if has_p else "")
+                         + (f"<td>{'' if r['a'] is None else r['a']}</td>" if has_a else "")
+                         + f"<td class='g'>{r['g']}</td></tr>")
+    return f"<table><thead><tr>{head}</tr></thead><tbody>{''.join(body_rows)}</tbody></table>"
+
+
 # ----------------------------------------------------------------------------- lecture d'index.html
 def parse_index():
     src = open(INDEX, encoding="utf-8").read()
@@ -143,6 +200,8 @@ def men_slugs(clubs, leagues):
             own.update(lg["slugs"])
     out = {}
     for l in leagues:
+        if ISRAEL.search(l["key"] + " " + l["name"]):
+            continue
         for sl in l["slugs"]:
             if sl in own or not NOT_MEN_SLUG.search(sl):
                 out[sl] = l["name"]
@@ -287,7 +346,10 @@ def league_scorers(league, pages=1):
     rows = []
     for sl in league["slugs"]:
         for pg in range(1, pages + 1):
-            rows += _athletes(fetch_json(BYATH.format(sl=sl, pg=pg)))
+            got = _athletes(fetch_json(BYATH.format(sl=sl, pg=pg)))
+            rows += got
+            if not got:
+                break
         if not rows:
             rows = _core_leaders(sl)
         if rows:
@@ -394,6 +456,9 @@ footer{border-top:1px solid var(--bd);margin-top:2.5rem;padding:1rem 0 2rem;colo
 .grp{font-weight:800;margin:1.2rem 0 .3rem}
 .pl{display:flex;align-items:center;gap:10px}.av{position:relative;width:40px;height:40px;flex:0 0 auto;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#334155,#475569);color:#fff;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center}
 .av::before{content:attr(data-i)}.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#1e293b}
+nav{display:flex;flex-wrap:wrap}.mp{font-size:.72rem;font-weight:700}
+.form{display:flex;gap:6px;margin:8px 0}.form b{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#04210f}
+.form .fV{background:var(--ac)}.form .fN{background:#94a3b8}.form .fD{background:var(--rd);color:#fff}
 @media(max-width:560px){.m li{grid-template-columns:1fr auto}.m .d{grid-column:1/-1}}
 """
 
@@ -423,14 +488,36 @@ def page(title, desc, path, body, ld, noindex=False):
 {ld_json}
 <style>{CSS}</style></head><body>
 <header><div class="c"><a class="brand" href="/">⚽ FootLive Pro</a>
-<nav aria-label="Navigation"><a href="/">Scores</a><a href="/clubs/">Clubs</a><a href="/buteurs/">Buteurs</a></nav></div></header>
+<nav aria-label="Navigation"><a href="/">Scores</a><a href="/matchs/">Matchs</a><a href="/programme-tv.html">Programme TV</a><a href="/classements.html">Classements</a><a href="/clubs/">Clubs</a><a href="/buteurs/">Buteurs</a><a href="/selections.html">Sélections</a></nav></div></header>
 <main class="c">
 {body}
 </main>
-<footer><div class="c"><a href="/mentions-legales.html">Mentions légales</a><a href="/confidentialite.html">Confidentialité</a><a href="/contact.html">Contact</a>
+<footer><div class="c"><a href="/a-propos.html">À propos</a><a href="/mentions-legales.html">Mentions légales</a><a href="/confidentialite.html">Confidentialité</a><a href="/contact.html">Contact</a>
 <p>FootLive Pro © {now.year} — {ts}</p></div></footer>
 </body></html>
 """
+
+
+CHANGED = set()  # pages dont le contenu a réellement changé pendant ce passage (sert au lastmod du sitemap)
+
+
+def write_sitemap(rel, urls, today):
+    """Écrit un sitemap. lastmod = aujourd'hui seulement si la page a vraiment changé (ou est nouvelle),
+    sinon la date déjà publiée est conservée. Retourne True si le fichier a été réécrit."""
+    path = os.path.join(ROOT, rel)
+    old_txt = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
+    old = {m[1]: m[2] for m in re.finditer(r"<loc>(.*?)</loc>\s*<lastmod>(.*?)</lastmod>", old_txt)}
+
+    def lastmod(u):
+        r = (u.lstrip("/") + "index.html") if u.endswith("/") else u.lstrip("/")
+        return today if (r in CHANGED or BASE + u not in old) else old[BASE + u]
+
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           + "".join(f"  <url><loc>{BASE}{u}</loc><lastmod>{lastmod(u)}</lastmod></url>\n" for u in urls) + "</urlset>\n")
+    if xml != old_txt:
+        open(path, "w", encoding="utf-8").write(xml)
+        return True
+    return False
 
 
 def write_if_changed(rel, content, written):
@@ -442,6 +529,7 @@ def write_if_changed(rel, content, written):
         if TS_RE.sub("", old) == TS_RE.sub("", content):
             return False
     open(path, "w", encoding="utf-8").write(content)
+    CHANGED.add(rel)
     return True
 
 
@@ -468,7 +556,11 @@ def match_li(m):
     h = f"<b>{e(m['home'])}</b>" if m["is_h"] else e(m["home"])
     a = e(m["away"]) if m["is_h"] else f"<b>{e(m['away'])}</b>"
     when = '<span class="live">● EN DIRECT</span>' if live else fr_short(d)
-    return (f'<li><span class="d">{when}</span><span>{h} – {a}<span class="l">{e(m["lg"])}</span></span>'
+    mp = match_url(m)
+    link = ""
+    if os.path.exists(os.path.join(ROOT, mp.lstrip("/"))):
+        link = ' · <a class="mp" href="' + mp + '">Page du match</a>'
+    return (f'<li><span class="d">{when}</span><span>{h} – {a}<span class="l">{e(m["lg"])}{link}</span></span>'
             f'<span class="s {cls}">{s}</span></li>')
 
 
@@ -479,7 +571,9 @@ def match_text(m):
 
 def club_page(c, ms, scorers, league, same_league, stand=None):
     now = datetime.now(PARIS)
-    up = sorted([m for m in ms if m["state"] != "post" and not m["off"]], key=lambda m: m["start"])
+    # un match encore « à venir » plus de 4 h après son coup d'envoi n'est pas fiable (statut ESPN non mis à jour) : écarté
+    up = sorted([m for m in ms if m["state"] != "post" and not m["off"]
+                 and (m["state"] == "in" or m["start"] > now - timedelta(hours=4))], key=lambda m: m["start"])
     past = sorted([m for m in ms if m["state"] == "post"], key=lambda m: m["start"], reverse=True)
     name = c["name"]
     if up:
@@ -507,22 +601,31 @@ def club_page(c, ms, scorers, league, same_league, stand=None):
         t = scorers[0]
         a_top = f"{t['n']} est le meilleur buteur de {name} en {league['name'] if league else 'championnat'} cette saison avec {plural(t['g'], 'but', 'buts')}."
         faqs.append((f"Qui est le meilleur buteur de {name} ?", a_top))
-        sc_html = (f"<h2>Meilleurs buteurs de {e(name)}</h2><table><thead><tr><th class='n'>#</th><th>Joueur</th><th>Matchs</th><th>Passes déc.</th><th>Buts</th></tr></thead><tbody>"
-                   + "".join(f"<tr><td class='n'>{i + 1}</td><td>{e(r['n'])}</td><td>{'' if r['p'] is None else r['p']}</td><td>{'' if r['a'] is None else r['a']}</td><td class='g'>{r['g']}</td></tr>"
-                             for i, r in enumerate(scorers[:10])) + "</tbody></table>")
+        sc_html = f"<h2>Meilleurs buteurs de {e(name)}</h2>" + scorer_table(scorers[:10])
     intro = (f"{name} ({c['country']}) évolue en {c['league']}. Retrouvez son prochain match, ses derniers résultats, son calendrier"
              + (" et ses meilleurs buteurs" if scorers else "") + f", mis à jour automatiquement par FootLive Pro. {a_next if nxt else ''}")
+    res = []
+    for m in past[:5]:
+        try:
+            g1, g2 = int(m["hs"]), int(m["as_"])
+        except (TypeError, ValueError):
+            continue
+        mine, opp = (g1, g2) if m["is_h"] else (g2, g1)
+        res.append("V" if mine > opp else "D" if mine < opp else "N")
+    form_html = ("<h2>Forme récente</h2><div class='form' aria-label='Cinq derniers résultats, du plus récent au plus ancien'>"
+                 + "".join(f"<b class='f{r}'>{r}</b>" for r in res) + "</div>") if res else ""
     links = "".join(f'<a href="/clubs/{x["slug"]}.html">{e(x["name"])}</a>' for x in same_league[:14])
     bt = (f'<p><a href="/buteurs/{league["key"]}.html">Classement des buteurs : {e(league["name"])}</a></p>' if league else "")
     body = (f'<p class="crumbs"><a href="/">Accueil</a> › <a href="/clubs/">Clubs</a> › {e(name)}</p>'
             f"<h1>{c['flag']} {e(name)} : résultats, prochain match et calendrier</h1><p>{e(intro)}</p>{box}"
             f'<a class="cta" href="/#club-{c["slug"]}">▶ Suivre {e(name)} en direct</a>'
+            + form_html
             + (f'<h2>Prochains matchs</h2><ul class="m">{"".join(match_li(m) for m in up[:5])}</ul>' if up else "")
             + (f'<h2>Derniers résultats</h2><ul class="m">{"".join(match_li(m) for m in past[:5])}</ul>' if past else "")
             + st_html + sc_html
             + "<h2>Questions fréquentes</h2>" + "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in faqs)
             + (f"<h2>Autres clubs · {e(c['league'])}</h2><div class='chips'>{links}</div>" if links else "")
-            + bt)
+            + bt + comp_link(league))
     desc = f"{name} : prochain match, derniers résultats, calendrier" + (" et meilleurs buteurs" if scorers else "") + ". Scores en direct sur FootLive Pro."
     path = f"/clubs/{c['slug']}.html"
     ld = [{"@context": "https://schema.org", "@type": "SportsTeam", "name": name, "sport": "Soccer",
@@ -552,7 +655,7 @@ def av_img(r):
             if r.get("img") else "")
 
 
-def scorers_page(lg, rows, others):
+def scorers_page(lg, rows, others, clubs=()):
     name = lg["name"]
     if rows:
         t = rows[0]
@@ -562,9 +665,7 @@ def scorers_page(lg, rows, others):
     faqs = [(f"Qui est le meilleur buteur de {name} ?", ans),
             ("Comment est calculé le classement des buteurs ?",
              "Le classement compte les buts marqués par chaque joueur dans la compétition, d’après les statistiques publiées par ESPN. Les égalités sont départagées par le nombre de passes décisives.")]
-    table = ("<table><thead><tr><th class='n'>#</th><th>Joueur</th><th>Équipe</th><th>Matchs</th><th>Passes déc.</th><th>Buts</th></tr></thead><tbody>"
-             + "".join(f"<tr><td class='n'>{i + 1}</td><td><span class='pl'><span class='av' data-i='{e(initials(r['n']))}'>{av_img(r)}</span>{e(r['n'])}</span></td><td>{e(r['t'])}</td><td>{'' if r['p'] is None else r['p']}</td><td>{'' if r['a'] is None else r['a']}</td><td class='g'>{r['g']}</td></tr>" for i, r in enumerate(rows[:25]))
-             + "</tbody></table>") if rows else "<p>Classement indisponible pour le moment.</p>"
+    table = scorer_table(rows[:25], clubs, rich=True) if rows else "<p>Classement indisponible pour le moment.</p>"
     chips = "".join(f'<a href="/buteurs/{o["key"]}.html">{e(o["name"])}</a>' for o in others)
     path = f"/buteurs/{lg['key']}.html"
     body = (f'<p class="crumbs"><a href="/">Accueil</a> › <a href="/buteurs/">Buteurs</a> › {e(name)}</p>'
@@ -572,7 +673,7 @@ def scorers_page(lg, rows, others):
             f"<p>Classement des meilleurs buteurs de {e(name)} avec le nombre de buts marqués par joueur, mis à jour automatiquement. {e(ans)}</p>"
             f'<a class="cta" href="/#buteurs-{lg["key"]}">▶ Voir en direct dans l’application</a>{table}'
             "<h2>Questions fréquentes</h2>" + "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in faqs)
-            + f"<h2>Autres classements de buteurs</h2><div class='chips'>{chips}</div>")
+            + f"<h2>Autres classements de buteurs</h2><div class='chips'>{chips}</div>" + comp_link(lg))
     ld = [breadcrumb([("Accueil", "/"), ("Buteurs", "/buteurs/"), (name, path)]), faq_ld(faqs)]
     if rows:
         ld.append({"@context": "https://schema.org", "@type": "ItemList", "name": f"Meilleurs buteurs {name}",
@@ -609,7 +710,7 @@ def main():
     print(len(matches), "matchs chargés")
     written = []
     changed = 0
-    bt_leagues = [l for l in leagues if not BT_SKIP.search(l["key"])]
+    bt_leagues = [l for l in leagues if not BT_SKIP.search(l["key"]) and not ISRAEL.search(l["key"] + " " + l["name"])]
     by_key = {l["key"]: l for l in bt_leagues}
 
     # --- clubs
@@ -627,7 +728,7 @@ def main():
             scorers = []
             if lg:
                 pat = re.compile(c["pat"], re.I)
-                scorers = [r for r in league_scorers(lg, pages=2) if r["t"] and pat.search(norm(r["t"])) and not EXC.search(norm(r["t"]))]
+                scorers = [r for r in league_scorers(lg, pages=4) if r["t"] and pat.search(norm(r["t"])) and not EXC.search(norm(r["t"]))]
             same = [x for x in clubs if x["league"] == c["league"] and x["slug"] != c["slug"]]
             stand = club_standing(c, league_standings(lg)) if lg else None
             changed += write_if_changed(f"clubs/{c['slug']}.html", club_page(c, ms, scorers, lg, same, stand), written)
@@ -649,21 +750,23 @@ def main():
             if not rows:
                 empty.add(f"buteurs/{l['key']}.html")  # page vide : noindex et hors sitemap
             others = [by_key[k] for k in BT_TOP if k in by_key and k != l["key"]]
-            changed += write_if_changed(f"buteurs/{l['key']}.html", scorers_page(l, rows, others), written)
+            changed += write_if_changed(f"buteurs/{l['key']}.html", scorers_page(l, rows, others, clubs), written)
             done.append(l)
         except Exception as ex:  # noqa
             print("  ! buteurs", l["key"], ex, file=sys.stderr)
     changed += write_if_changed("buteurs/index.html", scorers_index(done), written)
 
-    # --- sitemap
+    # --- Israël : suppression des pages déjà publiées (blocage permanent)
+    bd = os.path.join(ROOT, "buteurs")
+    for f in sorted(os.listdir(bd)) if os.path.isdir(bd) else []:
+        if f.endswith(".html") and ISRAEL.search(f[:-5]):
+            os.remove(os.path.join(bd, f))
+            print("page israélienne supprimée :", f)
+
+    # --- sitemap (lastmod = vraie date de modification de chaque page)
     today = datetime.now(PARIS).strftime("%Y-%m-%d")
     urls = ["/clubs/", "/buteurs/"] + [f"/{p}" for p in written if p not in ("clubs/index.html", "buteurs/index.html") and p not in empty]
-    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-           + "".join(f"  <url><loc>{BASE}{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n")
-    sm = os.path.join(ROOT, "sitemap-seo.xml")
-    if not os.path.exists(sm) or re.sub(r"<lastmod>.*?</lastmod>", "", open(sm, encoding="utf-8").read()) != re.sub(r"<lastmod>.*?</lastmod>", "", xml):
-        open(sm, "w", encoding="utf-8").write(xml)
-        changed += 1
+    changed += write_sitemap("sitemap-seo.xml", urls, today)
     print(f"{len(written)} pages traitées, {changed} fichiers modifiés")
     return 0
 
