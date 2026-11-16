@@ -62,10 +62,6 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); line-height: 1.5; min-height: 100vh; }
         .container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
 
-        /* ===== Publicités (hauteurs réservées = pas de CLS) ===== */
-        .ad-slot { display:flex; flex-direction:column; align-items:center; justify-content:center; margin:14px auto; max-width:100%; overflow:hidden; }
-        .ad-slot small { font-size:.62rem; color:var(--text-muted); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; opacity:.7; }
-        .ad-320 { min-height:70px; } .ad-300 { min-height:270px; } .ad-native { min-height:120px; }
 
         header { background: linear-gradient(90deg, #0a0f1e 0%, #1a2332 100%); border-bottom: 1px solid var(--border); padding: 1rem 0; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
         .header-content { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -832,21 +828,6 @@ h1{will-change:opacity}
   .tv-nm>.tv-tm:last-child .tv-n{order:3;text-align:left}
 }
 </style>
-<script>
-/* Consentement publicité : les scripts pub ne se chargent qu'après acceptation */
-(function(){try{window.__ads=localStorage.getItem('fl_consent')==='yes';}catch(e){window.__ads=false;}
-if(!window.__ads)document.documentElement.className+=' ads-off';})();
-</script>
-<style>
-.ads-off .ad-slot{display:none!important}
-#cookie-banner{position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#141c2b;color:#e8edf5;border-top:2px solid #22c55e;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 24px rgba(0,0,0,.45);font-size:.85rem;line-height:1.5}
-#cookie-banner .cb-in{max-width:1100px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-#cookie-banner p{flex:1 1 320px;margin:0}
-#cookie-banner a{color:#22c55e;text-decoration:underline}
-#cookie-banner .cb-btns{display:flex;gap:10px;flex:0 0 auto}
-#cookie-banner button{cursor:pointer;border-radius:20px;padding:9px 18px;font-weight:700;font-size:.85rem;border:1px solid #3b4a63;background:transparent;color:#e8edf5}
-#cookie-banner button.cb-yes{background:#22c55e;border-color:#22c55e;color:#06210f}
-</style>
 <style id="names-fix">
 /* Mobile : une équipe par ligne (nom complet, police normale), score à droite — plus de nom coupé */
 body{overflow-x:clip}
@@ -1078,11 +1059,26 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 /* Page Sélections nationales : même habillage que l'accueil (variables, pastilles .filters, cartes .m-row, .cb-card, .news-card) */
 #sel-view .sel-lead{color:var(--text-muted);font-size:.85rem;margin:-.2rem 0 .9rem;line-height:1.5}
 #sel-view .filters{margin:.2rem 0 .6rem}
-#sel-comps{flex-wrap:wrap;overflow:visible;padding-bottom:0}
-#sel-comps button[data-empty]:not(.active){opacity:.6}
-#sel-tabs{margin:.2rem 0 .4rem}
+html[data-selpage] #compbar{display:none!important}
+#sel-comps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:.4rem 0 1rem}
+#sel-comps .sc{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-main);font-family:inherit;cursor:pointer;min-height:96px;transition:border-color .15s}
+#sel-comps .sc:hover,#sel-comps .sc:focus-visible{border-color:var(--accent)}
+#sel-comps .sc-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.92rem;line-height:1.25}
+#sel-comps .sc-h i{font-style:normal;font-size:1.2rem}
+#sel-comps .sc-b{align-self:flex-start;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--text-muted);letter-spacing:.2px}
+#sel-comps .sc-b.live{background:rgba(239,68,68,.18);color:#f87171}
+#sel-comps .sc-b.next{background:rgba(34,197,94,.15);color:#4ade80}
+#sel-comps .sc-l{font-size:.78rem;color:var(--text-muted);line-height:1.35}
+#sel-comps .sc[data-state="none"]{opacity:.55}
+#sel-comps .sc[data-state="load"] .sc-l{height:12px;border-radius:6px;background:rgba(255,255,255,.06)}
+#sel-sticky{position:sticky;top:var(--sel-top,0px);z-index:50;background:var(--bg-dark);padding:6px 0 4px;margin-bottom:4px;border-bottom:1px solid var(--border)}
+#sel-bar{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+#sel-back{border:1px solid var(--border);background:var(--bg-card);color:var(--text-main);border-radius:999px;padding:7px 14px;font:700 .8rem Inter,sans-serif;cursor:pointer;flex:0 0 auto}
+#sel-back:hover{border-color:var(--accent);color:var(--accent)}
+#sel-name{font-size:1rem;font-weight:800;line-height:1.2;min-width:0}
+#sel-tabs{margin:0}
 #sel-tabs button{min-width:96px}
-@media(max-width:700px){#sel-comps{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}#sel-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}#sel-tabs button{min-width:0;padding:8px 4px;font-size:.78rem}}
+@media(max-width:700px){#sel-comps{grid-template-columns:1fr 1fr;gap:8px}#sel-comps .sc{padding:10px;min-height:92px}#sel-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}#sel-tabs button{min-width:0;padding:8px 4px;font-size:.78rem}}
 #sel-view .m-row{cursor:default}
 #sel-view .m-row .m-live{display:block}
 #sel-view .cb-lgn{white-space:normal;overflow:visible;line-height:1.25}
@@ -1097,6 +1093,12 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 #sel-view .news-grid{padding-bottom:6px}
 #sel-view .empty{padding:2rem 1rem}
 #sel-view .cb-seo{margin-top:2.2rem}
+#sel-seo{position:relative;max-height:220px;overflow:hidden;cursor:pointer}
+#sel-seo::before{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(transparent,var(--bg-dark,#0a0f1e));pointer-events:none}
+#sel-seo::after{content:"▼ Ver todo";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:.78rem;font-weight:700;color:var(--accent)}
+#sel-seo.open{max-height:none;overflow:visible}
+#sel-seo.open::before{display:none}
+#sel-seo.open::after{content:"▲ Ver menos";position:static;display:block;padding:.6rem 0 0}
 #sel-view .cb-seo h2{margin-top:1.3rem}#sel-view .cb-seo h2:first-child{margin-top:0}
 #sel-view .cb-seo p{margin-bottom:.5rem}#sel-view .cb-seo li{margin:.3rem 0}
 #sel-td{width:min(600px,94vw);max-height:88vh;margin:auto;background:var(--bg-dark);color:var(--text-main);border:1px solid var(--border);border-radius:18px;padding:16px;overflow:auto}
@@ -1140,17 +1142,17 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     </header>
     <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="eredivisie.html"><span>🇳🇱</span><img class="cl" alt="" data-lgre="eredivisie|dutch (?!eerste)" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/11.png&w=40&h=40" width="20" height="20" data-id="11">Eredivisie</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
-    <div class="container"><div class="ad-slot ad-320" aria-label="Publicité"><small>Publicité</small>
-<script>if(window.__ads){document.write("<script>atOptions={'key':'724d608874c57ab226af0bb850e5a691','format':'iframe','height':50,'width':320,'params':{}};<\/script><script src=\"https://czernik.org/22/724d608874c57ab226af0bb850e5a691\"><\/script>");}</script>
-    </div></div>
     <main class="container">
     <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
     <div id="sel-view">
 <h2 class="sec-title">🌍 Selecciones nacionales</h2>
 <p class="sel-lead">Selecciones nacionales masculinas absolutas: calendario completo, historial, equipos y noticias. Hora de París.</p>
-<div class="filters" id="sel-comps" role="tablist" aria-label="Competiciones de selecciones"></div>
-<div class="filters" id="sel-tabs" role="tablist"><button type="button" data-t="up" class="active">Calendario</button><button type="button" data-t="past">Resultados</button><button type="button" data-t="teams">Equipos</button><button type="button" data-t="news">Noticias</button></div>
+<div id="sel-home"><div id="sel-comps" aria-label="Competiciones de selecciones"></div></div>
+<div id="sel-detail" hidden>
+<div id="sel-sticky"><div id="sel-bar"><button type="button" id="sel-back">← Competiciones</button><b id="sel-name"></b></div>
+<div class="filters" id="sel-tabs" role="tablist"><button type="button" data-t="up" class="active">Calendario</button><button type="button" data-t="past">Resultados</button><button type="button" data-t="teams">Equipos</button><button type="button" data-t="news">Noticias</button></div></div>
 <div id="sel-pane" aria-live="polite"></div>
+</div>
 <noscript><p class="empty">Activa JavaScript para ver los partidos de las selecciones nacionales.</p></noscript>
 <section class="cb-seo" id="sel-seo" aria-label="Selecciones nacionales"><h2>Fútbol de selecciones: todas las competiciones</h2>
 <p>FootLive Pro sigue a las selecciones masculinas: Mundial, Liga de Naciones UEFA, Eurocopa, Copa Africana de Naciones, Copa América, Copa Oro, Copa Asiática, clasificatorias y amistosos. Elige una competición para ver el calendario completo, el historial de partidos, los equipos con su plantilla y las últimas noticias. Consulta también los <a href="/es/#clubs">resultados de los grandes clubes</a>, la <a href="/es/#buteurs">clasificación de goleadores</a>, las <a href="/classements.html">clasificaciones</a> y la <a href="/programme-tv.html">programación TV del fútbol</a>.</p>
@@ -1175,7 +1177,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 <h3>¿Qué competiciones de selecciones cubre FootLive Pro?</h3>
 <p>Mundial, Liga de Naciones UEFA, Eurocopa, Copa Africana de Naciones (CAN), Copa América, Copa Oro, Copa Asiática, Liga de Naciones CONCACAF, clasificatorias al Mundial (Europa, África, Sudamérica, CONCACAF, Asia, Oceanía), clasificatorias a la Eurocopa y la CAN, y amistosos internacionales.</p>
 <h3>¿Cómo veo los próximos partidos de una selección?</h3>
-<p>Elige la competición en la barra superior y abre la pestaña «Calendario»: todos los partidos por venir se muestran por día, en hora de París. Para un solo equipo, abre «Equipos» y toca la selección: aparecen sus próximos partidos y últimos resultados.</p>
+<p>Elige una competición en las tarjetas y abre la pestaña «Calendario»: todos los partidos por venir se muestran por día, en hora de París. Para un solo equipo, abre «Equipos» y toca la selección: aparecen sus próximos partidos y últimos resultados.</p>
 <h3>¿Dónde encuentro la plantilla de una selección?</h3>
 <p>En la pestaña «Equipos» de la competición, toca el nombre de la selección: la ventana muestra la plantilla por posición (porteros, defensas, centrocampistas, delanteros) con dorsal y edad, cuando están publicados.</p>
 <h3>¿Se muestran las selecciones femeninas y de categorías inferiores?</h3>
@@ -1222,7 +1224,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     </main>
     <section class="container" aria-label="FootLive Pro" style="margin:2rem auto 1rem;padding:1rem 16px;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)"><h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">FootLive Pro: resultados de fútbol en directo, clasificaciones, noticias y radios deportivas</h2><p>FootLive Pro es un sitio gratuito para seguir el fútbol mundial en tiempo real. Encuentra resultados en directo, marcadores y calendarios de la Ligue 1, la Premier League, LaLiga, la Serie A, la Bundesliga, la Champions League, la Europa League y muchas otras competiciones.</p><p>Consulta las clasificaciones de cada competición, lee las últimas noticias de fútbol de fuentes reconocidas (ESPN, BBC Sport, The Guardian, Sky Sports, L’Équipe) y escucha radios deportivas de todo el mundo en directo, desde tu móvil o tu ordenador. Los datos se actualizan automáticamente.</p><div class="faq"><h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Preguntas frecuentes</h2><h3>¿Cómo seguir un partido de fútbol en directo?</h3><p>Abre la pestaña «En directo»: los partidos en curso se muestran con un marcador que se actualiza automáticamente. Toca un partido para ver sus estadísticas detalladas.</p><h3>¿FootLive Pro es gratis?</h3><p>Sí, FootLive Pro es gratis: resultados, clasificaciones, noticias y radios deportivas.</p><h3>¿Se pueden escuchar radios deportivas en directo?</h3><p>Sí, la pestaña Radio ofrece emisoras de fútbol de todo el mundo, clasificadas por tipo de competición. La escucha continúa aunque vuelvas a la página de resultados.</p><h3>¿Se puede instalar FootLive Pro en el móvil?</h3><p>Sí, puedes añadirlo a la pantalla de inicio de tu móvil para abrirlo como una aplicación.</p></div></section>
 
-    <footer><div class="container"><nav class="lang-links" aria-label="Language"><a href="/selections.html" hreflang="fr" lang="fr">Français</a><a href="/en/selections.html" hreflang="en" lang="en">English</a><a href="/es/selections.html" hreflang="es" lang="es" aria-current="true">Español</a><a href="/it/selections.html" hreflang="it" lang="it">Italiano</a><a href="/nl/selections.html" hreflang="nl" lang="nl">Nederlands</a><a href="/de/selections.html" hreflang="de" lang="de">Deutsch</a><a href="/ar/selections.html" hreflang="ar" lang="ar">العربية</a></nav><nav class="legal-links" aria-label="Informations légales"><a href="../a-propos.html">À propos</a><a href="../mentions-legales.html">Mentions légales</a><a href="../confidentialite.html">Confidentialité</a><a href="../contact.html">Contact</a><a href="#" id="cookie-reset">Gérer les cookies</a></nav><p>FootLive Pro © 2026 — <span id="updated"></span></p></div></footer>
+    <footer><div class="container"><nav class="lang-links" aria-label="Language"><a href="/selections.html" hreflang="fr" lang="fr">Français</a><a href="/en/selections.html" hreflang="en" lang="en">English</a><a href="/es/selections.html" hreflang="es" lang="es" aria-current="true">Español</a><a href="/it/selections.html" hreflang="it" lang="it">Italiano</a><a href="/nl/selections.html" hreflang="nl" lang="nl">Nederlands</a><a href="/de/selections.html" hreflang="de" lang="de">Deutsch</a><a href="/ar/selections.html" hreflang="ar" lang="ar">العربية</a></nav><nav class="legal-links" aria-label="Informations légales"><a href="../a-propos.html">À propos</a><a href="../mentions-legales.html">Mentions légales</a><a href="../confidentialite.html">Confidentialité</a><a href="../contact.html">Contact</a></nav><p>FootLive Pro © 2026 — <span id="updated"></span></p></div></footer>
 
     <script>
         // ===== CONFIGURATION =====
@@ -4649,21 +4651,6 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
 </script>
 <script>(function(){try{var V="2026-11-07";if(localStorage.getItem("fl_swv")===V)return;localStorage.setItem("fl_swv",V);var sw=navigator.serviceWorker;if(!sw||!sw.controller)return;if(/Lighthouse|PageSpeed|Chrome-Lighthouse/i.test(navigator.userAgent))return;var p=[sw.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))})];if(window.caches)p.push(caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c)}))}));Promise.all(p).then(function(){location.reload()})}catch(e){}})();</script><script>if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <!-- Cloudflare Web Analytics (différé) --><script>addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.defer=true;s.src='https://static.cloudflareinsights.com/beacon.min.js';s.setAttribute('data-cf-beacon','{"token": "011dde8c92c7439fbcf1b107ca987b0b"}');document.body.appendChild(s)},4000)});</script><!-- End Cloudflare Web Analytics -->
-<div id="cookie-banner" role="dialog" aria-live="polite" aria-label="Choix des cookies publicitaires" hidden>
-<div class="cb-in"><p>FootLive Pro est gratuit grâce à la publicité. Nos partenaires publicitaires peuvent utiliser des cookies pour afficher des annonces. Acceptez-vous ? Vous pouvez changer d’avis à tout moment via « Gérer les cookies » en bas de page. <a href="../confidentialite.html">En savoir plus</a></p>
-<div class="cb-btns"><button type="button" class="cb-no" id="cb-no">Refuser</button><button type="button" class="cb-yes" id="cb-yes">Accepter</button></div></div></div>
-<script>
-(function(){
-var b=document.getElementById('cookie-banner');if(!b)return;
-var v=null;try{v=localStorage.getItem('fl_consent');}catch(e){}
-if(!v)b.hidden=false;
-function set(x){try{localStorage.setItem('fl_consent',x);}catch(e){}}
-document.getElementById('cb-yes').onclick=function(){set('yes');location.reload();};
-document.getElementById('cb-no').onclick=function(){var was=window.__ads;set('no');b.hidden=true;if(was)location.reload();};
-var r=document.getElementById('cookie-reset');
-if(r)r.onclick=function(e){e.preventDefault();b.hidden=false;};
-})();
-</script>
 <script>
 /* Mobile : le score est affiché en face de chaque équipe (sépare « 1 - 0 » en deux valeurs, sans changer l'affichage sur ordinateur) */
 (function(){
@@ -4798,7 +4785,7 @@ function days(list,key){var last="",h="";list.forEach(function(m){var k=DF.forma
 function matchPane(kind){var l=data.m.filter(function(m){return kind==="up"?m.s!=="post":m.s==="post"});
  l.sort(function(a,b){return kind==="up"?new Date(a.t)-new Date(b.t):new Date(b.t)-new Date(a.t)});
  if(!l.length)return'<div class="empty">'+(kind==="up"?"No hay partidos próximos por ahora: calendario no publicado o competición terminada.":"No hay partidos jugados en los datos disponibles de esta competición.")+"</div>";
- var n=shown[kind];return'<p class="note">'+l.length+(kind==="up"?" partido(s) por jugar":" partido(s) jugado(s)")+"</p>"+days(l.slice(0,n))+(l.length>n?'<button class="sel-more" data-more="'+kind+'">Mostrar más ('+(l.length-n)+")</button>":"")}
+ var n=shown[kind];return'<p class="note">'+l.length+(kind==="up"?" partido(s) por jugar":" partido(s) jugado(s)")+"</p>"+days(l.slice(0,n))+(l.length>n?'<button class="sel-more" data-more="'+kind+'">Ver más ('+(l.length-n)+")</button>":"")}
 function teams(){var seen={},o=[];data.m.forEach(function(m){[m.h,m.a].forEach(function(t){if(real(t)&&!seen[t.id]){seen[t.id]=1;o.push(t)}})});return o.sort(function(a,b){return a.n.localeCompare(b.n,"es")})}
 function teamsPane(){var t=teams();return t.length?'<p class="note">'+t.length+" equipos · toca un equipo para ver sus partidos y su plantilla</p><div class=\"cb-grid\">"+t.map(function(x){return'<button type="button" class="cb-card" data-team="'+esc(x.id)+'"><span class="cb-lw" data-i="'+esc(ini(x.n))+'">'+lg(x.l)+'</span><span class="tx">'+esc(x.n)+"</span></button>"}).join("")+"</div>":'<div class="empty">Los equipos se mostrarán en cuanto se publique el calendario de la competición.</div>'}
 function newsPane(){return'<div class="sk"></div><div class="sk"></div>'}
@@ -4808,13 +4795,12 @@ function paint(){var p=$("#sel-pane");document.querySelectorAll("#sel-tabs butto
  if(data.err){p.innerHTML='<div class="empty">No se pueden cargar los datos por ahora. Comprueba tu conexión e inténtalo de nuevo.</div>';return}
  if(tab==="news"){p.innerHTML=newsPane();loadNews(ticket);return}
  p.innerHTML=tab==="teams"?teamsPane():matchPane(tab)}
-function select(c,push){cur=c;ticket++;var my=ticket;data=null;slug="";if(!userTab)tab="up";shown={up:PAGE,past:PAGE};
- document.querySelectorAll("#sel-comps button").forEach(function(b){b.classList.toggle("active",b.dataset.k===c[0])});
+function select(c,push){showDetail(c);cur=c;ticket++;var my=ticket;data=null;slug="";if(!userTab)tab="up";shown={up:PAGE,past:PAGE};
  if(push)try{history.replaceState(null,"","#"+c[0].split("|")[0])}catch(e){}
  if(push)document.title=c[2]+" : calendario, resultados, equipos y noticias | FootLive Pro";paint();
  var cached=ls.get("m_"+c[0]);var go=cached?Promise.resolve(cached):resolve(c).then(function(r){if(r.m.length)ls.set("m_"+c[0],r);return r});
  go.then(function(r){if(my!==ticket)return;slug=r.slug;data=r;if(tab==="up"&&!userTab&&r.m.length&&!r.m.some(function(m){return m.s!=="post"}))tab="past";if(!r.m.length)markEmpty(c);paint()}).catch(function(){if(my!==ticket)return;data={m:[],err:1};markEmpty(c);paint()})}
-function markEmpty(c){var b=document.querySelector('#sel-comps button[data-k="'+c[0]+'"]');if(b)b.dataset.empty="1"}
+function markEmpty(c){}
 // ---- détails d'une équipe
 function teamDetail(id){var t=teams().filter(function(x){return x.id===id})[0];if(!t)return;var d=$("#sel-td");
  var mine=data.m.filter(function(m){return m.h.id===id||m.a.id===id}),nx=mine.filter(function(m){return m.s!=="post"}).sort(function(a,b){return new Date(a.t)-new Date(b.t)}).slice(0,5),rs=mine.filter(function(m){return m.s==="post"}).sort(function(a,b){return new Date(b.t)-new Date(a.t)}).slice(0,5);
@@ -4825,17 +4811,36 @@ function teamDetail(id){var t=teams().filter(function(x){return x.id===id})[0];i
   G.forEach(function(g){var l=a.filter(function(p){return g[1].test(p.p)});if(l.length)out+="<h4>"+g[0]+"</h4>"+l.map(function(p){return'<div class="pl"><i>'+esc(p.j)+"</i><span>"+esc(p.n)+"</span><small>"+(p.a?esc(p.a)+" años":"")+"</small></div>"}).join("")});
   box.innerHTML=out||'<div class="empty">Plantilla aún no publicada.</div>'}).catch(function(){var box=$("#sel-ro");if(box)box.innerHTML='<div class="empty">Plantilla no disponible por ahora.</div>'})}
 // ---- initialisation
-$("#sel-comps").innerHTML=COMPS.map(function(c){return'<button type="button" role="tab" data-k="'+esc(c[0])+'">'+c[1]+" "+esc(c[2])+"</button>"}).join("");
+// ---- accueil : cartes de compétitions
+function showDetail(c){$("#sel-home").hidden=true;$("#sel-detail").hidden=false;$("#sel-name").textContent=c[2]}
+function showHome(){ticket++;cur=null;$("#sel-detail").hidden=true;$("#sel-home").hidden=false;document.title="Selecciones nacionales: competiciones, partidos y resultados | FootLive Pro";homeCards()}
+var cards={},homeDone=false;
+function cardHtml(c){return'<button type="button" class="sc" data-k="'+esc(c[0])+'" data-state="load"><span class="sc-h"><i>'+c[1]+"</i><span>"+esc(c[2])+'</span></span><span class="sc-b">…</span><span class="sc-l"></span></button>'}
+function summarize(evs){var l=evs.map(P).filter(Boolean),live=l.filter(function(m){return m.s==="in"}),pre=l.filter(function(m){return m.s==="pre"&&!m.off}).sort(function(a,b){return new Date(a.t)-new Date(b.t)}),post=l.filter(function(m){return m.s==="post"}).sort(function(a,b){return new Date(b.t)-new Date(a.t)});
+ if(live.length)return{st:"live",o:0,b:"● "+live.length+" en vivo",l:live[0].h.n+" "+(live[0].hs==null?0:live[0].hs)+" - "+(live[0].as==null?0:live[0].as)+" "+live[0].a.n};
+ if(pre.length){var m=pre[0],d=new Date(m.t);return{st:"next",o:1,t:+d,b:"Próximo partido",l:m.h.n+" – "+m.a.n+" · "+SF.format(d)+" "+TF.format(d)}}
+ if(post.length){var q=post[0];return{st:"past",o:2,b:"Finalizado",l:q.h.n+" "+q.hs+" - "+q.as+" "+q.a.n}}
+ return{st:"none",o:3,b:"Sin partidos",l:"Calendario no publicado"}}
+function loadCard(c){var k="c_"+c[0],cc=ls.get(k);if(cc)return Promise.resolve(cc);var alts=c[0].split("|"),i=0;
+ return(function next(){var sl=alts[i++];return J(API+sl+"/scoreboard").then(function(j){var r=summarize(j.events||[]);if(r.st==="none"&&i<alts.length)return next();return r}).catch(function(e){if(i<alts.length)return next();return{st:"none",o:3,b:"No disponible",l:"Inténtalo más tarde"}})})().then(function(r){ls.set(k,r);return r})}
+function homeCards(){var box=$("#sel-comps");if(!box.children.length)box.innerHTML=COMPS.map(cardHtml).join("");
+ if(homeDone)return;homeDone=true;
+ pool(COMPS,6,function(c){return loadCard(c).then(function(r){cards[c[0]]=r;var b=box.querySelector('button[data-k="'+c[0]+'"]');if(b){b.dataset.state=r.st;b.querySelector(".sc-b").textContent=r.b;b.querySelector(".sc-b").className="sc-b"+(r.st==="live"?" live":r.st==="next"?" next":"");b.querySelector(".sc-l").textContent=r.l}})}).then(function(){
+  var bs=Array.prototype.slice.call(box.children);bs.sort(function(a,b){var x=cards[a.dataset.k]||{o:4},y=cards[b.dataset.k]||{o:4};return x.o-y.o||(x.t||0)-(y.t||0)||COMPS.findIndex(function(c){return c[0]===a.dataset.k})-COMPS.findIndex(function(c){return c[0]===b.dataset.k})});bs.forEach(function(b){box.appendChild(b)})})}
+// onglets collants : décalage sous l'en-tête du site
+function setTop(){var hd=document.querySelector("header"),h=hd?hd.getBoundingClientRect().height:0;$("#sel-view").style.setProperty("--sel-top",Math.round(h)+"px")}
+setTop();window.addEventListener("resize",setTop);if(window.ResizeObserver){var hd0=document.querySelector("header");if(hd0)new ResizeObserver(setTop).observe(hd0)}
 document.addEventListener("click",function(e){var t=e.target,b;
- if(b=t.closest("#sel-comps button")){select(COMPS.filter(function(c){return c[0]===b.dataset.k})[0],true);return}
+ if(t.closest("#sel-back")){try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}showHome();window.scrollTo({top:0,behavior:"smooth"});return}
+ if(b=t.closest("#sel-comps button")){select(COMPS.filter(function(c){return c[0]===b.dataset.k})[0],true);window.scrollTo({top:0});return}
+ if((b=t.closest("#sel-seo"))&&!t.closest("a")){b.classList.toggle("open");return}
  if(b=t.closest("#sel-tabs button")){tab=b.dataset.t;userTab=1;paint();return}
  if(b=t.closest("[data-more]")){shown[b.dataset.more]+=PAGE;paint();return}
  if(b=t.closest("[data-team]")){teamDetail(b.dataset.team);return}
  var dl=$("#sel-td");if(t.closest("[data-close]")||(t===dl&&(e.clientX<dl.getBoundingClientRect().left||e.clientX>dl.getBoundingClientRect().right||e.clientY<dl.getBoundingClientRect().top||e.clientY>dl.getBoundingClientRect().bottom)))dl.close&&dl.close()});
 var h=(location.hash||"").slice(1),start=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0]||COMPS[0];
-select(start,!!h);
-window.addEventListener("hashchange",function(){var h=(location.hash||"").slice(1),c=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0];if(!c||c===cur)return;select(c,true);var b=document.querySelector('#sel-comps button[data-k="'+c[0]+'"]');if(b&&b.scrollIntoView)b.scrollIntoView({inline:"center",block:"nearest"});window.scrollTo({top:0,behavior:"smooth"})});
-var sb=document.querySelector('#sel-comps button[data-k="'+start[0]+'"]');if(sb&&sb.scrollIntoView)sb.scrollIntoView({inline:"center",block:"nearest"});
+var hc=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0];if(hc)select(hc,true);else showHome();
+window.addEventListener("hashchange",function(){var h=(location.hash||"").slice(1),c=COMPS.filter(function(c){return c[0].split("|")[0]===h})[0];if(!c){if(cur&&!h)showHome();return}if(c===cur)return;select(c,true);window.scrollTo({top:0,behavior:"smooth"})});
 window.__selPick=function(h){return COMPS.some(function(c){return c[0].split("|")[0]===h})};
 })();
 
