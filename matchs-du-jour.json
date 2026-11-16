@@ -1,17 +1,17 @@
 {
  "date": "2026-11-16",
- "generated": "2026-11-16T02:53:14.840Z",
+ "generated": "2026-11-16T20:48:51.283Z",
  "extra": 36,
  "matches": [
   {
    "id": "401883305",
    "lg": "LaLiga 2",
    "start": "2026-11-16T19:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "58'",
    "home": "Albacete",
    "away": "RC Celta Fortuna",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Carlos Belmonte",
    "place": "Albacete, Spain"
