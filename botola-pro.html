@@ -265,7 +265,7 @@
         @media (max-width: 600px) { .goal-toast .tv-tag { font-size: .9rem; padding: 8px 10px; letter-spacing: 1px; } .goal-toast .tv-team { font-size: .8rem; } .goal-toast .tv-score { font-size: 1.2rem; } }
         .m-row.goal-now { animation: goal-flash 1s ease-in-out 6; border-color: var(--accent); }
         @keyframes goal-flash { 0%,100% { background: var(--bg-card); } 50% { background: rgba(34,197,94,.28); } }
-        .goal-badge { display: inline-block; background: var(--accent); color: #000; font-weight: 800; font-size: .65rem; border-radius: 10px; padding: 1px 8px; margin-bottom: 2px; animation: goal-pop .6s ease-in-out infinite alternate; }
+        .goal-badge { white-space: nowrap; flex: 0 0 auto; line-height: 1.4; display: inline-block; background: var(--accent); color: #000; font-weight: 800; font-size: .65rem; border-radius: 10px; padding: 1px 8px; margin-bottom: 2px; animation: goal-pop .6s ease-in-out infinite alternate; }
         @keyframes goal-pop { from { transform: scale(1); } to { transform: scale(1.18); } }
         .goal-now .m-score { animation: goal-pop .6s ease-in-out infinite alternate; }
         @media (prefers-reduced-motion: reduce) { .goal-toast, .goal-toast::after, .goal-toast .tv-tag, .m-row.goal-now, .goal-badge, .goal-now .m-score { animation: none; } }
@@ -1077,6 +1077,8 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
             evs.forEach(m => { m.lg = cleanLg(m.lg); });
             const lgBefore = evs.map(m => m.lg);
             const carry = ((Date.now() - (extraT[d] || 0)) < 300000 ? (byDay[d] || []) : []).filter(p => p.tsdb && !evs.some(x => Math.abs(new Date(x.start) - new Date(p.start)) < 4 * 3600e3 && sameTeam(x.home, p.home) && sameTeam(x.away, p.away)));   // garde les matchs des sources complémentaires jusqu'à leur prochaine mise à jour (évite le « 0 match en direct » entre deux rafraîchissements)
+            // Le flux « tous les matchs » est en cache côté Worker : s'il est en retard sur une valeur lue il y a moins d'une minute (liveQuick), on garde la plus récente
+            { const _o = new Map((byDay[d] || []).map(x => [x.id, x])); evs.forEach(n => { const o = _o.get(n.id); if (o && o._qt && Date.now() - o._qt < 60000 && qKeepOld(o, n)) { n.h = o.h; n.a = o.a; n.state = o.state; n.label = o.label; n.off = o.off; n._qt = o._qt; } }); }
             byDay[d] = evs.concat(carry).filter(m => !isBlockedMatch(m));
             fixP.then(() => {
                 evs.forEach(m => { m.lg = cleanLg(m.lg); });
@@ -1215,7 +1217,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                 setTimeout(() => { if (n365Cb[id]) { delete n365Cb[id]; rej(new Error("délai dépassé")); } }, 15000);
                 if (typeof window.Native365 !== "undefined") { window.Native365.request(id, url); return; }
                 // Navigateur : on passe par le proxy (le site 365Scores bloque les appels directs, CORS)
-                fetch(CFG.PROXY2_URL.replace(/\/?$/, "/") + "365?url=" + encodeURIComponent(url))
+                fetch(CFG.PROXY2_URL.replace(/\/?$/, "/") + "365?url=" + encodeURIComponent(url), { cache: "no-store" })
                     .then(r => r.text().then(t => window.__n365(id, r.status, t)))
                     .catch(() => window.__n365(id, 599, ""));
             });
@@ -1259,7 +1261,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
                 if (e) { (LG_ALIAS[e.lg] ||= new Set()).add(key); e.start = g.startTime; e.lg = key; e.lgl = lgl;
                     // 365Scores est souvent plus rapide qu'ESPN : si son score en direct est plus récent (plus de buts), on l'affiche tout de suite
                     const s2 = v => (v === undefined || v === null || v < 0) ? null : Number(v), h2 = s2(hc.score), a2 = s2(ac.score);
-                    if ((g.statusGroup === 3 || (g.gameTime > 0 && g.gameTime < 150)) && h2 != null && a2 != null && h2 + a2 > (e.h ?? 0) + (e.a ?? 0)) { e.h = h2; e.a = a2; if (e.state === "pre") e.state = "in"; if (g.gameTimeDisplay) e.label = g.gameTimeDisplay; }
+                    if (g.statusGroup !== 4 && (g.statusGroup === 3 || (g.gameTime > 0 && g.gameTime < 150)) && h2 != null && a2 != null && e.state !== "post" && !e.off && (e.state === "pre" || qClk(e.label) >= 0 || h2 + a2 > qTot(e))) qApply(e, { h: h2, a: a2, state: "in", label: g.gameTimeDisplay || e.label, off: false });   // même règle « jamais en arrière » que liveQuick : score, minute et passage en direct
                     fixed++; return; }   // même match chez ESPN : on garde ses stats, mais horaire et compétition viennent de 365Scores
                 const st = String(g.statusText || ""), off = /postpon|cancel|suspend|abandon/i.test(st);
                 const sc = v => (v === undefined || v === null || v < 0) ? null : Number(v), h = sc(hc.score), a = sc(ac.score);
@@ -2561,6 +2563,70 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         setInterval(() => { if (document.hidden && ++hidTick % 4) return; if (liveBusy && Date.now() - liveBusy < 12000) return; liveBusy = Date.now(); refresh(allDays(0, 0), "light").then(refreshOpen).catch(() => { }).finally(() => { liveBusy = 0; }); }, CFG.LIVE_REFRESH_MS);
         setInterval(() => { if (document.hidden) return; refresh(allDays(-CFG.DAYS_BEFORE, CFG.DAYS_AFTER)); loadUpcoming().then(() => { try { renderAll(); } catch (e) { } }); }, CFG.OTHER_REFRESH_MS);
         document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(allDays(0, 0), "light"); });
+        // ===== Direct rapide : même source et même méthode que la page du match =====
+        // Le tableau « tous les matchs » (soccer/all/scoreboard) est mis en cache côté Worker : scores et minutes y arrivent en retard.
+        // La page du match relit le tableau de la seule compétition toutes les 4 s ; on fait pareil ici pour les matchs en cours.
+        // Règles identiques à la page du match : on ne revient jamais en arrière (statut, buts), la minute la plus avancée gagne.
+        function qRank(s) { return s === "post" ? 2 : s === "in" ? 1 : 0; }
+        function qTot(m) { return (m.h ?? 0) + (m.a ?? 0); }
+        function qClk(l) { const x = String(l || "").match(/(\d+)(?:\s*'?\s*\+\s*(\d+))?/); return x ? +x[1] * 100 + +(x[2] || 0) : -1; }
+        function qKeepOld(o, n) {   // true : la valeur o (déjà lue) est plus récente que n
+            if (qRank(o.state) > qRank(n.state)) return true;
+            if (qRank(o.state) < qRank(n.state) || n.state !== "in") return false;
+            if (qTot(o) !== qTot(n)) return qTot(o) > qTot(n);
+            const co = qClk(o.label), cn = qClk(n.label); return co >= 0 && cn >= 0 && co > cn;
+        }
+        function qApply(m, n) {
+            if (!n || qRank(n.state) < qRank(m.state)) return false;
+            if (qRank(n.state) === qRank(m.state) && n.state === "in" && qTot(n) < qTot(m)) return false;
+            if (qRank(n.state) === qRank(m.state) && n.state === "in" && qTot(n) === qTot(m)) { const co = qClk(m.label), cn = qClk(n.label); if (co >= 0 && cn >= 0 && cn < co) return false; }
+            const ch = m.h !== n.h || m.a !== n.a || m.state !== n.state || m.label !== n.label || m.off !== n.off;
+            m.h = n.h; m.a = n.a; m.state = n.state; m.label = n.label; m.off = n.off; m._qt = Date.now();
+            return ch;
+        }
+        const qUtc = t => { const d = new Date(t); return isNaN(d) ? "" : d.toISOString().slice(0, 10).replace(/-/g, ""); };
+        let qBusy = 0, qRot = 0;
+        async function liveQuick() {
+            if (document.hidden || (qBusy && Date.now() - qBusy < 15000)) return;
+            qBusy = Date.now();
+            try {
+                const now = Date.now(), today = qUtc(now), groups = new Map(), cand = [], dates = new Set([ymd(new Date())]);
+                all().forEach(m => {
+                    if (m.gh || m.tsdb) return;   // 365Scores / TheSportsDB / GitHub : autre mécanisme (voir n365Get)
+                    const t = new Date(m.start).getTime(); if (isNaN(t)) return;
+                    const live = m.state === "in", soon = m.state === "pre" && !m.off && now >= t - 120e3 && now - t < 4 * 3600e3;   // en cours, ou sur le point de commencer / commencé sans que le flux général le sache
+                    if (!live && !soon) return;
+                    cand.push(m); dates.add(ymd(new Date(t)));
+                    if (!m.slug || m.slug === "all") return;
+                    const dt = qUtc(m.start), k = m.slug + "|" + (dt === today ? "" : dt);
+                    let g = groups.get(k); if (!g) groups.set(k, g = { slug: m.slug, dt: dt === today ? "" : dt, ms: [] });
+                    g.ms.push(m);
+                });
+                if (!cand.length) return;
+                let list = Array.from(groups.values());
+                if (list.length > 12) { const s = qRot % list.length; list = list.slice(s).concat(list.slice(0, s)).slice(0, 12); qRot += 12; }   // beaucoup de compétitions en direct : on tourne pour rester léger
+                const base = slug => (CFG.PROXY_URL ? CFG.PROXY_URL.replace(/\/?$/, "/") + "soccer/" : "https://site.api.espn.com/apis/site/v2/sports/soccer/") + slug + "/scoreboard";
+                let changed = false, okAny = false;
+                const jobs = list.map(async g => {   // 1) tableau de la compétition (comme la page du match)
+                    const r = await fetch(base(g.slug) + (g.dt ? "?dates=" + g.dt : "")); if (!r.ok) return;
+                    const j = await r.json(); okAny = true;
+                    const evs = (j && j.events) || [];
+                    g.ms.forEach(m => { const ev = evs.find(e => String(e.id) === String(m.id)); if (ev && qApply(m, normalize(ev, j, g.slug))) changed = true; });
+                });
+                // 2) TOUS les matchs en direct, y compris ceux dont la compétition n'est pas identifiée : ESPN interrogé directement (le Worker garde ce flux en cache)
+                Array.from(dates).slice(0, 2).forEach(d => jobs.push((async () => {
+                    const r = await fetch("https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?dates=" + d + "&limit=1000", { cache: "no-store" }); if (!r.ok) return;
+                    const j = await r.json(); okAny = true;
+                    const byId = new Map(((j && j.events) || []).map(e => [String(e.id), e]));
+                    cand.forEach(m => { const ev = byId.get(String(m.id)); if (ev && qApply(m, normalize(ev, j, m.slug))) changed = true; });
+                })()));
+                await Promise.allSettled(jobs);
+                if (okAny) lastOk = Date.now();
+                if (changed) { detectGoals(); renderAll(); }
+            } catch (e) { } finally { qBusy = 0; }
+        }
+        setInterval(liveQuick, 5000);
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) liveQuick(); });
     </script>
 <script>
 (function(){

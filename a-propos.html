@@ -262,7 +262,7 @@
         @media (max-width: 600px) { .goal-toast .tv-tag { font-size: .9rem; padding: 8px 10px; letter-spacing: 1px; } .goal-toast .tv-team { font-size: .8rem; } .goal-toast .tv-score { font-size: 1.2rem; } }
         .m-row.goal-now { animation: goal-flash 1s ease-in-out 6; border-color: var(--accent); }
         @keyframes goal-flash { 0%,100% { background: var(--bg-card); } 50% { background: rgba(34,197,94,.28); } }
-        .goal-badge { display: inline-block; background: var(--accent); color: #000; font-weight: 800; font-size: .65rem; border-radius: 10px; padding: 1px 8px; margin-bottom: 2px; animation: goal-pop .6s ease-in-out infinite alternate; }
+        .goal-badge { white-space: nowrap; flex: 0 0 auto; line-height: 1.4; display: inline-block; background: var(--accent); color: #000; font-weight: 800; font-size: .65rem; border-radius: 10px; padding: 1px 8px; margin-bottom: 2px; animation: goal-pop .6s ease-in-out infinite alternate; }
         @keyframes goal-pop { from { transform: scale(1); } to { transform: scale(1.18); } }
         .goal-now .m-score { animation: goal-pop .6s ease-in-out infinite alternate; }
         @media (prefers-reduced-motion: reduce) { .goal-toast, .goal-toast::after, .goal-toast .tv-tag, .m-row.goal-now, .goal-badge, .goal-now .m-score { animation: none; } }
