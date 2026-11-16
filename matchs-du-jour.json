@@ -1,14 +1,14 @@
 {
  "date": "2026-11-16",
- "generated": "2026-11-16T20:48:51.283Z",
+ "generated": "2026-11-16T22:45:16.961Z",
  "extra": 36,
  "matches": [
   {
    "id": "401883305",
    "lg": "LaLiga 2",
    "start": "2026-11-16T19:30Z",
-   "state": "in",
-   "label": "58'",
+   "state": "post",
+   "label": "90'+4'",
    "home": "Albacete",
    "away": "RC Celta Fortuna",
    "h": 1,
