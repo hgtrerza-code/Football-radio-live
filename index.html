@@ -3930,6 +3930,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
     }
     return null;
   }
+  const cbResKeep = {};
   async function cbScorers(slug, list) {
     const box = $("#cb-sc"); if (!box) return; let pk = cbPick(list);
     let stv, cur = { A: null, done: 0, total: 1 }; const paintSt = () => cbPaintSt(slug, cur.A, stv, cur.done, cur.total);
@@ -3941,14 +3942,16 @@ html[dir=rtl] .lf-ch svg{transform:none}
     if (lgName && $("#cb-stt")) $("#cb-stt").innerHTML = "📊 Statistiques de l’équipe <small>" + esc(lgName) + "</small>";
     cbStand(pk.slug, pk.tid).then(v => { stv = v || null; paintSt(); }).catch(() => { stv = null; paintSt(); });
     const ck = "fl_cbsc3_" + pk.slug + "_" + pk.tid; let cached = null; try { cached = JSON.parse(localStorage.getItem(ck) || "null"); } catch (e) { }
-    if (cached && Date.now() - cached.t < 6 * 3600e3) { cbPaintSc(slug, cached.v, 1, 1, cached.i); cur = { A: cbAgg(cached.r), done: 1, total: 1 }; return paintSt(); }
     const fillRes = evs => {
       const rb = $("#cb-res"); if (cbCur !== slug || !rb || !rb.querySelector(".empty")) return;
       const sc = x => x.score && typeof x.score === "object" ? (x.score.displayValue != null ? x.score.displayValue : x.score.value) : x.score, lg0 = t => cbSm(t.logo || ((t.logos || [])[0] || {}).href);
       const rows = evs.map(e => { const c = (e.competitions || [])[0] || {}, cp = c.competitors || [], h = cp.find(x => x.homeAway === "home") || cp[0], a = cp.find(x => x.homeAway === "away") || cp[1]; if (!h || !a) return null;
         return { id: e.id, lg: lgName, start: e.date, state: "post", off: false, home: h.team.displayName || h.team.name, away: a.team.displayName || a.team.name, hs: sc(h), as: sc(a), isH: String(h.team.id) === pk.tid, hl: lg0(h.team), al: lg0(a.team) }; }).filter(Boolean).sort((x, y) => new Date(y.start) - new Date(x.start)).slice(0, 5);
-      if (rows.length) rb.innerHTML = rows.map(cbRow).join("");
+      if (rows.length) { const h = rows.map(cbRow).join(""); rb.innerHTML = h; cbResKeep[slug] = h; }
     };
+    const isPost = e => { const c = (e.competitions || [])[0] || {}, st = (c.status && c.status.type) || (e.status && e.status.type) || {}; return st.state === "post" || st.completed; };
+    if (cached && Date.now() - cached.t < 6 * 3600e3) { cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/" + pk.slug + "/teams/" + pk.tid + "/schedule").then(j => fillRes((j.events || []).filter(isPost))).catch(() => { }); }
+    if (cached && Date.now() - cached.t < 6 * 3600e3) { cbPaintSc(slug, cached.v, 1, 1, cached.i); cur = { A: cbAgg(cached.r), done: 1, total: 1 }; return paintSt(); }
     let ids = []; try { const j = await cbJ("https://site.api.espn.com/apis/site/v2/sports/soccer/" + pk.slug + "/teams/" + pk.tid + "/schedule"); ids = (j.events || []).filter(e => { const c = (e.competitions || [])[0] || {}, st = (c.status && c.status.type) || (e.status && e.status.type) || {}; return st.state === "post" || st.completed; }).map(e => e.id); fillRes((j.events || []).filter(e => { const c = (e.competitions || [])[0] || {}, st = (c.status && c.status.type) || (e.status && e.status.type) || {}; return st.state === "post" || st.completed; })); } catch (e) { }
     if (!ids.length) return none();
     const goals = {}, pids = {}, recs = []; let done = 0; const q = ids.slice();
@@ -4000,7 +4003,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
       '<div class="cb-head"><img id="cb-logo" class="cb-logo" alt="Logo ' + esc(c[1]) + '" width="60" height="60" hidden onerror="this.hidden=true"><div><h2>' + esc(c[1]) + " <span>: matchs et résultats</span></h2><p>" + esc(c[1]) + " (<span>" + esc(c[2]) + "</span>) · " + esc(c[4]) + "</p></div></div>" +
       '<div class="cb-next" id="cb-next"><small>Prochain match</small><div class="t">Chargement…</div></div>' +
       '<div class="sec-title">📅 Prochains matchs <small>heure de Paris</small></div><div id="cb-up"><div class="sk"></div><div class="sk"></div></div>' +
-      '<div class="sec-title">✅ Derniers résultats</div><div id="cb-res"><div class="sk"></div><div class="sk"></div></div>' +
+      '<div class="sec-title">✅ Derniers résultats</div><div id="cb-res">' + (cbResKeep[slug] || '<div class="sk"></div><div class="sk"></div>') + '</div>' +
       '<div class="sec-title" id="cb-stt">📊 Statistiques de l’équipe <small>saison en cours</small></div><div id="cb-st"><div class="sk"></div><div class="sk"></div></div>' +
       '<div class="sec-title" id="cb-sct">⚽ Meilleurs buteurs <small>buts marqués</small></div><div id="cb-sc"><div class="sk"></div><div class="sk"></div></div>' +
       (CLUBS.some(x => x[4] === c[4] && x[0] !== slug) ? '<div class="sec-title">🛡️ <span>Autres clubs</span> · ' + esc(c[4]) + '</div><div class="cb-chips">' + CLUBS.filter(x => x[4] === c[4] && x[0] !== slug).map(x => '<a href="#club-' + x[0] + '" data-club="' + x[0] + '">' + esc(x[1]) + "</a>").join("") + "</div>" : "");
@@ -4012,7 +4015,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
     if (up.length) { const n = up[0]; $("#cb-next").innerHTML = "<small>" + (n.state === "in" ? "En direct" : "Prochain match") + '</small><div class="t">' + cbTeams(n) + '</div><div class="w">' + (n.state === "in" ? esc(n.hs) + " – " + esc(n.as) + " · " : "") + cbDL.format(new Date(n.start)) + (n.state === "pre" ? " <span>à</span> " + cbTF.format(new Date(n.start)) + " <span>(heure de Paris)</span>" : "") + " · " + esc(n.lg) + "</div>"; }
     else $("#cb-next").innerHTML = '<small>Prochain match</small><div class="t">Aucun match annoncé dans les prochains jours</div><div class="w">Le calendrier se met à jour automatiquement.</div>';
     $("#cb-up").innerHTML = up.length ? up.slice(0, 5).map(cbRow).join("") : '<div class="empty">Aucun match à venir pour le moment.</div>';
-    $("#cb-res").innerHTML = past.length ? past.slice(0, 5).map(cbRow).join("") : '<div class="empty">Aucun résultat récent.</div>';
+    if (past.length) { const h = past.slice(0, 5).map(cbRow).join(""); $("#cb-res").innerHTML = h; cbResKeep[slug] = h; } else $("#cb-res").innerHTML = cbResKeep[slug] || '<div class="empty">Aucun résultat récent.</div>';
     cbScorers(slug, list); cbSeo(slug);
   }
   function renderClubs(slug) {
