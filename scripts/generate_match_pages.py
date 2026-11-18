@@ -301,7 +301,7 @@ def nav_html(lang, active="mj"):
         elif key == "clubs": href, new = p + "/#clubs", D.get(label, label)
         elif key == "buteurs": href, new = p + "/#buteurs", D.get(label, label)
         elif key == "sel": href, new = p + "/selections.html", _sel_label(lang) or label
-        else: href, new = ROOT_PAGES.get(key, "/"), D.get(label, label)
+        else: href, new = (p if key in ("tv", "radio", "table") else "") + ROOT_PAGES.get(key, "/"), D.get(label, label)   # Radio, Classements, Programme TV : pages traduites (/en/radio.html…)
         a = re.sub(r'href="[^"]*"', 'href="%s"' % href, a, count=1)
         a = re.sub(r'(</span>)[^<]*(</a>)', lambda m: m.group(1) + esc(new) + m.group(2), a, count=1)
         if key == "mj":
@@ -432,8 +432,8 @@ def build_match(m, siblings, lang, today):
     if cp: chips.append(f'<a href="{pre}/{cp}.html">{esc(t["c_comp"].format(lg=lg))}</a>')
     if hl: chips.append(f'<a href="{hl}">{esc(t["c_club"].format(c=home))}</a>')
     if al: chips.append(f'<a href="{al}">{esc(t["c_club"].format(c=away))}</a>')
-    chips += [f'<a href="/programme-tv.html">{esc(t["c_tv"])}</a>', f'<a href="/radio.html">{esc(t["c_radio"])}</a>',
-              f'<a href="/classements.html">{esc(t["c_table"])}</a>', f'<a href="{pre}/matchs-du-jour.html">{esc(t["c_all"])}</a>']
+    chips += [f'<a href="{pre}/programme-tv.html">{esc(t["c_tv"])}</a>', f'<a href="{pre}/radio.html">{esc(t["c_radio"])}</a>',
+              f'<a href="{pre}/classements.html">{esc(t["c_table"])}</a>', f'<a href="{pre}/matchs-du-jour.html">{esc(t["c_all"])}</a>']
     sib = "".join(
         f'<li><span><time datetime="{esc(s["start"])}">{hhmm(datetime.fromisoformat(s["start"].replace("Z", "+00:00")).astimezone(PARIS))}</time>'
         f'<a href="{match_href(s, lang, today)}">{esc(s["home"])} – {esc(s["away"])}</a></span><small>{status_label(s, t)}</small></li>'
@@ -463,7 +463,7 @@ def build_match(m, siblings, lang, today):
 <table><thead><tr><th>{esc(t['th_city'])}</th><th>{esc(t['th_ko'])}</th></tr></thead><tbody>{rows}</tbody></table>
 <p>{esc(t['time_note'])}</p>
 <h2>{esc(t['h2_where'].format(**kwb))}</h2>
-<p>{t['p_where'].format(tv='/programme-tv.html', radio='/radio.html')}</p>
+<p>{t['p_where'].format(tv=pre + '/programme-tv.html', radio=pre + '/radio.html')}</p>
 <h2>{esc(t['h2_links'])}</h2>
 <div class="chips">{''.join(chips)}</div>
 {('<h2>' + esc(t['h2_others'].format(lg=lg)) + '</h2><ul class="m">' + sib + '</ul>') if sib else ''}
@@ -538,7 +538,7 @@ def build_hub(items, today, upcoming, lang):
 <p>{esc(t['h_intro'])}</p>
 {secs or '<p>' + esc(t['h_empty']) + '</p>'}
 {upcoming_html(upcoming, today, lang)}
-<div class="chips"><a href="/programme-tv.html">{esc(t['c_tv'])}</a><a href="/classements.html">{esc(t['c_table'])}</a><a href="/radio.html">{esc(t['c_radio'])}</a><a href="/actualites.html">{esc(t['c_news'])}</a><a href="{pre}/">{esc(t['c_scores'])}</a></div>
+<div class="chips"><a href="{pre}/programme-tv.html">{esc(t['c_tv'])}</a><a href="{pre}/classements.html">{esc(t['c_table'])}</a><a href="{pre}/radio.html">{esc(t['c_radio'])}</a><a href="/actualites.html">{esc(t['c_news'])}</a><a href="{pre}/">{esc(t['c_scores'])}</a></div>
 {seo}
 </main>
 """
