@@ -107,16 +107,19 @@ function statusText(m) {
   if (m.state === "post") return "terminé";
   return "à venir";
 }
+// Même algorithme que slugify() dans scripts/generate_match_pages.py : le lien pointe vers la page indexable du match.
+const slug = t => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const matchUrl = m => "/matchs/" + slug(m.home) + "-" + slug(m.away) + "-" + m.id + ".html";
 function line(m) {
   const score = m.state === "pre" || m.state === "off" || m.h === null || m.a === null ? " – " : " " + m.h + "–" + m.a + " ";
-  return '<li><time datetime="' + esc(m.start) + '">' + hhmm(m.start) + "</time> — " + esc(m.home) + score + esc(m.away) + " <small>(" + esc(statusText(m)) + ")</small></li>";
+  return '<li><time datetime="' + esc(m.start) + '">' + hhmm(m.start) + "</time> — <a href=\"" + matchUrl(m) + "\">" + esc(m.home) + score + esc(m.away) + "</a> <small>(" + esc(statusText(m)) + ")</small></li>";
 }
 
 async function main() {
   const now = new Date(), today = dayOf(now);
   const base = new Date(today + "T12:00:00Z");
   const ymdOf = n => new Date(base.getTime() + n * 864e5).toISOString().slice(0, 10).replace(/-/g, "");
-  const dates = [-1, 0, 1].map(ymdOf), topDates = [-1, 0].map(ymdOf);
+  const dates = [-1, 0, 1, 2].map(ymdOf), topDates = [-1, 0].map(ymdOf);
 
   const allRes = await Promise.allSettled(dates.map(loadAll));
   const topJobs = TOP.flatMap(([slug, name]) => topDates.map(d => loadSlug(slug, d).then(j => ({ j, name }))));
@@ -133,6 +136,16 @@ async function main() {
     const m = normalize(ev, r.value.j);
     if (m && dayOf(m.start) === today) { m.lg = r.value.name; m.known = true; seen.set(m.id, m); }
   }
+  // Matchs des 2 prochains jours (compétitions principales uniquement) : alimentent les pages /matchs/ en avance.
+  const day1 = dayOf(new Date(base.getTime() + 864e5)), day2 = dayOf(new Date(base.getTime() + 2 * 864e5));
+  const soonMap = new Map();
+  for (const r of allRes) if (r.status === "fulfilled") for (const ev of (r.value.events || [])) {
+    const m = normalize(ev, r.value); const d = m && dayOf(m.start);
+    if (m && (d === day1 || d === day2)) soonMap.set(m.id, m);
+  }
+  await resolveLeagueNames([...soonMap.values()]);
+  const soon = [...soonMap.values()].filter(m => rank(m.lg) < 99 && !BLOCK.test(m.lg) && !BLOCK.test(m.raw))
+    .sort((a, b) => a.start.localeCompare(b.start)).slice(0, 60).map(({ raw, lid, known, ...m }) => m);
   const stat = await resolveLeagueNames([...seen.values()].filter(m => !m.known));
   const kept0 = [...seen.values()].filter(m => !BLOCK.test(m.lg) && !BLOCK.test(m.raw));
   const named = kept0.filter(m => m.lg !== OTHER)
@@ -150,7 +163,7 @@ async function main() {
 
   // Rien de changé depuis la dernière exécution : on ne touche à rien (pas de commit inutile).
   let prev = null; try { prev = JSON.parse(fs.readFileSync(JSON_FILE, "utf8")); } catch (e) { }
-  if (prev && prev.date === today && JSON.stringify(prev.matches) === JSON.stringify(matches) && prev.extra === extra) { console.log("Aucun changement."); return; }
+  if (prev && prev.date === today && JSON.stringify(prev.matches) === JSON.stringify(matches) && JSON.stringify(prev.soon || []) === JSON.stringify(soon) && prev.extra === extra) { console.log("Aucun changement."); return; }
 
   const longDate = now.toLocaleDateString("fr-FR", { timeZone: TZ, weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const upd = now.toLocaleTimeString("fr-FR", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
@@ -163,7 +176,7 @@ async function main() {
   const section = '<!--APERCU-START--><section id="apercu-matchs" aria-label="Aperçu des matchs du jour">' +
     "<h2>Matchs de football du jour : " + esc(longDate) + "</h2>" +
     "<p class=\"ap-upd\">Aperçu mis à jour à " + upd + " (heure de Paris). Les scores en direct s’actualisent dans l’application ci-dessus.</p>" +
-    body + "</section><!--APERCU-END-->";
+    body + '<p><a href="/matchs-du-jour.html">Tous les matchs du jour : heures, scores et pages dédiées</a></p>' + "</section><!--APERCU-END-->";
 
   const ld = matches.slice(0, MAX_LD).map(m => ({
     "@type": "SportsEvent", name: m.home + " - " + m.away, sport: "Football",
@@ -175,7 +188,7 @@ async function main() {
     organizer: { "@type": "Organization", name: m.lg, url: orgUrl(m.lg) },
     image: [LOGO],
     homeTeam: { "@type": "SportsTeam", name: m.home }, awayTeam: { "@type": "SportsTeam", name: m.away },
-    url: "https://www.footlivepro.com/"
+    url: "https://www.footlivepro.com" + matchUrl(m)
   }));
   const ldBlock = "<!--APERCU-LD-START-->" + (ld.length ? '<script type="application/ld+json">' + JSON.stringify({ "@context": "https://schema.org", "@graph": ld }).replace(/</g, "\\u003c") + "</script>" : "") + "<!--APERCU-LD-END-->";
 
@@ -184,7 +197,7 @@ async function main() {
   if (!reS.test(html) || !reL.test(html)) throw new Error("Repères APERCU-START/END ou APERCU-LD-START/END introuvables dans " + FILE);
   html = html.replace(reS, () => section).replace(reL, () => ldBlock);
   fs.writeFileSync(FILE, html);
-  fs.writeFileSync(JSON_FILE, JSON.stringify({ date: today, generated: now.toISOString(), extra, matches }, null, 1));
+  fs.writeFileSync(JSON_FILE, JSON.stringify({ date: today, generated: now.toISOString(), extra, matches, soon }, null, 1));
   console.log(matches.length + " matchs écrits pour le " + today);
 }
 main().catch(e => { console.error(e.message); process.exit(1); });
