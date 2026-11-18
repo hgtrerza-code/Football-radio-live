@@ -1,6 +1,6 @@
 {
  "date": "2026-11-18",
- "generated": "2026-11-18T14:52:46.916Z",
+ "generated": "2026-11-18T18:53:11.181Z",
  "extra": 25,
  "matches": [
   {
@@ -20,8 +20,8 @@
    "id": "401928518",
    "lg": "Coupe du Roi",
    "start": "2026-11-18T18:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+2'",
    "home": "Portugalete",
    "away": "Real Unión Irun",
    "h": 0,
@@ -33,12 +33,12 @@
    "id": "401928497",
    "lg": "Coupe du Roi",
    "start": "2026-11-18T18:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "45'+2'",
    "home": "Utebo",
    "away": "CD Sabadell",
    "h": 0,
-   "a": 0,
+   "a": 3,
    "venue": "Campo de Fútbol Municipal Santa Ana",
    "place": "Utebo, Spain"
   },
@@ -94,5 +94,6 @@
    "venue": "Camp Nou Municipal",
    "place": "Reus, Spain"
   }
- ]
+ ],
+ "soon": []
 }
