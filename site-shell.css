@@ -1,0 +1,67 @@
+/* FootLive Pro : en-tête + barre d'onglets IDENTIQUES à l'accueil, pour les pages statiques (matchs/, matchs-du-jour.html).
+   Valeurs copiées de index.html (état final après les blocs pro-theme / app-nav / nav-fit). Si le style de l'accueil change, mettre ce fichier à jour. */
+:root{--bg-dark:#070b16;--bg-card:#111a2b;--bg-card-hover:#17223a;--bg-detail:#0d1524;--text-main:#f8fafc;--text-muted:#8b9bb4;--border:#1f2c47;--accent:#2ee59d;--live-red:#ef4444;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@font-face{font-family:'Inter Fallback';src:local('Arial'),local('Helvetica Neue'),local('Roboto');size-adjust:107.4%;ascent-override:90.2%;descent-override:22.5%;line-gap-override:0%}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter','Inter Fallback',Arial,sans-serif;background:radial-gradient(900px 420px at 50% -120px,rgba(46,229,157,.13),transparent),var(--bg-dark);color:var(--text-main);line-height:1.5;min-height:100vh}
+.container{max-width:1100px;margin:0 auto;padding:0 16px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* En-tête */
+header{background:rgba(7,11,22,.97);padding:calc(.7rem + var(--sat)) 0 .6rem;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-content{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+/* Logo : mêmes règles que le h1 de l'accueil (ici un <a>, car le h1 de ces pages est le titre du match) */
+header .brand{display:flex;align-items:center;gap:0;font-size:1.8rem;font-weight:800;letter-spacing:-.4px;line-height:1.1;color:#fff;text-decoration:none;text-shadow:none}
+header .brand:hover{text-decoration:none}
+header .brand .brand-mark{width:44px;height:44px;display:block;flex-shrink:0;margin-right:-2px}
+header .brand .brand-mark svg{width:100%;height:100%;display:block}
+header .brand b{font-weight:800;letter-spacing:-.3px;margin-left:0}
+header .brand b span{color:var(--accent)}
+@media(max-width:600px){header .brand{font-size:1.65rem}}
+
+/* Barre d'onglets (ordinateur) */
+#tabbar{border-top:1px solid var(--border);background:rgba(7,11,22,.6);min-height:46px}
+#tabbar .container{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-top:0;padding-bottom:0}
+#tabbar .container::-webkit-scrollbar{display:none}
+#tabbar a{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;padding:11px 16px;color:var(--text-muted);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:3px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s,background .2s}
+#tabbar a span{font-size:1.05rem;line-height:1}
+#tabbar a span .svgi{width:1.3em;height:1.3em}
+#tabbar a:hover{color:var(--text-main);background:rgba(255,255,255,.04);text-decoration:none}
+#tabbar a.on{color:var(--accent);border-bottom-color:var(--accent)}
+@media(max-width:600px){#tabbar a{padding:10px 13px;font-size:.82rem}}
+@media(min-width:701px){#tabbar .container{gap:0;justify-content:space-between}#tabbar a{padding:11px 10px;gap:6px;font-size:.86rem}#tabbar[data-tight] a{padding:11px 7px;gap:5px;font-size:.82rem}}
+
+/* Mobile : menu du bas façon application (onglets + « Plus ») */
+.more-btn,.more-sheet{display:none}
+@media (max-width:700px){
+  :root{--tbh:60px}
+  body{padding-bottom:calc(var(--tbh) + var(--sab,0px))}
+  #tabbar{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:1000;min-height:0;border-top:1px solid var(--border);background:rgba(7,11,22,.98);padding-bottom:var(--sab,0px);box-shadow:0 -6px 20px rgba(0,0,0,.4)}
+  #tabbar .container{display:flex;gap:0;overflow:visible;padding:0 6px;max-width:none;justify-content:space-evenly}
+  #tabbar .container>a,#tabbar .container>.more-btn{flex:0 0 auto;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:var(--tbh);padding:6px 2px 4px;font-size:0;border:0;border-radius:0;background:none;color:var(--text-muted);cursor:pointer;position:relative;font-family:inherit;font-weight:700;text-decoration:none}
+  #tabbar .container>a::after,#tabbar .container>.more-btn::after{content:attr(data-short);font-size:.64rem;line-height:1;font-weight:700;white-space:nowrap}
+  #tabbar .container>a>span,#tabbar .container>.more-btn>span{font-size:1.2rem;line-height:1;display:flex}
+  #tabbar .container>a.on,#tabbar:has(.more-panel a.on) .container>.more-btn{color:var(--accent)}
+  #tabbar .container>a.on::before,#tabbar:has(.more-panel a.on) .container>.more-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+  #tabbar .container>.more-btn>span .svgi{width:1.3em;height:1.3em}
+  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"],#tabbar .container>a[data-sel]{display:none}
+  #tabbar .container>a[data-go="scores"]{order:1}
+  #tabbar .container>a[data-mj]{order:2}
+  #tabbar .container>a[data-go="tv"]{order:3}
+  #tabbar .container>a[data-go="table"]{order:4}
+  #tabbar .container>a[data-go="radio"]{order:5}
+  #tabbar .container>.more-btn{order:6;display:flex}
+  .more-sheet:not([hidden]){display:block}
+  .more-bd{position:fixed;left:0;right:0;top:0;bottom:calc(var(--tbh) + var(--sab,0px));background:rgba(0,0,0,.55);z-index:1}
+  .more-panel{position:fixed;left:10px;right:10px;bottom:calc(var(--tbh) + var(--sab,0px) + 10px);z-index:2;background:#0d1524;border:1px solid var(--border);border-radius:18px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;box-shadow:0 -10px 40px rgba(0,0,0,.6);animation:more-up .2s ease}
+  #tabbar .more-panel a{display:flex;align-items:center;gap:10px;padding:14px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;color:var(--text-main);font-size:.9rem;font-weight:700;text-decoration:none}
+  #tabbar .more-panel a.on{border-color:var(--accent);color:var(--accent)}
+  #tabbar .more-panel a>span{font-size:1.3rem;line-height:1;display:flex}
+  #tabbar .container>a,#tabbar .container>.more-btn{justify-content:flex-start;padding:10px 0 0;gap:4px;box-sizing:border-box}
+  #tabbar .container>a>span,#tabbar .container>.more-btn>span{width:26px;height:26px;flex:0 0 26px;align-items:center;justify-content:center;font-size:0;line-height:0}
+  #tabbar .container>a>span .svgi,#tabbar .container>.more-btn>span .svgi{width:24px;height:24px;vertical-align:baseline}
+  #tabbar .container>a::after,#tabbar .container>.more-btn::after{height:12px;line-height:12px;flex:0 0 12px}
+  @keyframes more-up{from{transform:translateY(14px);opacity:0}}
+}
+@media (max-width:700px) and (prefers-reduced-motion:reduce){.more-panel{animation:none}}
