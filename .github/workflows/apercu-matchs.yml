@@ -22,11 +22,16 @@ jobs:
           node-version: 20
       - name: Générer l'aperçu
         run: node scripts/update-apercu.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pages indexables par match + sitemap-matchs.xml + IndexNow
+        run: python3 scripts/generate_match_pages.py --ping
       - name: Commit si changement
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html matchs-du-jour.json
+          git add index.html matchs-du-jour.json matchs matchs-du-jour.html sitemap-matchs.xml
           if ! git diff --cached --quiet; then
             git commit -m "Aperçu des matchs du jour"
             git pull --rebase origin "${GITHUB_REF_NAME}"
