@@ -9,6 +9,9 @@ const JSON_FILE = "matchs-du-jour.json";
 const PROXY = "https://footlive.hgtrerza.workers.dev/soccer/";            // votre Worker (même source que le site)
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/";     // secours direct
 const MAX_PER_LEAGUE = 12, MAX_TOTAL = 80, MAX_LD = 25;
+const SOON_DAYS = 7, MAX_SOON = 500;   // pages /matchs/ créées à l'avance : de J+1 à J+7
+// En plus des compétitions principales (TOP), on garde ces compétitions pour les matchs à venir (Maroc, sélections nationales).
+const SOON_EXTRA = /botola|moroccan|nations league|friendl|amical|world cup|coupe du monde|qualif|africa cup|afcon|euro(pean)? championship/i;
 const LOGO = "https://www.footlivepro.com/og-image.png"; // image de partage du site
 
 // Compétitions principales : interrogées une par une, donc leur nom est toujours connu. L'ordre = l'ordre d'affichage.
@@ -119,11 +122,16 @@ async function main() {
   const now = new Date(), today = dayOf(now);
   const base = new Date(today + "T12:00:00Z");
   const ymdOf = n => new Date(base.getTime() + n * 864e5).toISOString().slice(0, 10).replace(/-/g, "");
-  const dates = [-1, 0, 1, 2].map(ymdOf), topDates = [-1, 0].map(ymdOf);
+  const soonIdx = Array.from({ length: SOON_DAYS }, (_, i) => i + 1);
+  const dates = [-1, 0, ...soonIdx].map(ymdOf), topDates = [-1, 0].map(ymdOf);
+  const soonRange = ymdOf(1) + "-" + ymdOf(SOON_DAYS);   // ESPN accepte une plage AAAAMMJJ-AAAAMMJJ
 
   const allRes = await Promise.allSettled(dates.map(loadAll));
   const topJobs = TOP.flatMap(([slug, name]) => topDates.map(d => loadSlug(slug, d).then(j => ({ j, name }))));
   const topRes = await Promise.allSettled(topJobs);
+  // Prochains jours : une requête par compétition principale sur toute la plage (nom de compétition fiable)
+  const soonTopRes = await Promise.allSettled(TOP.map(([slug, name]) => loadSlug(slug, soonRange).then(j => ({ j, name }))));
+  console.log("Prochains jours (J+1 à J+" + SOON_DAYS + ") : " + soonTopRes.filter(r => r.status === "fulfilled").length + "/" + TOP.length + " compétitions lues.");
   const okAll = allRes.filter(r => r.status === "fulfilled").length, okTop = topRes.filter(r => r.status === "fulfilled").length;
   console.log("Flux général : " + okAll + "/" + dates.length + " ; compétitions principales : " + okTop + "/" + topJobs.length + " requêtes réussies.");
   if (!okAll && !okTop) throw new Error("Aucune source de scores n'a répondu : index.html non modifié.");
@@ -136,16 +144,22 @@ async function main() {
     const m = normalize(ev, r.value.j);
     if (m && dayOf(m.start) === today) { m.lg = r.value.name; m.known = true; seen.set(m.id, m); }
   }
-  // Matchs des 2 prochains jours (compétitions principales uniquement) : alimentent les pages /matchs/ en avance.
-  const day1 = dayOf(new Date(base.getTime() + 864e5)), day2 = dayOf(new Date(base.getTime() + 2 * 864e5));
+  // Matchs des prochains jours (J+1 à J+SOON_DAYS) : alimentent les pages /matchs/ en avance.
+  const soonDays = new Set(soonIdx.map(n => dayOf(new Date(base.getTime() + n * 864e5))));
   const soonMap = new Map();
   for (const r of allRes) if (r.status === "fulfilled") for (const ev of (r.value.events || [])) {
-    const m = normalize(ev, r.value); const d = m && dayOf(m.start);
-    if (m && (d === day1 || d === day2)) soonMap.set(m.id, m);
+    const m = normalize(ev, r.value);
+    if (m && soonDays.has(dayOf(m.start))) soonMap.set(m.id, m);
   }
   await resolveLeagueNames([...soonMap.values()]);
-  const soon = [...soonMap.values()].filter(m => rank(m.lg) < 99 && !BLOCK.test(m.lg) && !BLOCK.test(m.raw))
-    .sort((a, b) => a.start.localeCompare(b.start)).slice(0, 60).map(({ raw, lid, known, ...m }) => m);
+  // Flux par compétition principale : nom connu, prioritaire sur le flux général
+  for (const r of soonTopRes) if (r.status === "fulfilled") for (const ev of (r.value.j.events || [])) {
+    const m = normalize(ev, r.value.j);
+    if (m && soonDays.has(dayOf(m.start))) { m.lg = r.value.name; m.known = true; soonMap.set(m.id, m); }
+  }
+  const soon = [...soonMap.values()].filter(m => (rank(m.lg) < 99 || SOON_EXTRA.test(m.lg + " " + m.raw)) && m.lg !== OTHER && !BLOCK.test(m.lg) && !BLOCK.test(m.raw))
+    .sort((a, b) => a.start.localeCompare(b.start)).slice(0, MAX_SOON).map(({ raw, lid, known, ...m }) => m);
+  console.log("Matchs à venir retenus (J+1 à J+" + SOON_DAYS + ") : " + soon.length + ".");
   const stat = await resolveLeagueNames([...seen.values()].filter(m => !m.known));
   const kept0 = [...seen.values()].filter(m => !BLOCK.test(m.lg) && !BLOCK.test(m.raw));
   const named = kept0.filter(m => m.lg !== OTHER)

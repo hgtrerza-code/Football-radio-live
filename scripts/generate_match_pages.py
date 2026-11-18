@@ -100,12 +100,11 @@ def score_txt(m):
     return f"{m['h']}–{m['a']}"
 
 
-CSS = """:root{--bg:#0a0f1e;--card:#111a2e;--bd:#1f2b45;--tx:#e8edf7;--mu:#93a1bd;--ac:#22c55e;--rd:#ef4444}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 -apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+# L'en-tête, le logo et la barre d'onglets viennent de /site-shell.css (même rendu que l'accueil) : ici, seulement le contenu de la page.
+CSS = """:root{--bg:#070b16;--card:#111a2b;--bd:#1f2c47;--tx:#e8edf7;--mu:#93a1bd;--ac:#22c55e;--rd:#ef4444}
+main{line-height:1.6}
 a{color:var(--ac);text-decoration:none}a:hover{text-decoration:underline}
 .c{max-width:860px;margin:0 auto;padding:0 16px}
-header{border-bottom:1px solid var(--bd);background:rgba(7,11,22,.8)}header .c{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
-.brand{font-weight:800;color:var(--tx);font-size:1.05rem}nav a{color:var(--mu);font-weight:700;font-size:.9rem;margin-right:14px}nav a:hover{color:var(--ac)}
 h1{font-size:1.5rem;line-height:1.25;margin:1.2rem 0 .4rem}h2{font-size:1.1rem;margin:1.6rem 0 .6rem}h3{font-size:.95rem;margin:1rem 0 .2rem}
 p{margin:.4rem 0;color:var(--mu)}.crumbs{font-size:.8rem;color:var(--mu);margin-top:1rem}
 .hero{background:linear-gradient(135deg,#0f2a1d,#11202f);border:1px solid rgba(34,197,94,.4);border-radius:16px;padding:18px 16px;margin:12px 0;text-align:center}
@@ -151,14 +150,99 @@ HEAD = """<!DOCTYPE html>
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{site}/og-image.png">
 {ld}
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="preload" as="style" onload="this.onload=null;if(matchMedia('(min-width:700px)').matches)this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/site-shell.css?v=2">
 <style>{css}</style></head><body>
-<header><div class="c"><a class="brand" href="/">⚽ FootLive Pro</a>
-<nav aria-label="Navigation"><a href="/">Scores</a><a href="/matchs-du-jour.html">Matchs du jour</a><a href="/programme-tv.html">Programme TV</a><a href="/radio.html">Radio</a><a href="/classements.html">Classements</a></nav></div></header>
+<header>
+<div class="container header-content"><a class="brand" href="/" aria-label="FootLive Pro : accueil">{mark}<b>FootLive <span>Pro</span></b></a></div>
+{nav}
+</header>
+"""
+
+# Menu du bas mobile (« Plus ») et ajustement de la barre sur ordinateur : mêmes comportements que l'accueil.
+SHELL_JS = """<script>
+(function(){var bar=document.getElementById('tabbar');if(!bar)return;var box=bar.querySelector('.container');if(!box)return;
+function fit(){bar.removeAttribute('data-tight');if(window.innerWidth<701)return;if(box.scrollWidth>box.clientWidth+1)bar.setAttribute('data-tight','1')}
+fit();addEventListener('resize',fit);addEventListener('load',function(){fit();setTimeout(fit,700)});
+if(box.querySelector('.more-btn'))return;
+var SHORT={scores:'Scores',table:'Classements',tv:'Guide TV',radio:'Radio'};
+box.querySelectorAll('a[data-go]').forEach(function(a){if(SHORT[a.dataset.go])a.setAttribute('data-short',SHORT[a.dataset.go])});
+var btn=document.createElement('button');btn.type='button';btn.className='more-btn';btn.setAttribute('data-short','Plus');btn.setAttribute('aria-label','Plus de sections');btn.setAttribute('aria-haspopup','true');btn.setAttribute('aria-expanded','false');
+btn.innerHTML='<span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></span>';
+box.appendChild(btn);
+var sheet=document.createElement('div');sheet.className='more-sheet';sheet.hidden=true;sheet.innerHTML='<div class="more-bd"></div><div class="more-panel" role="menu"></div>';
+var panel=sheet.querySelector('.more-panel');
+['clubs','buteurs','news','women'].forEach(function(k){var o=box.querySelector('a[data-go="'+k+'"]');if(!o)return;var c=o.cloneNode(true);c.classList.remove('on');c.removeAttribute('aria-current');c.setAttribute('role','menuitem');panel.appendChild(c)});
+var sl=box.querySelector('a[data-sel]');if(sl){var cs=sl.cloneNode(true);cs.setAttribute('role','menuitem');panel.appendChild(cs)}
+bar.appendChild(sheet);
+function set(o){sheet.hidden=!o;btn.setAttribute('aria-expanded',o?'true':'false')}
+btn.addEventListener('click',function(e){e.stopPropagation();set(sheet.hidden)});
+sheet.addEventListener('click',function(e){if(e.target.closest('a')||e.target.closest('.more-bd'))set(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
+addEventListener('resize',function(){if(innerWidth>700)set(false)});
+})();
+</script>
 """
 
 FOOT = """<footer><div class="c"><a href="/mentions-legales.html">Mentions légales</a><a href="/confidentialite.html">Confidentialité</a><a href="/contact.html">Contact</a><a href="/a-propos.html">À propos</a></div></footer>
-</body></html>
+""" + SHELL_JS + """</body></html>
 """
+
+
+# --- En-tête et barre d'onglets : lus dans index.html pour rester IDENTIQUES à l'accueil (logo, onglets, ordre) ---
+_SHELL = {}
+
+
+def shell_parts():
+    """(logo, anchors) lus dans index.html ; liens réécrits en absolus (/page.html)."""
+    if _SHELL:
+        return _SHELL["mark"], _SHELL["anchors"]
+    try:
+        t = open("index.html", encoding="utf-8").read()
+    except OSError:
+        t = ""
+    m = re.search(r'<span class="brand-mark">.*?</span>', t, re.S)
+    mark = m.group(0) if m else '<span class="brand-mark">⚽</span>'
+    nav = re.search(r'<nav id="tabbar".*?</div></nav>', t, re.S)
+    anchors = re.findall(r'<a [^>]*>.*?</a>', nav.group(0), re.S) if nav else []
+
+    def absolute(a):
+        a = re.sub(r'\s+class="on"', "", a)
+        a = re.sub(r'\s+aria-current="page"', "", a)
+
+        def fix(mm):
+            h = mm.group(1)
+            if h in ("", "./"): h = "/"
+            elif h.startswith("#"): h = "/" + h
+            elif not (h.startswith("/") or h.startswith("http")): h = "/" + h
+            return f'href="{h}"'
+        return re.sub(r'href="([^"]*)"', fix, a, count=1)
+    _SHELL.update(mark=mark, anchors=[absolute(a) for a in anchors])
+    return _SHELL["mark"], _SHELL["anchors"]
+
+
+def nav_html(active="matchs"):
+    """Barre d'onglets de l'accueil ; l'onglet « Matchs du jour » est actif sur le hub et sur les pages match."""
+    _, anchors = shell_parts()
+    if not anchors:   # index.html introuvable : barre minimale
+        anchors = ['<a href="/" data-go="scores"><span></span>Scores</a>',
+                   '<a href="/matchs-du-jour.html" data-mj data-short="Matchs"><span></span>Matchs du jour</a>',
+                   '<a href="/programme-tv.html" data-go="tv"><span></span>Programme TV</a>',
+                   '<a href="/radio.html" data-go="radio"><span></span>Radio</a>']
+    out = []
+    for a in anchors:
+        if active == "matchs" and "data-mj" in a:
+            a = a.replace("<a ", '<a class="on" aria-current="page" ', 1)
+        out.append(a)
+    return '<nav id="tabbar" aria-label="Navigation du site"><div class="container">' + "".join(out) + "</div></nav>"
+
+
+def head(title, desc, url, ld):
+    return HEAD.format(title=esc(title), desc=esc(desc), url=url, site=SITE, css=CSS, ld=ld,
+                       mark=shell_parts()[0], nav=nav_html())
 
 
 def ld_script(objs):
@@ -258,17 +342,34 @@ if(st){{st.textContent=s.state==="in"?"en direct · "+((ev.status&&ev.status.dis
 tick();setInterval(tick,60000)}})();
 </script>
 """
-    page = HEAD.format(title=esc(title), desc=esc(desc), url=url, site=SITE, css=CSS,
-                       ld=ld_script([event, crumbs, faq_ld])) + body + FOOT
+    page = head(title, desc, url, ld_script([event, crumbs, faq_ld])) + body + FOOT
     return name, page, url
 
 
-def build_hub(items, today):
+def upcoming_html(upcoming, today):
+    """Liste des matchs des prochains jours, groupés par jour : chaque match est lié à sa page (maillage interne)."""
+    days = {}
+    for m in sorted(upcoming, key=lambda x: x["start"]):
+        days.setdefault(datetime.fromisoformat(m["start"].replace("Z", "+00:00")).astimezone(PARIS).date(), []).append(m)
+    out = ""
+    for day, ms in days.items():
+        li = "".join(
+            f'<li><span><time datetime="{esc(m["start"])}">{hhmm(datetime.fromisoformat(m["start"].replace("Z", "+00:00")).astimezone(PARIS))}</time>'
+            f'<a href="/{DIR}/{page_name(m)}.html">{esc(m["home"])} – {esc(m["away"])}</a></span>'
+            f'<small>{esc(m.get("lg") or "Football")}</small></li>' for m in ms)
+        d = datetime(day.year, day.month, day.day, 12, tzinfo=timezone.utc)
+        out += f'<h3>{esc(fr_date(d))}</h3><ul class="m">{li}</ul>'
+    return ('<h2>Prochains matchs</h2><p>Heure, compétition et page dédiée de chaque match des prochains jours (heure de Paris).</p>'
+            + out) if out else ""
+
+
+def build_hub(items, today, upcoming=()):
     url = SITE + "/matchs-du-jour.html"
     d = datetime.fromisoformat(today + "T12:00:00+00:00")
     title = f"Matchs de foot aujourd'hui ({d.day} {MOIS[d.month - 1]}) : heures et scores | FootLive Pro"
     desc = (f"Tous les matchs de football du {fr_date(d)} : heure, score en direct, compétition. "
-            f"{len(items)} matchs avec leur page dédiée.")[:158]
+            f"{len(items)} matchs avec leur page dédiée"
+            + (f" et les {len(upcoming)} prochains matchs." if upcoming else "."))[:158]
     by = {}
     for m in items:
         by.setdefault(m.get("lg") or "Football", []).append(m)
@@ -287,10 +388,11 @@ def build_hub(items, today):
 <h1>Matchs de foot aujourd'hui : {esc(fr_date(d))}</h1>
 <p>Heure (Paris), score et statut de chaque match. Touchez un match pour sa page : heure dans votre pays, suivi en direct, radios et programme TV.</p>
 {secs or '<p>Aucun match des principales compétitions n’est programmé aujourd’hui.</p>'}
+{upcoming_html(upcoming, today)}
 <div class="chips"><a href="/programme-tv.html">Programme TV foot</a><a href="/classements.html">Classements</a><a href="/radio.html">Radios foot en direct</a><a href="/actualites.html">Actualités foot</a><a href="/">Scores en direct</a></div>
 </main>
 """
-    return HEAD.format(title=esc(title), desc=esc(desc), url=url, site=SITE, css=CSS, ld=ld_script([crumbs])) + body + FOOT
+    return head(title, desc, url, ld_script([crumbs])) + body + FOOT
 
 
 def ping_indexnow(urls):
@@ -340,10 +442,15 @@ def main():
     json.dump(reg, open(REG, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
 
     hub_items = sorted(src["matches"], key=lambda m: m["start"])
-    open("matchs-du-jour.html", "w", encoding="utf-8").write(build_hub(hub_items, today))
+    # matchs des prochains jours (jour de Paris > aujourd'hui) : listés sur le hub pour que chaque page soit liée et explorable
+    def paris_day(m):
+        return datetime.fromisoformat(m["start"].replace("Z", "+00:00")).astimezone(PARIS).strftime("%Y-%m-%d")
+    upcoming = [m for m in reg.values() if paris_day(m) > today and m["state"] in ("pre", "off")]
+    open("matchs-du-jour.html", "w", encoding="utf-8").write(build_hub(hub_items, today, upcoming))
 
+    # lastmod : jamais dans le futur (un match de dans 5 jours est « vu » aujourd'hui)
     urls = [(SITE + "/matchs-du-jour.html", today)] + \
-           [(f"{SITE}/{DIR}/{page_name(m)}.html", m["start"][:10]) for m in sorted(reg.values(), key=lambda x: x["start"])]
+           [(f"{SITE}/{DIR}/{page_name(m)}.html", min(m["start"][:10], today)) for m in sorted(reg.values(), key=lambda x: x["start"])]
     with open("sitemap-matchs.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
         for u, lm in urls:
