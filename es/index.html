@@ -3312,16 +3312,16 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     tvPut((kd.length ? '<div class="note" style="font-size:.72rem;opacity:.7;padding:4px 6px">Détail des chaînes indisponible pour le moment (' + esc(kd.map(d => koErr[d] || "erreur").join(", ")) + ') — chaînes principales affichées.</div>' : "") + koDiag() + grouped(L, rowFn, false, true));
   }
   const TV_FAQ = [
-    ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Le programme ne montre que les matchs des 10 compétitions de la barre (Ligue des champions, Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Europa League, Conference League, Liga Portugal, Botola Pro). Pour chaque match, il affiche ensemble beIN SPORTS, Arryadia ou Sport TV selon la compétition, puis toutes les autres chaînes annoncées par la source (Espagne, Italie, France, Europe…), quand elles sont disponibles. Vérifiez toujours la grille de la chaîne le jour du match."],
-    ["Quel est le numéro de la chaîne beIN SPORTS pour un match ?", "Le numéro exact (beIN SPORTS 1, 2, 3…) est annoncé par la chaîne le jour du match. Il s’affiche dans le programme quand la source le fournit."],
-    ["À quelle heure commencent les matchs ?", "Les horaires sont affichés à l’heure de votre appareil et mis à jour automatiquement."]
+    ["¿En qué canal ver la Champions League y las grandes ligas?", "La programación solo muestra los partidos de las 10 competiciones de la barra (Champions League, Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Europa League, Conference League, Liga Portugal, Botola Pro). Para cada partido muestra beIN SPORTS, Arryadia o Sport TV según la competición y, después, el resto de canales que anuncia la fuente (España, Italia, Francia, Europa…), cuando están disponibles. Comprueba siempre la parrilla del canal el día del partido."],
+    ["¿Cuál es el número del canal beIN SPORTS para un partido?", "El número exacto (beIN SPORTS 1, 2, 3…) lo anuncia el canal el día del partido. Aparece en la programación cuando la fuente lo facilita."],
+    ["¿Es gratuita la programación TV de FootLive Pro?", "Sí, la programación TV, los resultados, las clasificaciones y las radios deportivas son gratuitos."]
   ];
   const tvSt = 'style="color:var(--accent)"';
-  const tvSeo = '<section id="tv-seo" class="container" aria-label="Présentation du programme TV football" style="margin:2rem auto 1rem;padding:1rem 4px 0;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">' +
-    '<h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">Programme TV football : matchs du jour et chaînes qui les diffusent</h2>' +
-    '<p>Le programme TV de FootLive Pro liste les matchs importants de la journée avec l’heure, les équipes, le score en direct et la chaîne qui diffuse la rencontre (beIN SPORTS, Arryadia, Sport TV). Choisissez un jour avec les boutons en haut pour préparer votre semaine.</p>' +
-    '<p>Pages à découvrir : <a href="./" ' + tvSt + '>scores en direct</a>, <a href="../classements.html" ' + tvSt + '>classements de football</a>, <a href="../radio.html" ' + tvSt + '>radios foot en direct</a> et <a href="../actualites.html" ' + tvSt + '>actualités foot</a>.</p>' +
-    '<div class="faq"><h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Questions fréquentes</h2>' + TV_FAQ.map(f => '<h3>' + f[0] + '</h3><p>' + f[1] + '</p>').join("") + '</div></section>';
+  const tvSeo = '<section id="tv-seo" class="container" aria-label="Programación TV de fútbol: partidos de hoy y canales que los emiten" style="margin:2rem auto 1rem;padding:1rem 4px 0;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">' +
+    '<h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">Programación TV de fútbol: partidos de hoy y canales que los emiten</h2>' +
+    '<p>La programación TV de FootLive Pro enumera los partidos importantes del día con la hora, los equipos, el marcador en directo y el canal que emite el encuentro (beIN SPORTS, Arryadia, Sport TV). Elige un día en la franja de fechas para ver los próximos partidos.</p>' +
+    '<p>Más páginas: <a href="./" ' + tvSt + '>resultados en directo</a>, <a href="classements.html" ' + tvSt + '>clasificaciones de fútbol</a>, <a href="radio.html" ' + tvSt + '>radios de fútbol</a> y <a href="../actualites.html" ' + tvSt + '>noticias de fútbol</a>.</p>' +
+    '<div class="faq"><h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Preguntas frecuentes</h2>' + TV_FAQ.map(f => '<h3>' + f[0] + '</h3><p>' + f[1] + '</p>').join("") + '</div></section>';
   const tvLD = () => ({ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": TV_FAQ.map(f => ({ "@type": "Question", "name": f[0], "acceptedAnswer": { "@type": "Answer", "text": f[1] } })) });
   $("main").insertAdjacentHTML("beforeend", '<div id="tv-view" hidden><div class="sec-title">📺 Programme TV <small>les matchs importants et la chaîne qui les diffuse</small></div><div class="daystrip" id="tv-days"></div><div id="tv-list"><div class="empty">Chargement du programme…</div></div>' + tvSeo + '</div>');
   $("#tv-days").addEventListener("click", e => { const b = e.target.closest("button[data-day]"); if (!b) return; tvDay = b.dataset.day; renderTV(); });
@@ -4316,18 +4316,18 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 
   // ---------- Navigation ----------
   const TAB_META = {
-    radio: "Écoutez les radios foot et sport en direct (RMC, BBC Radio 5 Live, talkSPORT, Cadena SER, COPE…) par compétition. Gratuit sur FootLive Pro.",
-    table: "Classements de football en direct : Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Ligue des champions et plus. Mis à jour automatiquement sur FootLive Pro.",
-    news: "Actualités football du jour : ESPN, BBC Sport, The Guardian, Sky Sports et L’Équipe. Transferts, résultats et compétitions, sur FootLive Pro.",
-    tv: "Programme TV football : les matchs importants du jour et la chaîne qui les diffuse (beIN SPORTS, Arryadia…). Gratuit sur FootLive Pro.",
-    women: "Football féminin : scores, résultats, classements, meilleures buteuses et actualités des compétitions féminines. Gratuit sur FootLive Pro."
+    radio: "Escucha radios de fútbol y deportes en directo (RMC, BBC Radio 5 Live, talkSPORT, Cadena SER, COPE…) por competición. Gratis en FootLive Pro.",
+    table: "Clasificaciones de fútbol en directo: Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Champions League y más. Actualizadas automáticamente en FootLive Pro.",
+    news: "Noticias de fútbol de hoy: ESPN, BBC Sport, The Guardian, Sky Sports y L’Équipe. Fichajes, resultados y competiciones, en FootLive Pro.",
+    tv: "Programación de fútbol en TV: los partidos importantes de hoy, la hora y el canal que los emite (beIN SPORTS, Arryadia, Sport TV). Gratis en FootLive Pro.",
+    women: "Fútbol femenino: resultados, clasificaciones, máximas goleadoras y noticias de las competiciones femeninas. Gratis en FootLive Pro."
   };
   const TAB_URL = {};
   const TAB_BACK = { "radio.html": "radio", "classements.html": "table", "actualites.html": "news", "football-feminin.html": "women", "programme-tv.html": "tv" };
   const locPage = () => { const h = location.hash.slice(1); if (h) return h; return TAB_BACK[location.pathname.split("/").pop()] || "scores"; };
   const PAGES = { scores: "#scores-view", table: "#table-view", news: "#news-view", radio: "#radio-view", clubs: "#clubs-view", women: "#women-view", buteurs: "#scorers-view", tv: "#tv-view" };
   const inited = {};
-  const PAGE_TITLES = { scores: "Scores en direct", table: "Classements", news: "Actualités", radio: "Radio sport", clubs: "Clubs", women: "Women's Foot", buteurs: "Meilleurs buteurs", tv: "Programme TV football : matchs du jour et chaînes (beIN SPORTS, Arryadia)" };
+  const PAGE_TITLES = { scores: "Resultados en directo", table: "Clasificaciones", news: "Noticias", radio: "Radio deportiva", clubs: "Clubes", women: "Women's Foot", buteurs: "Máximos goleadores", tv: "Programación TV de fútbol: partidos del día y canales (beIN SPORTS, Arryadia)" };
   window.showPage = function (p, fromHistory) {
     let club = null, bt = null, wk = null;
     if (/^women-/.test(p)) { wk = p.slice(6); p = "women"; if (!wFind(wk)) wk = null; }
