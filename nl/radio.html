@@ -3313,16 +3313,16 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     tvPut((kd.length ? '<div class="note" style="font-size:.72rem;opacity:.7;padding:4px 6px">Détail des chaînes indisponible pour le moment (' + esc(kd.map(d => koErr[d] || "erreur").join(", ")) + ') — chaînes principales affichées.</div>' : "") + koDiag() + grouped(L, rowFn, false, true));
   }
   const TV_FAQ = [
-    ["Sur quelle chaîne regarder la Ligue des champions et les grands championnats ?", "Le programme ne montre que les matchs des 10 compétitions de la barre (Ligue des champions, Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Europa League, Conference League, Liga Portugal, Botola Pro). Pour chaque match, il affiche ensemble beIN SPORTS, Arryadia ou Sport TV selon la compétition, puis toutes les autres chaînes annoncées par la source (Espagne, Italie, France, Europe…), quand elles sont disponibles. Vérifiez toujours la grille de la chaîne le jour du match."],
-    ["Quel est le numéro de la chaîne beIN SPORTS pour un match ?", "Le numéro exact (beIN SPORTS 1, 2, 3…) est annoncé par la chaîne le jour du match. Il s’affiche dans le programme quand la source le fournit."],
-    ["À quelle heure commencent les matchs ?", "Les horaires sont affichés à l’heure de votre appareil et mis à jour automatiquement."]
+    ["Op welke zender kijk ik naar de Champions League en de grote competities?", "De gids toont alleen wedstrijden van de 10 competities in de balk (Champions League, Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Europa League, Conference League, Liga Portugal, Botola Pro). Per wedstrijd staat eerst beIN SPORTS, Arryadia of Sport TV, afhankelijk van de competitie, en daarna alle andere zenders die de bron meldt (Spanje, Italië, Frankrijk, Europa…), wanneer beschikbaar. Controleer op de wedstrijddag altijd het schema van de zender."],
+    ["Wat is het zendernummer van beIN SPORTS voor een wedstrijd?", "Het exacte nummer (beIN SPORTS 1, 2, 3…) wordt op de wedstrijddag door de zender bekendgemaakt. Het verschijnt in de gids zodra de bron het levert."],
+    ["Is de tv-gids van FootLive Pro gratis?", "Ja, de tv-gids, uitslagen, standen en sportradio zijn gratis."]
   ];
   const tvSt = 'style="color:var(--accent)"';
-  const tvSeo = '<section id="tv-seo" class="container" aria-label="Présentation du programme TV football" style="margin:2rem auto 1rem;padding:1rem 4px 0;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">' +
-    '<h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">Programme TV football : matchs du jour et chaînes qui les diffusent</h2>' +
-    '<p>Le programme TV de FootLive Pro liste les matchs importants de la journée avec l’heure, les équipes, le score en direct et la chaîne qui diffuse la rencontre (beIN SPORTS, Arryadia, Sport TV). Choisissez un jour avec les boutons en haut pour préparer votre semaine.</p>' +
-    '<p>Pages à découvrir : <a href="./" ' + tvSt + '>scores en direct</a>, <a href="../classements.html" ' + tvSt + '>classements de football</a>, <a href="../radio.html" ' + tvSt + '>radios foot en direct</a> et <a href="../actualites.html" ' + tvSt + '>actualités foot</a>.</p>' +
-    '<div class="faq"><h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Questions fréquentes</h2>' + TV_FAQ.map(f => '<h3>' + f[0] + '</h3><p>' + f[1] + '</p>').join("") + '</div></section>';
+  const tvSeo = '<section id="tv-seo" class="container" aria-label="Voetbal tv-gids: wedstrijden van vandaag en zenders" style="margin:2rem auto 1rem;padding:1rem 4px 0;color:var(--text-muted);font-size:.85rem;line-height:1.7;border-top:1px solid var(--border)">' +
+    '<h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:.5rem">Voetbal tv-gids: wedstrijden van vandaag en zenders</h2>' +
+    '<p>De tv-gids van FootLive Pro toont de belangrijkste wedstrijden van de dag met aanvangstijd, teams, live score en de zender die de wedstrijd uitzendt (beIN SPORTS, Arryadia, Sport TV). Kies een dag in de datumbalk om komende wedstrijden te zien.</p>' +
+    '<p>Meer pagina’s: <a href="./" ' + tvSt + '>live uitslagen</a>, <a href="classements.html" ' + tvSt + '>voetbalstanden</a>, <a href="radio.html" ' + tvSt + '>voetbalradio</a> en <a href="../actualites.html" ' + tvSt + '>voetbalnieuws</a>.</p>' +
+    '<div class="faq"><h2 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-top:1.2rem">Veelgestelde vragen</h2>' + TV_FAQ.map(f => '<h3>' + f[0] + '</h3><p>' + f[1] + '</p>').join("") + '</div></section>';
   const tvLD = () => ({ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": TV_FAQ.map(f => ({ "@type": "Question", "name": f[0], "acceptedAnswer": { "@type": "Answer", "text": f[1] } })) });
   $("main").insertAdjacentHTML("beforeend", '<div id="tv-view" hidden><div class="sec-title">📺 Programme TV <small>les matchs importants et la chaîne qui les diffuse</small></div><div class="daystrip" id="tv-days"></div><div id="tv-list"><div class="empty">Chargement du programme…</div></div>' + tvSeo + '</div>');
   $("#tv-days").addEventListener("click", e => { const b = e.target.closest("button[data-day]"); if (!b) return; tvDay = b.dataset.day; renderTV(); });
@@ -4319,16 +4319,16 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   const TAB_META = {
     radio: "Luister live naar voetbal- en sportradio (RMC, BBC Radio 5 Live, talkSPORT, Cadena SER, COPE…) per competitie. Gratis op FootLive Pro.",
     table: "Voetbalstanden live: Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Champions League en meer. Automatisch bijgewerkt op FootLive Pro.",
-    news: "Actualités football du jour : ESPN, BBC Sport, The Guardian, Sky Sports et L’Équipe. Transferts, résultats et compétitions, sur FootLive Pro.",
+    news: "Voetbalnieuws van vandaag: ESPN, BBC Sport, The Guardian, Sky Sports en L’Équipe. Transfers, uitslagen en competities, op FootLive Pro.",
     tv: "Tv-gids voetbal: de belangrijkste wedstrijden van vandaag, de aanvangstijd en de zender die ze uitzendt (beIN SPORTS, Arryadia, Sport TV). Gratis op FootLive Pro.",
-    women: "Football féminin : scores, résultats, classements, meilleures buteuses et actualités des compétitions féminines. Gratuit sur FootLive Pro."
+    women: "Vrouwenvoetbal: uitslagen, standen, topscoorsters en nieuws uit de vrouwencompetities. Gratis op FootLive Pro."
   };
   const TAB_URL = { radio: "radio.html", table: "classements.html", tv: "programme-tv.html" };
   const TAB_BACK = { "radio.html": "radio", "classements.html": "table", "actualites.html": "news", "football-feminin.html": "women", "programme-tv.html": "tv" };
   const locPage = () => { const h = location.hash.slice(1); if (h) return h; return TAB_BACK[location.pathname.split("/").pop()] || "scores"; };
   const PAGES = { scores: "#scores-view", table: "#table-view", news: "#news-view", radio: "#radio-view", clubs: "#clubs-view", women: "#women-view", buteurs: "#scorers-view", tv: "#tv-view" };
   const inited = {};
-  const PAGE_TITLES = { scores: "Scores en direct", table: "Classements", news: "Actualités", radio: "Radio sport", clubs: "Clubs", women: "Women's Foot", buteurs: "Meilleurs buteurs", tv: "Programme TV football : matchs du jour et chaînes (beIN SPORTS, Arryadia)" };
+  const PAGE_TITLES = { scores: "Live scores", table: "Standen", news: "Nieuws", radio: "Sportradio", clubs: "Clubs", women: "Women's Foot", buteurs: "Topscorers", tv: "Voetbal op tv: wedstrijden van vandaag en zenders (beIN SPORTS, Arryadia)" };
   window.showPage = function (p, fromHistory) {
     let club = null, bt = null, wk = null;
     if (/^women-/.test(p)) { wk = p.slice(6); p = "women"; if (!wFind(wk)) wk = null; }
