@@ -1,6 +1,6 @@
 {
  "date": "2026-11-19",
- "generated": "2026-11-19T01:32:07.653Z",
+ "generated": "2026-11-19T02:50:50.916Z",
  "extra": 19,
  "matches": [
   {
@@ -46,11 +46,11 @@
    "id": "401841316",
    "lg": "Brasileirão",
    "start": "2026-11-19T00:30Z",
-   "state": "in",
-   "label": "45'+2'",
+   "state": "post",
+   "label": "90'+1'",
    "home": "Corinthians",
    "away": "Botafogo",
-   "h": 2,
+   "h": 4,
    "a": 0,
    "venue": "Neo Química Arena",
    "place": "Sao Paulo, Brazil"
@@ -59,8 +59,8 @@
    "id": "401841312",
    "lg": "Brasileirão",
    "start": "2026-11-19T00:30Z",
-   "state": "in",
-   "label": "45'+3'",
+   "state": "post",
+   "label": "90'+6'",
    "home": "Grêmio",
    "away": "Bahia",
    "h": 0,
