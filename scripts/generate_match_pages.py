@@ -456,7 +456,7 @@ def build_match(m, siblings, lang, today):
 <div class="lg">{esc(lg)}</div>
 <div class="row"><div class="t">{esc(home)}</div><div class="sc" id="sc">{score_txt(m)}</div><div class="t">{esc(away)}</div></div>
 <div class="{stc}" id="st">{status_label(m, t)}</div>
-<a class="cta" href="{live_q}">{esc(t['cta1'])}</a><a class="cta alt" href="/radio.html">{esc(t['cta2'])}</a>
+<a class="cta" href="{live_q}">{esc(t['cta1'])}</a><a class="cta alt" href="{pre}/radio.html">{esc(t['cta2'])}</a>
 </section>
 {venue}
 <h2>{esc(t['h2_time'].format(**kwb))}</h2>
