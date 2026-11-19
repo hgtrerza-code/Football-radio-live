@@ -1,6 +1,6 @@
 {
  "date": "2026-11-19",
- "generated": "2026-11-19T05:02:03.757Z",
+ "generated": "2026-11-19T22:47:23.105Z",
  "extra": 22,
  "matches": [
   {
@@ -72,8 +72,8 @@
    "id": "401841308",
    "lg": "Brasileirão",
    "start": "2026-11-19T22:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "15'",
    "home": "Vasco da Gama",
    "away": "Internacional",
    "h": 0,
@@ -85,11 +85,11 @@
    "id": "401841317",
    "lg": "Brasileirão",
    "start": "2026-11-19T22:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "15'",
    "home": "Vitória",
    "away": "Red Bull Bragantino",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Estadio Manoel Barradas",
    "place": "Salvador, Brazil"
