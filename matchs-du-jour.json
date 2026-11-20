@@ -1,6 +1,6 @@
 {
  "date": "2026-11-20",
- "generated": "2026-11-20T13:04:25.995Z",
+ "generated": "2026-11-20T18:56:33.807Z",
  "extra": 58,
  "matches": [
   {
@@ -228,12 +228,12 @@
    "id": "401885049",
    "lg": "2. Bundesliga",
    "start": "2026-11-20T17:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "68'",
    "home": "Arminia Bielefeld",
    "away": "1. FC Magdeburg",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 2,
    "venue": "SchücoArena",
    "place": "Bielefeld, Germany"
   },
@@ -241,12 +241,12 @@
    "id": "401885053",
    "lg": "2. Bundesliga",
    "start": "2026-11-20T17:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "67'",
    "home": "SV Darmstadt 98",
    "away": "1. FC Heidenheim 1846",
-   "h": 0,
-   "a": 0,
+   "h": 3,
+   "a": 1,
    "venue": "Merck-Stadion am Böllenfalltor",
    "place": "Darmstadt, Germany"
   }
