@@ -1017,7 +1017,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   #tabbar .container>a.on,#tabbar:has(.more-panel a.on) .container>.more-btn{color:var(--accent)}
   #tabbar .container>a.on::before,#tabbar:has(.more-panel a.on) .container>.more-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
   #tabbar .container>.more-btn>span .svgi{width:1.3em;height:1.3em}
-  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none}
+  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none}
   #tabbar .container>a[data-go="scores"]{order:1}
   #tabbar .container>a[data-mj]{order:2}
   #tabbar .container>a[data-go="tv"]{order:3}
@@ -4570,7 +4570,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
   var sheet=document.createElement('div'); sheet.className='more-sheet'; sheet.hidden=true;
   sheet.innerHTML='<div class="more-bd"></div><div class="more-panel" role="menu"></div>';
   var panel=sheet.querySelector('.more-panel');
-  ['clubs','buteurs','news','women'].forEach(function(k){
+  ['table','clubs','buteurs','news','women'].forEach(function(k){
     var o=box.querySelector('a[data-go="'+k+'"]'); if(!o) return;
     var c=o.cloneNode(true); c.classList.remove('on'); c.removeAttribute('aria-current'); c.setAttribute('role','menuitem'); panel.appendChild(c);
   });

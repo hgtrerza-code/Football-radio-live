@@ -4,7 +4,7 @@
  * - Jamais de cache pour les API (Workers, ESPN, 365Scores, YouTube), les flux radio ni les requêtes non GET.
  * Pour forcer une mise à jour chez tous les visiteurs, changer VERSION.
  */
-const VERSION = "2026-11-18-1";
+const VERSION = "2026-11-19-2";
 const STATIC_CACHE = "flp-static-" + VERSION;
 const PAGE_CACHE = "flp-pages-" + VERSION;
 const PRECACHE = ["/favicon-192x192.png", "/competition.css", "/competition.js", "/i18n.js", "/install-app.js", "/404.html"];

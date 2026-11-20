@@ -45,7 +45,7 @@ header .brand b span{color:var(--accent)}
   #tabbar .container>a.on,#tabbar:has(.more-panel a.on) .container>.more-btn{color:var(--accent)}
   #tabbar .container>a.on::before,#tabbar:has(.more-panel a.on) .container>.more-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
   #tabbar .container>.more-btn>span .svgi{width:1.3em;height:1.3em}
-  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"],#tabbar .container>a[data-sel]{display:none}
+  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"],#tabbar .container>a[data-sel]{display:none}
   #tabbar .container>a[data-go="scores"]{order:1}
   #tabbar .container>a[data-mj]{order:2}
   #tabbar .container>a[data-go="tv"]{order:3}
