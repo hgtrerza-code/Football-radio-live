@@ -827,7 +827,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   #tabbar .container>a.on,#tabbar:has(.more-panel a.on) .container>.more-btn{color:var(--accent)}
   #tabbar .container>a.on::before,#tabbar:has(.more-panel a.on) .container>.more-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
   #tabbar .container>.more-btn>span .svgi{width:1.3em;height:1.3em}
-  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none}
+  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none}
   #tabbar .container>a[data-go="scores"]{order:1}
   #tabbar .container>a[data-mj]{order:2}
   #tabbar .container>a[data-go="tv"]{order:3}
@@ -892,7 +892,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="eredivisie.html"><span>🇳🇱</span><img class="cl" alt="" data-lgre="eredivisie|dutch (?!eerste)" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/11.png&w=40&h=40" width="20" height="20" data-id="11">Eredivisie</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
     <main class="container">
-    <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
+    <noscript><p class="note">Activa JavaScript para ver los resultados de fútbol en directo de FootLive Pro.</p></noscript>
     <div id="scores-view">
         <div id="hero"></div>
         <div class="sec-title">📅 Calendrier & résultats <small>touchez un match pour voir les statistiques détaillées</small></div>
@@ -3037,7 +3037,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   // ---------- Navigation ----------
   const PAGES = { scores: "#scores-view", table: "#table-view", news: "#news-view", radio: "#radio-view" };
   const inited = {};
-  const PAGE_TITLES = { scores: "Scores en direct", table: "Classements", news: "Actualités", radio: "Radio sport" };
+  const PAGE_TITLES = { scores: "Resultados en directo", table: "Clasificaciones", news: "Noticias", radio: "Radio deportiva" };
   window.showPage = function (p, fromHistory) {
     if (!PAGES[p]) p = "scores";
     Object.keys(PAGES).forEach(k => { const el = $(PAGES[k]); if (el) el.hidden = k !== p; });
@@ -3150,7 +3150,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     const curSl = location.pathname.split("/").pop().replace(/\.html$/, "");
     if (!fromHist && curSl !== slug) { try { history.pushState(null, "", slug + ".html" + location.search); } catch (e) { } }
     showPage("scores", true);
-    document.title = a.textContent.trim() + " : scores, résultats et classement | FootLive Pro";
+    document.title = a.textContent.trim() + ": resultados y clasificación | FootLive Pro";
     tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
     const lf = $("#league-filter"); if (lf) lf.value = "all"; const si = $("#search"); if (si) si.value = "";
     compChip(); buildDays(); renderMatches(true); window.scrollTo({ top: 0 });
@@ -3249,7 +3249,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   var sheet=document.createElement('div'); sheet.className='more-sheet'; sheet.hidden=true;
   sheet.innerHTML='<div class="more-bd"></div><div class="more-panel" role="menu"></div>';
   var panel=sheet.querySelector('.more-panel');
-  ['clubs','buteurs','news','women'].forEach(function(k){
+  ['table','clubs','buteurs','news','women'].forEach(function(k){
     var o=box.querySelector('a[data-go="'+k+'"]'); if(!o) return;
     var c=o.cloneNode(true); c.classList.remove('on'); c.removeAttribute('aria-current'); c.setAttribute('role','menuitem'); panel.appendChild(c);
   });
