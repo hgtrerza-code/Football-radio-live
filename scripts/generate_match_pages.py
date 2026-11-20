@@ -209,7 +209,7 @@ btn.innerHTML='<span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="c
 box.appendChild(btn);
 var sheet=document.createElement('div');sheet.className='more-sheet';sheet.hidden=true;sheet.innerHTML='<div class="more-bd"></div><div class="more-panel" role="menu"></div>';
 var panel=sheet.querySelector('.more-panel');
-['clubs','buteurs','news','women'].forEach(function(k){var o=box.querySelector('a[data-go="'+k+'"]');if(!o)return;var c=o.cloneNode(true);c.classList.remove('on');c.removeAttribute('aria-current');c.setAttribute('role','menuitem');panel.appendChild(c)});
+['table','clubs','buteurs','news','women'].forEach(function(k){var o=box.querySelector('a[data-go="'+k+'"]');if(!o)return;var c=o.cloneNode(true);c.classList.remove('on');c.removeAttribute('aria-current');c.setAttribute('role','menuitem');panel.appendChild(c)});
 var sl=box.querySelector('a[data-sel]');if(sl){var cs=sl.cloneNode(true);cs.setAttribute('role','menuitem');panel.appendChild(cs)}
 bar.appendChild(sheet);
 function set(o){sheet.hidden=!o;btn.setAttribute('aria-expanded',o?'true':'false')}
@@ -558,6 +558,11 @@ def ping_indexnow(urls):
         print("IndexNow ignoré :", e)
 
 
+
+LIVE_LOGO = {"fr": "EN DIRECT", "en": "LIVE", "es": "EN VIVO", "it": "LIVE", "nl": "LIVE", "de": "LIVE", "ar": "مباشر"}
+def fixlogo(html, lang):
+    return html.replace(">EN DIRECT</text>", ">" + LIVE_LOGO.get(lang, "EN DIRECT") + "</text>")
+
 def match_dir(lang):
     return os.path.join(prefix(lang).lstrip("/"), DIR)
 
@@ -596,7 +601,7 @@ def main():
                 continue
             name, page, _ = build_match(m, sib, l, today)
             keep[l].add(name + ".html")
-            open(os.path.join(match_dir(l), name + ".html"), "w", encoding="utf-8").write(page)
+            open(os.path.join(match_dir(l), name + ".html"), "w", encoding="utf-8").write(fixlogo(page, l))
     for l in LANG_ORDER:               # pages orphelines (ex. ancien nom, match sorti de la fenêtre de traduction)
         for f in os.listdir(match_dir(l)):
             if f.endswith(".html") and f not in keep[l]:
@@ -608,7 +613,7 @@ def main():
     upcoming = [m for m in reg.values() if paris_day(m) > datetime.fromisoformat(today).date() and m["state"] in ("pre", "off")]
     for l in LANG_ORDER:
         out = "matchs-du-jour.html" if l == "fr" else os.path.join(l, "matchs-du-jour.html")
-        open(out, "w", encoding="utf-8").write(build_hub(hub_items, today, upcoming, l))
+        open(out, "w", encoding="utf-8").write(fixlogo(build_hub(hub_items, today, upcoming, l), l))
 
     # lastmod : jamais dans le futur (un match de dans 5 jours est « vu » aujourd'hui)
     urls = [(f"{SITE}{prefix(l)}/matchs-du-jour.html", today) for l in LANG_ORDER]
