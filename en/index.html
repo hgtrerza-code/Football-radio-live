@@ -1013,7 +1013,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   #tabbar .container>a.on,#tabbar:has(.more-panel a.on) .container>.more-btn{color:var(--accent)}
   #tabbar .container>a.on::before,#tabbar:has(.more-panel a.on) .container>.more-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
   #tabbar .container>.more-btn>span .svgi{width:1.3em;height:1.3em}
-  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none}
+  #tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none}
   #tabbar .container>a[data-go="scores"]{order:1}
   #tabbar .container>a[data-mj]{order:2}
   #tabbar .container>a[data-go="tv"]{order:3}
@@ -1083,7 +1083,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     <nav id="compbar" aria-label="Meilleures compétitions"><div class="container"><a href="ligue-des-champions.html"><span>⭐</span><img class="cl" alt="" data-lgre="champions league|ligue des champions" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2.png&w=40&h=40" width="20" height="20" data-id="2">Ligue des champions</a><a href="premier-league.html"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><img class="cl" alt="" data-lgre="^(english )?premier league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/23.png&w=40&h=40" width="20" height="20" data-id="23">Premier League</a><a href="laliga.html"><span>🇪🇸</span><img class="cl" alt="" data-lgre="laliga|la liga|spanish primera" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/15.png&w=40&h=40" width="20" height="20" data-id="15">LaLiga</a><a href="serie-a.html"><span>🇮🇹</span><img class="cl" alt="" data-lgre="^(italian )?serie a" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/12.png&w=40&h=40" width="20" height="20" data-id="12">Serie A</a><a href="bundesliga.html"><span>🇩🇪</span><img class="cl" alt="" data-lgre="^(german )?bundesliga" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/10.png&w=40&h=40" width="20" height="20" data-id="10">Bundesliga</a><a href="ligue-1.html"><span>🇫🇷</span><img class="cl" alt="" data-lgre="^(french )?ligue 1" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/9.png&w=40&h=40" width="20" height="20" data-id="9">Ligue 1</a><a href="europa-league.html"><span>🟠</span><img class="cl" alt="" data-lgre="europa league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/2310.png&w=40&h=40" width="20" height="20" data-id="2310">Europa League</a><a href="conference-league.html"><span>🟢</span><img class="cl" alt="" data-lgre="conference league" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/20296.png&w=40&h=40" width="20" height="20" data-id="20296">Conference League</a><a href="liga-portugal.html"><span>🇵🇹</span><img class="cl" alt="" data-lgre="liga portugal|primeira liga|portuguese" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/14.png&w=40&h=40" width="20" height="20" data-id="14">Liga Portugal</a><a href="eredivisie.html"><span>🇳🇱</span><img class="cl" alt="" data-lgre="eredivisie|dutch (?!eerste)" src="https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500-dark/11.png&w=40&h=40" width="20" height="20" data-id="11">Eredivisie</a><a href="botola-pro.html"><span>🇲🇦</span><img class="cl" alt="" data-lgre="botola|moroccan">Botola Pro</a></div></nav>
 
     <main class="container">
-    <noscript><p class="note">Activez JavaScript pour afficher les scores de football en direct de FootLive Pro.</p></noscript>
+    <noscript><p class="note">Enable JavaScript to see FootLive Pro’s live football scores.</p></noscript>
     <div id="scores-view">
         <div id="hero"></div>
         <div class="sec-title">📅 Calendrier & résultats <small>touchez un match pour voir les statistiques détaillées</small></div>
@@ -3999,7 +3999,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
         "<p>FootLive Pro réunit " + CLUBS.length + " grands clubs du monde (Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Liga Portugal, Botola Pro, Saudi Pro League, MLS et plus). Pour chaque club, retrouvez le prochain match, les derniers résultats, le calendrier et les meilleurs buteurs, mis à jour automatiquement.</p>" +
         CB_GROUPS.map(g => { const cs = CLUBS.filter(x => cbGroupOf(x) === g[0]); return cs.length ? "<p><b>" + esc(g[0]) + " :</b> " + cs.map(x => '<a href="#club-' + x[0] + '" data-club="' + x[0] + '">' + esc(x[1]) + "</a>").join(", ") + ".</p>" : ""; }).join("") +
         "<h3>Comment suivre un club ?</h3><p>Choisissez un club dans la liste : sa page affiche le match à venir avec l’heure de Paris, les résultats récents et le classement des meilleurs buteurs. Les scores en direct s’actualisent sans recharger la page.</p>";
-      setMeta("Résultats, prochain match, calendrier et meilleurs buteurs de " + CLUBS.length + " grands clubs de football : Real Madrid, PSG, Manchester City, Barça, Wydad, Raja et plus. Gratuit sur FootLive Pro."); setLD("cb-ld", null); return;
+      setMeta("Results, next match, fixtures and top scorers of " + CLUBS.length + " top football clubs: Real Madrid, PSG, Manchester City, Barça, Wydad, Raja and more. Free on FootLive Pro."); setLD("cb-ld", null); return;
     }
     const list = (cbCache[slug] || {}).v || [], dt = m => new Date(m.start);
     const up = list.filter(m => m.state !== "post" && !m.off).sort((a, b) => dt(a) - dt(b)), past = list.filter(m => m.state === "post").sort((a, b) => dt(b) - dt(a));
@@ -4007,7 +4007,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     const nextTxt = up.length ? "Le prochain match de " + esc(c[1]) + " : " + esc(up[0].home) + " – " + esc(up[0].away) + " le " + cbDL.format(dt(up[0])) + (up[0].state === "pre" ? " à " + cbTF.format(dt(up[0])) + " (heure de Paris)" : " (en cours)") + ", en " + esc(up[0].lg) + "." : "Aucun match de " + esc(c[1]) + " n’est annoncé dans les prochains jours ; le calendrier se met à jour automatiquement.";
     const lastTxt = past.length ? "Dernier résultat de " + esc(c[1]) + " : " + sc(past[0]) + " (" + esc(past[0].lg) + ")." : "Aucun résultat récent n’est disponible pour le moment.";
     const top = cbTopSc[slug], bl = btLeagues.find(l => cbNorm(l[2]) === cbNorm(c[4]) || cbNorm(l[2]).indexOf(cbNorm(c[4])) === 0 || cbNorm(c[4]).indexOf(cbNorm(l[2])) === 0);
-    const topTxt = top ? esc(top.n) + " est le meilleur buteur de " + esc(c[1]) + " avec " + top.g + (top.g > 1 ? " buts" : " but") + " marqués en championnat cette saison." : "Le classement des meilleurs buteurs de " + esc(c[1]) + " est affiché sur cette page et se met à jour automatiquement.";
+    const topTxt = top ? esc(top.n) + " est le meilleur buteur de " + esc(c[1]) + " avec " + top.g + (top.g > 1 ? " goals" : " goal") + " marqués en championnat cette saison." : "Le classement des meilleurs buteurs de " + esc(c[1]) + " est affiché sur cette page et se met à jour automatiquement.";
     box.innerHTML = "<h2>" + esc(c[1]) + " : résultats, prochain match et calendrier</h2>" +
       "<p>" + esc(c[1]) + " (" + esc(c[2]) + ") évolue en " + esc(c[4]) + ". Suivez ses résultats, son prochain match, son calendrier et ses meilleurs buteurs en direct sur FootLive Pro. " + nextTxt + "</p>" +
       (past.length ? "<ul>" + past.slice(0, 5).map(m => "<li>" + cbDF.format(dt(m)) + " : " + sc(m) + " (" + esc(m.lg) + ")</li>").join("") + "</ul>" : "") +
@@ -4015,7 +4015,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
       "<h3>Quel est le dernier résultat de " + esc(c[1]) + " ?</h3><p>" + lastTxt + "</p>" +
       "<h3>Qui est le meilleur buteur de " + esc(c[1]) + " ?</h3><p>" + topTxt + "</p>" +
       (bl ? '<p><a href="#buteurs-' + esc(btKey(bl)) + '" data-bt="' + esc(btKey(bl)) + '">Voir le classement des buteurs de ' + esc(bl[2]) + "</a></p>" : "");
-    setMeta(c[1] + " : prochain match, derniers résultats, calendrier et meilleurs buteurs. Scores en direct sur FootLive Pro.");
+    setMeta(c[1] + ": next match, latest results, fixtures and top scorers. Live scores on FootLive Pro.");
     setLD("cb-ld", { "@context": "https://schema.org", "@type": "SportsTeam", "name": c[1], "sport": "Soccer", "memberOf": { "@type": "SportsOrganization", "name": c[4] }, "location": { "@type": "Place", "name": c[2] }, "url": "https://www.footlivepro.com/#club-" + slug });
   }
 
@@ -4198,14 +4198,14 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
   function btSeo(key, rows) {
     const l = btFind(key), nm = l[2], top = rows && rows[0], box = $("#bt-seo"); if (!box) return;
     const line = r => esc(r.n) + (r.t ? " (" + esc(r.t) + ")" : "") + " : " + r.g + (r.g > 1 ? " buts" : " but");
-    const ans = top ? esc(top.n) + (top.t ? " (" + esc(top.t) + ")" : "") + " est actuellement en tête du classement des buteurs de " + esc(nm) + " avec " + top.g + (top.g > 1 ? " buts" : " but") + "." : "Le classement des buteurs de " + esc(nm) + " se met à jour automatiquement dès que les statistiques sont disponibles.";
+    const ans = top ? esc(top.n) + (top.t ? " (" + esc(top.t) + ")" : "") + " est actuellement en tête du classement des buteurs de " + esc(nm) + " avec " + top.g + (top.g > 1 ? " goals" : " goal") + "." : "Le classement des buteurs de " + esc(nm) + " se met à jour automatiquement dès que les statistiques sont disponibles.";
     box.innerHTML = "<h2>Meilleurs buteurs " + esc(nm) + " : classement des buteurs de la saison</h2>" +
       "<p>Classement des meilleurs buteurs de " + esc(nm) + " avec le nombre de buts marqués par chaque joueur, mis à jour automatiquement sur FootLive Pro. " + ans + "</p>" +
       (rows && rows.length ? "<ul>" + rows.slice(0, 5).map((r, i) => "<li>" + (i + 1) + ". " + line(r) + "</li>").join("") + "</ul>" : "") +
       "<h3>Qui est le meilleur buteur de " + esc(nm) + " ?</h3><p>" + ans + "</p>" +
       "<h3>Comment est calculé le classement des buteurs ?</h3><p>Le classement compte les buts marqués par chaque joueur dans la compétition, d’après les statistiques publiées par ESPN. Les égalités sont départagées par le nombre de passes décisives.</p>" +
       "<h3>Autres classements de buteurs</h3><p>" + BT_TOP.filter(k => k !== key).map(k => { const x = btFind(k); return x ? '<a href="#buteurs-' + esc(k) + '" data-bt="' + esc(k) + '">' + esc(x[2]) + "</a>" : ""; }).filter(Boolean).join(" · ") + "</p>";
-    setMeta("Meilleurs buteurs " + nm + " : classement des buteurs avec le nombre de buts marqués" + (top ? ". " + top.n + " en tête avec " + top.g + (top.g > 1 ? " buts" : " but") : "") + ". Mis à jour automatiquement sur FootLive Pro.");
+    setMeta("Top scorers " + nm + ": scorers table with goals scored" + (top ? ". " + top.n + " leads with " + top.g + (top.g > 1 ? " goals" : " goal") : "") + ". Updated automatically on FootLive Pro.");
     setLD("bt-ld", rows && rows.length ? { "@context": "https://schema.org", "@type": "ItemList", "name": "Meilleurs buteurs " + nm, "itemListElement": rows.slice(0, 10).map((r, i) => ({ "@type": "ListItem", "position": i + 1, "name": r.n + " : " + r.g + (r.g > 1 ? " buts" : " but") })) } : null);
   }
   let btCur = null;
@@ -4308,7 +4308,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     const l = (k && wFind(k)) || (wCur && wFind(wCur)) || WL[0]; k = l[0]; wCur = k;
     $("#w-league").value = k; $$("#w-chips a").forEach(a => a.classList.toggle("on", a.dataset.wk === k));
     $("#w-up").innerHTML = skel(3); $("#w-res").innerHTML = skel(3); $("#w-tb").innerHTML = skel(5); $("#w-sc").innerHTML = skel(4); $("#w-nw").innerHTML = "";
-    setMeta("Football féminin : " + l[2] + ", scores, résultats, classement, meilleures buteuses et actualités. Gratuit sur FootLive Pro.");
+    setMeta("Women’s football: " + l[2] + ", scores, results, standings, top scorers and news. Free on FootLive Pro.");
     wMatches(k); wTable(k); wScorers(k); wNews(k);
   }
   $("#w-league").onchange = e => showPage("women-" + e.target.value);
@@ -4347,7 +4347,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     if (p !== "clubs") setLD("cb-ld", null);
     if (p !== "buteurs") setLD("bt-ld", null);
     setLD("tv-ld", p === "tv" ? tvLD() : null);
-    document.title = (p === "women" ? "Women's Foot" + (wk ? " : " + wFind(wk)[2] : "") + " : scores et classements" : p === "clubs" && club ? clubOf(club)[1] + " : prochain match et résultats" : p === "buteurs" ? "Meilleurs buteurs" + (bt ? " " + btFind(bt)[2] : "") + " : classement" : PAGE_TITLES[p]) + " | FootLive Pro";
+    document.title = (p === "women" ? "Women's Foot" + (wk ? " : " + wFind(wk)[2] : "") + ": scores and standings" : p === "clubs" && club ? clubOf(club)[1] + ": next match and results" : p === "buteurs" ? "Top scorers" + (bt ? " " + btFind(bt)[2] : "") + ": ranking" : PAGE_TITLES[p]) + " | FootLive Pro";
     if (!fromHistory) { try { history.pushState(null, "", TAB_URL[p] ? TAB_URL[p] + location.search + (p === "women" && wk ? "#women-" + wk : "") : p === "scores" ? (document.documentElement.dataset.tabpage ? "./" : location.pathname) + location.search : "#" + (p === "clubs" && club ? "club-" + club : p === "buteurs" && bt ? "buteurs-" + bt : p === "women" && wk ? "women-" + wk : p)); } catch (e) { } }
     window.scrollTo({ top: 0 });
     try { radMini(); } catch (e) { }   // le lecteur radio du bas reste visible sur tous les onglets
@@ -4446,7 +4446,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
     const curSl = location.pathname.split("/").pop().replace(/\.html$/, "");
     if (!fromHist && curSl !== slug) { try { history.pushState(null, "", slug + ".html" + location.search); } catch (e) { } }
     showPage("scores", true);
-    document.title = a.textContent.trim() + " : scores, résultats et classement | FootLive Pro";
+    document.title = a.textContent.trim() + ": scores, results and standings | FootLive Pro";
     tab = "comp"; $$("#filters button").forEach(x => x.classList.remove("active"));
     const lf = $("#league-filter"); if (lf) lf.value = "all"; const si = $("#search"); if (si) si.value = "";
     compChip(); buildDays(); renderMatches(true); window.scrollTo({ top: 0 });
@@ -4582,7 +4582,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
   var sheet=document.createElement('div'); sheet.className='more-sheet'; sheet.hidden=true;
   sheet.innerHTML='<div class="more-bd"></div><div class="more-panel" role="menu"></div>';
   var panel=sheet.querySelector('.more-panel');
-  ['clubs','buteurs','news','women'].forEach(function(k){
+  ['table','clubs','buteurs','news','women'].forEach(function(k){
     var o=box.querySelector('a[data-go="'+k+'"]'); if(!o) return;
     var c=o.cloneNode(true); c.classList.remove('on'); c.removeAttribute('aria-current'); c.setAttribute('role','menuitem'); panel.appendChild(c);
   });
