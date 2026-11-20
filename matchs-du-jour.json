@@ -1,6 +1,6 @@
 {
  "date": "2026-11-20",
- "generated": "2026-11-20T02:50:36.932Z",
+ "generated": "2026-11-20T04:58:25.965Z",
  "extra": 58,
  "matches": [
   {
@@ -72,12 +72,12 @@
    "id": "401933555",
    "lg": "MLS",
    "start": "2026-11-20T03:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "84'",
    "home": "Seattle Sounders FC",
    "away": "Real Salt Lake",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 1,
    "venue": "Lumen Field",
    "place": "Seattle, Washington, USA"
   },
