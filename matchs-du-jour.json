@@ -1,6 +1,6 @@
 {
  "date": "2026-11-20",
- "generated": "2026-11-20T00:59:13.945Z",
+ "generated": "2026-11-20T02:50:36.932Z",
  "extra": 58,
  "matches": [
   {
@@ -59,12 +59,12 @@
    "id": "401933535",
    "lg": "MLS",
    "start": "2026-11-20T00:30Z",
-   "state": "in",
-   "label": "18'",
+   "state": "post",
+   "label": "90'+8'",
    "home": "Orlando City SC",
    "away": "FC Cincinnati",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 3,
    "venue": "Inter&Co Stadium",
    "place": "Orlando, Florida, USA"
   },
@@ -85,12 +85,12 @@
    "id": "401841309",
    "lg": "Brasileirão",
    "start": "2026-11-20T00:30Z",
-   "state": "in",
-   "label": "29'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "São Paulo",
    "away": "Fluminense",
    "h": 0,
-   "a": 0,
+   "a": 1,
    "venue": "Estádio Cícero Pompeu de Toledo",
    "place": "Sao Paulo, Brazil"
   },
