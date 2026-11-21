@@ -1,6 +1,6 @@
 {
  "date": "2026-11-21",
- "generated": "2026-11-21T02:49:12.458Z",
+ "generated": "2026-11-21T04:54:48.159Z",
  "extra": 153,
  "matches": [
   {
@@ -605,8 +605,8 @@
    "id": "401877054",
    "lg": "Liga MX",
    "start": "2026-11-21T01:00Z",
-   "state": "in",
-   "label": "89'",
+   "state": "post",
+   "label": "90'+8'",
    "home": "Puebla",
    "away": "Atlético de San Luis",
    "h": 1,
@@ -618,12 +618,12 @@
    "id": "401877053",
    "lg": "Liga MX",
    "start": "2026-11-21T03:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "90'+1'",
    "home": "FC Juárez",
    "away": "Atlas",
-   "h": 0,
-   "a": 0,
+   "h": 2,
+   "a": 2,
    "venue": "Estadio Olímpico Benito Juárez",
    "place": "Ciudad Juárez, Mexico"
   },
@@ -631,11 +631,11 @@
    "id": "401877052",
    "lg": "Liga MX",
    "start": "2026-11-21T03:10Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "85'",
    "home": "Tijuana",
    "away": "Atlante",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Estadio Caliente",
    "place": "Tijuana, Mexico"
@@ -911,7 +911,7 @@
    "h": 0,
    "a": 0,
    "venue": "Stade Auguste Delaune",
-   "place": "Bobigny, France"
+   "place": "Reims, France"
   },
   {
    "id": "401882299",
