@@ -2,7 +2,7 @@ name: Aperçu des matchs du jour
 
 on:
   schedule:
-    - cron: "5 */2 * * *"   # toutes les 2 h (UTC)
+    - cron: "*/10 * * * *"   # toutes les 10 min (GitHub peut retarder un peu)
   workflow_dispatch:         # lancement manuel possible
 
 permissions:
