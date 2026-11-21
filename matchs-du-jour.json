@@ -1,6 +1,6 @@
 {
  "date": "2026-11-21",
- "generated": "2026-11-21T08:50:00.411Z",
+ "generated": "2026-11-21T10:46:42.163Z",
  "extra": 153,
  "matches": [
   {
@@ -462,11 +462,11 @@
    "id": "401888247",
    "lg": "Süper Lig",
    "start": "2026-11-21T10:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "14'",
    "home": "Genclerbirligi",
    "away": "Gaziantep FK",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Eryaman Stadium",
    "place": "Ankara, Türkiye"
@@ -735,8 +735,8 @@
    "id": "401877532",
    "lg": "J1 League",
    "start": "2026-11-21T07:00Z",
-   "state": "in",
-   "label": "88'",
+   "state": "post",
+   "label": "90'+4'",
    "home": "Gamba Osaka",
    "away": "Fagiano Okayama",
    "h": 0,
