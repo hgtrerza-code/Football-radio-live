@@ -142,13 +142,19 @@ th,td{padding:9px 12px;text-align:start;border-bottom:1px solid var(--bd)}th{col
 .m{list-style:none;padding:0;margin:0}.m li{display:flex;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:6px 0}
 .m time{color:var(--ac);font-weight:700;margin-inline-end:8px}.m small{color:var(--mu)}
 .mm{list-style:none;padding:0;margin:0}.mm li{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:6px 0}.mm li.lv{border-color:var(--ac);box-shadow:inset 3px 0 0 var(--ac)}
-.mm a.mc{display:flex;align-items:center;gap:12px;padding:10px 12px;color:var(--tx);text-decoration:none}.mm a.mc:hover{text-decoration:none;background:rgba(255,255,255,.03);border-radius:12px}
-.mm .mt{flex:none;width:56px;text-align:center;line-height:1.25}.mm .mt time{display:block;color:var(--ac);font-weight:800;font-size:.95rem}.mm .mt small{display:block;color:var(--mu);font-size:.7rem}
-.mm .mt .bd{display:inline-block;background:var(--rd);color:#fff;font-weight:800;font-size:.62rem;padding:1px 5px;border-radius:4px;letter-spacing:.3px;margin-top:2px}.mm .mt .mn{display:block;color:var(--ac);font-weight:800;font-size:.8rem}
-.mm .tm{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}.mm .tm span{display:flex;align-items:center;gap:8px;min-width:0;font-weight:600;font-size:.95rem}
-.mm .tm i{flex:none;width:20px;height:20px;border-radius:50%;background:#26324d;color:var(--mu);font-style:normal;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center}
-.mm .tm b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.mm .sc{flex:none;display:flex;flex-direction:column;gap:6px;text-align:center;min-width:18px;font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums;direction:ltr}.mm .sc.lv{color:var(--ac)}.mm .sc.pre{color:var(--mu);font-weight:400}
+.mm a.mc{display:grid;grid-template-columns:56px minmax(0,1fr) auto;column-gap:12px;row-gap:6px;align-items:center;padding:10px 12px;color:var(--tx);text-decoration:none}.mm a.mc:hover{text-decoration:none;background:rgba(255,255,255,.03);border-radius:12px}
+.mm .mt{grid-column:1;grid-row:1/3;text-align:center;line-height:1.25}.mm .mt time{display:block;color:var(--ac);font-weight:800;font-size:.95rem}.mm .mt small{display:block;color:var(--mu);font-size:.7rem}
+.mm .mt .bd{display:inline-block;background:var(--rd);color:#fff;font-weight:800;font-size:.62rem;padding:1px 5px;border-radius:4px;letter-spacing:.3px;margin-top:2px;white-space:nowrap}
+.mm .th,.mm .ta{display:flex;align-items:center;gap:8px;min-width:0;font-weight:600;font-size:.95rem}.mm .th{grid-column:2;grid-row:1}.mm .ta{grid-column:2;grid-row:2}
+.mm .th i,.mm .ta i{flex:none;width:20px;height:20px;border-radius:50%;background:#26324d;color:var(--mu);font-style:normal;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.mm .th b,.mm .ta b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.mm .sh,.mm .sa{grid-column:3;text-align:center;min-width:18px;font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums;direction:ltr}.mm .sh{grid-row:1}.mm .sa{grid-row:2}.mm .sd{display:none}
+.mm li.lv .sh,.mm li.lv .sa{color:var(--ac)}.mm li.pre .sh,.mm li.pre .sa{color:var(--mu);font-weight:400}
+@media(min-width:700px){.mm a.mc{grid-template-columns:124px minmax(0,1fr) 30px 14px 30px minmax(0,1fr);column-gap:10px;row-gap:0;padding:12px 16px}
+.mm .mt{grid-row:1;display:flex;align-items:center;justify-content:center;gap:8px;text-align:start}.mm .mt time,.mm .mt small{display:inline;font-size:.9rem}.mm .mt small{font-size:.72rem}.mm .mt .bd{margin-top:0}
+.mm .th{grid-column:2;grid-row:1;flex-direction:row-reverse;justify-content:flex-start;text-align:end}.mm .th b{text-align:end}
+.mm .sh{grid-column:3;grid-row:1}.mm .sd{display:block;grid-column:4;grid-row:1;text-align:center;color:var(--mu);font-weight:800}.mm .sa{grid-column:5;grid-row:1}
+.mm .ta{grid-column:6;grid-row:1}}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chips a{border:1px solid var(--bd);background:var(--card);color:var(--tx);font-weight:700;font-size:.82rem;padding:7px 12px;border-radius:999px}
 .cb-seo{margin:2rem 0 1rem;padding:1rem 4px 0;color:var(--mu);font-size:.85rem;line-height:1.7;border-top:1px solid var(--bd)}
 .cb-seo h2{font-size:1rem;font-weight:700;color:var(--tx);margin:0 0 .5rem}.cb-seo h3{font-size:.9rem;font-weight:600;color:var(--tx);margin:.9rem 0 .2rem}
@@ -522,10 +528,10 @@ function paint(li,m){var live=m.state==='in',post=m.state==='post',show=(live||p
 var st=live?'s_in':post?'s_post':m.state==='off'?'s_off':'s_pre',left;
 if(live)left='<time datetime="'+iso+'">'+hh+'</time><span class="bd">'+esc(L.s_in).toUpperCase()+'</span>';
 else left='<time datetime="'+iso+'">'+hh+'</time><small>'+esc(L[st])+'</small>';
-var mt=li.querySelector('.mt'),sc=li.querySelector('.sc');if(!mt||!sc)return;
+var mt=li.querySelector('.mt'),sh=li.querySelector('.sh'),sa=li.querySelector('.sa');if(!mt||!sh||!sa)return;
 var sig=m.state+'|'+m.h+'|'+m.a;if(li.dataset.sig===sig)return;li.dataset.sig=sig;
-mt.innerHTML=left;sc.className='sc '+(live?'lv':show?'':'pre');sc.innerHTML='<span>'+(show?m.h:'–')+'</span><span>'+(show?m.a:'–')+'</span>';
-li.className=live?'lv':''}
+mt.innerHTML=left;sh.textContent=show?m.h:'–';sa.textContent=show?m.a:'–';
+li.className=live?'lv':show?'':'pre'}
 function run(){if(document.hidden)return;fetch('/matchs-du-jour.json?t='+(Date.now()/60000|0),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.matches)return;var by={};d.matches.forEach(function(m){by[m.id]=m});list.forEach(function(li){var m=by[li.dataset.id];if(m)paint(li,m)})}).catch(function(){})}
 setInterval(run,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)run()});run();
 })();
@@ -543,13 +549,14 @@ def hub_row(m, lang, today, t):
         left = f'<time datetime="{esc(m["start"])}">{hh}</time><small>{status_label(m, t)}</small>'
     if live:
         left = f'<time datetime="{esc(m["start"])}">{hh}</time>' + left
-    sc_cls = "lv" if live else ("" if show else "pre")
     sh, sa = (str(m["h"]), str(m["a"])) if show else ("–", "–")
     ini = lambda n: esc((n or "?").strip()[:1].upper())
-    return (f'<li class="{"lv" if live else ""}" data-id="{esc(m["id"])}" data-hh="{hh}" data-iso="{esc(m["start"])}"><a class="mc" href="{match_href(m, lang, today)}">'
+    cls = "lv" if live else ("" if show else "pre")
+    return (f'<li class="{cls}" data-id="{esc(m["id"])}" data-hh="{hh}" data-iso="{esc(m["start"])}"><a class="mc" href="{match_href(m, lang, today)}">'
             f'<div class="mt">{left}</div>'
-            f'<div class="tm"><span><i>{ini(m["home"])}</i><b>{esc(m["home"])}</b></span><span><i>{ini(m["away"])}</i><b>{esc(m["away"])}</b></span></div>'
-            f'<div class="sc {sc_cls}"><span>{sh}</span><span>{sa}</span></div></a></li>')
+            f'<span class="th"><i>{ini(m["home"])}</i><b>{esc(m["home"])}</b></span>'
+            f'<span class="sh">{sh}</span><span class="sd">–</span><span class="sa">{sa}</span>'
+            f'<span class="ta"><i>{ini(m["away"])}</i><b>{esc(m["away"])}</b></span></a></li>')
 
 
 def build_hub(items, today, upcoming, lang):
