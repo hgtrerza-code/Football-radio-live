@@ -19,6 +19,7 @@ ICON = '<span><svg class="svgi" viewBox="0 0 24 24" fill="none" stroke="currentC
 # Barre d'onglets sur ordinateur : tous les onglets tiennent dans la largeur de la page (avant : 1198 px pour 1100 px, « Sélections » était coupé)
 NAVFIT = ('<style id="nav-fit">@media(min-width:701px){#tabbar .container{gap:0;justify-content:space-between}'
           '#tabbar a{padding:11px 10px;gap:6px;font-size:.86rem}#tabbar[data-tight] a{padding:11px 7px;gap:5px;font-size:.82rem}}</style>')
+NAVSTABLE = '<style id="nav-stable">@media(max-width:700px){#tabbar .container{overflow:hidden!important;gap:0!important;padding:0 4px!important;justify-content:stretch!important}#tabbar .container>a,#tabbar .container>.more-btn{flex:1 1 0!important;min-width:0!important;max-width:none!important}#tabbar .container>a::after,#tabbar .container>.more-btn::after{max-width:100%;overflow:hidden;text-overflow:ellipsis}#tabbar .container:not(:has(.more-btn))::after{content:"";flex:1 1 0;order:6}#tabbar .container>a[data-sel],#tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none!important}}</style>'
 # Si malgré tout les onglets dépassent la largeur (langues aux libellés longs), la barre passe en mode « serré » au lieu de couper le dernier onglet
 NAVFIT_JS = ('<script id="nav-fit-js">(function(){var b=document.getElementById("tabbar");if(!b)return;var c=b.querySelector(".container");if(!c)return;'
              'function fit(){b.removeAttribute("data-tight");if(window.innerWidth<701)return;if(c.scrollWidth>c.clientWidth+1)b.setAttribute("data-tight","1")}'
@@ -61,7 +62,8 @@ def add_nav_link(t, label):
         t = t.replace(nav, new, 1)
     t = re.sub(r'<style id="nav-fit">.*?</style>\n?', '', t, flags=re.S)
     t = re.sub(r'<script id="nav-fit-js">.*?</script>\n?', '', t, flags=re.S)
-    t = rep(t, "</head>", NAVFIT + "\n</head>")
+    t = re.sub(r'<style id="nav-stable">.*?</style>\n?', '', t, flags=re.S)
+    t = rep(t, "</head>", NAVFIT + "\n" + NAVSTABLE + "\n</head>")
     i = t.rindex("</body>")
     t = t[:i] + NAVFIT_JS + "\n" + t[i:]
     return t

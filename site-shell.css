@@ -92,3 +92,6 @@ html[dir=rtl] .lang-menu{right:auto;left:0}
 header .brand{white-space:nowrap}
 @media(max-width:700px){.header-content{flex-wrap:nowrap;gap:6px}.hdr-capsule{gap:4px}.goal-toggle{padding:0 9px;gap:5px}.lang-btn .chev{display:none}}
 @media(max-width:420px){header .brand{font-size:1.4rem}header .brand .brand-mark{width:38px;height:38px}.goal-toggle{padding:0 8px;gap:4px;font-size:.74rem}.gt-sw{flex-basis:24px;width:24px}}
+
+/* nav-stable : menu du bas mobile à largeur fixe (pas de décalage au chargement, pas de défilement horizontal) */
+@media(max-width:700px){#tabbar .container{overflow:hidden!important;gap:0!important;padding:0 4px!important;justify-content:stretch!important}#tabbar .container>a,#tabbar .container>.more-btn{flex:1 1 0!important;min-width:0!important;max-width:none!important}#tabbar .container>a::after,#tabbar .container>.more-btn::after{max-width:100%;overflow:hidden;text-overflow:ellipsis}#tabbar .container:not(:has(.more-btn))::after{content:"";flex:1 1 0;order:6}#tabbar .container>a[data-sel],#tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none!important}}

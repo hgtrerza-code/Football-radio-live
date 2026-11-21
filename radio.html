@@ -1066,6 +1066,7 @@ html[dir=rtl] .lf-ch svg{transform:none}
 <script id="flp-ip">window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__flpIP=e;window.dispatchEvent(new Event("flp-ip"))});</script>
 <script src="/install-app.js" defer></script>
 <style id="nav-fit">@media(min-width:701px){#tabbar .container{gap:0;justify-content:space-between}#tabbar a{padding:11px 10px;gap:6px;font-size:.86rem}#tabbar[data-tight] a{padding:11px 7px;gap:5px;font-size:.82rem}}</style>
+<style id="nav-stable">@media(max-width:700px){#tabbar .container{overflow:hidden!important;gap:0!important;padding:0 4px!important;justify-content:stretch!important}#tabbar .container>a,#tabbar .container>.more-btn{flex:1 1 0!important;min-width:0!important;max-width:none!important}#tabbar .container>a::after,#tabbar .container>.more-btn::after{max-width:100%;overflow:hidden;text-overflow:ellipsis}#tabbar .container:not(:has(.more-btn))::after{content:"";flex:1 1 0;order:6}#tabbar .container>a[data-sel],#tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none!important}}</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -4574,6 +4575,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
     var o=box.querySelector('a[data-go="'+k+'"]'); if(!o) return;
     var c=o.cloneNode(true); c.classList.remove('on'); c.removeAttribute('aria-current'); c.setAttribute('role','menuitem'); panel.appendChild(c);
   });
+  var sl=box.querySelector('a[data-sel]'); if(sl){ var cs=sl.cloneNode(true); cs.setAttribute('role','menuitem'); panel.appendChild(cs); }
   bar.appendChild(sheet);
   function set(open){ sheet.hidden=!open; btn.setAttribute('aria-expanded',open?'true':'false'); document.body.classList.toggle('more-open',open); }
   btn.addEventListener('click',function(e){ e.stopPropagation(); set(sheet.hidden); });
