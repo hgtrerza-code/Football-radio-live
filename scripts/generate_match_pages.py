@@ -520,10 +520,10 @@ HUB_JS = r"""<script>
 function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function paint(li,m){var live=m.state==='in',post=m.state==='post',show=(live||post)&&m.h!=null&&m.a!=null,hh=li.dataset.hh,iso=li.dataset.iso;
 var st=live?'s_in':post?'s_post':m.state==='off'?'s_off':'s_pre',left;
-if(live)left='<time datetime="'+iso+'">'+hh+'</time><span class="bd">'+esc(L.s_in).toUpperCase()+'</span><span class="mn">'+esc(m.label||'')+'</span>';
+if(live)left='<time datetime="'+iso+'">'+hh+'</time><span class="bd">'+esc(L.s_in).toUpperCase()+'</span>';
 else left='<time datetime="'+iso+'">'+hh+'</time><small>'+esc(L[st])+'</small>';
 var mt=li.querySelector('.mt'),sc=li.querySelector('.sc');if(!mt||!sc)return;
-var sig=m.state+'|'+m.label+'|'+m.h+'|'+m.a;if(li.dataset.sig===sig)return;li.dataset.sig=sig;
+var sig=m.state+'|'+m.h+'|'+m.a;if(li.dataset.sig===sig)return;li.dataset.sig=sig;
 mt.innerHTML=left;sc.className='sc '+(live?'lv':show?'':'pre');sc.innerHTML='<span>'+(show?m.h:'–')+'</span><span>'+(show?m.a:'–')+'</span>';
 li.className=live?'lv':''}
 function run(){if(document.hidden)return;fetch('/matchs-du-jour.json?t='+(Date.now()/60000|0),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.matches)return;var by={};d.matches.forEach(function(m){by[m.id]=m});list.forEach(function(li){var m=by[li.dataset.id];if(m)paint(li,m)})}).catch(function(){})}
@@ -538,7 +538,7 @@ def hub_row(m, lang, today, t):
     live, post = m["state"] == "in", m["state"] == "post"
     show = (live or post) and m.get("h") is not None and m.get("a") is not None
     if live:
-        left = (f'<span class="bd">{esc(t["s_in"]).upper()}</span><span class="mn">{esc(m.get("label") or "")}</span>')
+        left = (f'<span class="bd">{esc(t["s_in"]).upper()}</span>')
     else:
         left = f'<time datetime="{esc(m["start"])}">{hh}</time><small>{status_label(m, t)}</small>'
     if live:
