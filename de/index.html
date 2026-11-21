@@ -1055,6 +1055,7 @@ html[dir=rtl] .hdr-capsule{margin-left:0;margin-right:auto}
 .fav-chips{display:flex;flex-wrap:wrap;gap:.4rem}.fav-chip{background:rgba(46,229,157,.1);border:1px solid rgba(46,229,157,.35);color:#e8fff6;border-radius:999px;padding:.35rem .7rem;font:600 .78rem inherit;font-family:inherit;cursor:pointer}
 .m-page{display:flex;align-items:center;gap:10px;margin:0 0 .8rem;padding:.7rem .85rem;border-radius:12px;border:1px solid #2ee59d;color:#2ee59d!important;font-weight:700;font-size:.9rem;text-decoration:none;background:transparent;-webkit-tap-highlight-color:transparent}.m-page span{flex:1;text-align:center}.m-page svg{width:18px;height:18px;flex:0 0 18px}.m-page:hover,.m-page:active{background:rgba(46,229,157,.12)}</style>
 <style id="nav-fit">@media(min-width:701px){#tabbar .container{gap:0;justify-content:space-between}#tabbar a{padding:11px 10px;gap:6px;font-size:.86rem}#tabbar[data-tight] a{padding:11px 7px;gap:5px;font-size:.82rem}}</style>
+<style id="nav-stable">@media(max-width:700px){#tabbar .container{overflow:hidden!important;gap:0!important;padding:0 4px!important;justify-content:stretch!important}#tabbar .container>a,#tabbar .container>.more-btn{flex:1 1 0!important;min-width:0!important;max-width:none!important}#tabbar .container>a::after,#tabbar .container>.more-btn::after{max-width:100%;overflow:hidden;text-overflow:ellipsis}#tabbar .container:not(:has(.more-btn))::after{content:"";flex:1 1 0;order:6}#tabbar .container>a[data-sel],#tabbar .container>a[data-go="clubs"],#tabbar .container>a[data-go="table"],#tabbar .container>a[data-go="buteurs"],#tabbar .container>a[data-go="news"],#tabbar .container>a[data-go="women"]{display:none!important}}</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="flcc"><circle cx="10" cy="10" r="10"/></clipPath>
@@ -4586,6 +4587,7 @@ document.addEventListener("click", function (e) { var s = e.target.closest && e.
     var o=box.querySelector('a[data-go="'+k+'"]'); if(!o) return;
     var c=o.cloneNode(true); c.classList.remove('on'); c.removeAttribute('aria-current'); c.setAttribute('role','menuitem'); panel.appendChild(c);
   });
+  var sl=box.querySelector('a[data-sel]'); if(sl){ var cs=sl.cloneNode(true); cs.setAttribute('role','menuitem'); panel.appendChild(cs); }
   bar.appendChild(sheet);
   function set(open){ sheet.hidden=!open; btn.setAttribute('aria-expanded',open?'true':'false'); document.body.classList.toggle('more-open',open); }
   btn.addEventListener('click',function(e){ e.stopPropagation(); set(sheet.hidden); });
