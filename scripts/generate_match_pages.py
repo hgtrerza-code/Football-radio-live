@@ -141,6 +141,14 @@ table{width:100%;border-collapse:collapse;background:var(--card);border:1px soli
 th,td{padding:9px 12px;text-align:start;border-bottom:1px solid var(--bd)}th{color:var(--mu);font-size:.75rem;text-transform:uppercase}
 .m{list-style:none;padding:0;margin:0}.m li{display:flex;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:6px 0}
 .m time{color:var(--ac);font-weight:700;margin-inline-end:8px}.m small{color:var(--mu)}
+.mm{list-style:none;padding:0;margin:0}.mm li{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:6px 0}.mm li.lv{border-color:var(--ac);box-shadow:inset 3px 0 0 var(--ac)}
+.mm a.mc{display:flex;align-items:center;gap:12px;padding:10px 12px;color:var(--tx);text-decoration:none}.mm a.mc:hover{text-decoration:none;background:rgba(255,255,255,.03);border-radius:12px}
+.mm .mt{flex:none;width:56px;text-align:center;line-height:1.25}.mm .mt time{display:block;color:var(--ac);font-weight:800;font-size:.95rem}.mm .mt small{display:block;color:var(--mu);font-size:.7rem}
+.mm .mt .bd{display:inline-block;background:var(--rd);color:#fff;font-weight:800;font-size:.62rem;padding:1px 5px;border-radius:4px;letter-spacing:.3px;margin-top:2px}.mm .mt .mn{display:block;color:var(--ac);font-weight:800;font-size:.8rem}
+.mm .tm{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}.mm .tm span{display:flex;align-items:center;gap:8px;min-width:0;font-weight:600;font-size:.95rem}
+.mm .tm i{flex:none;width:20px;height:20px;border-radius:50%;background:#26324d;color:var(--mu);font-style:normal;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.mm .tm b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.mm .sc{flex:none;display:flex;flex-direction:column;gap:6px;text-align:center;min-width:18px;font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums;direction:ltr}.mm .sc.lv{color:var(--ac)}.mm .sc.pre{color:var(--mu);font-weight:400}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chips a{border:1px solid var(--bd);background:var(--card);color:var(--tx);font-weight:700;font-size:.82rem;padding:7px 12px;border-radius:999px}
 .cb-seo{margin:2rem 0 1rem;padding:1rem 4px 0;color:var(--mu);font-size:.85rem;line-height:1.7;border-top:1px solid var(--bd)}
 .cb-seo h2{font-size:1rem;font-weight:700;color:var(--tx);margin:0 0 .5rem}.cb-seo h3{font-size:.9rem;font-weight:600;color:var(--tx);margin:.9rem 0 .2rem}
@@ -507,6 +515,43 @@ def upcoming_html(upcoming, today, lang):
     return (f'<h2>{esc(t["h_up_h2"])}</h2><p>{esc(t["h_up_p"])}</p>' + out) if out else ""
 
 
+HUB_JS = r"""<script>
+(function(){var L=__L__,list=document.querySelectorAll('.mm li[data-id]');if(!list.length||!window.fetch)return;
+function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function paint(li,m){var live=m.state==='in',post=m.state==='post',show=(live||post)&&m.h!=null&&m.a!=null,hh=li.dataset.hh,iso=li.dataset.iso;
+var st=live?'s_in':post?'s_post':m.state==='off'?'s_off':'s_pre',left;
+if(live)left='<time datetime="'+iso+'">'+hh+'</time><span class="bd">'+esc(L.s_in).toUpperCase()+'</span><span class="mn">'+esc(m.label||'')+'</span>';
+else left='<time datetime="'+iso+'">'+hh+'</time><small>'+esc(L[st])+'</small>';
+var mt=li.querySelector('.mt'),sc=li.querySelector('.sc');if(!mt||!sc)return;
+var sig=m.state+'|'+m.label+'|'+m.h+'|'+m.a;if(li.dataset.sig===sig)return;li.dataset.sig=sig;
+mt.innerHTML=left;sc.className='sc '+(live?'lv':show?'':'pre');sc.innerHTML='<span>'+(show?m.h:'–')+'</span><span>'+(show?m.a:'–')+'</span>';
+li.className=live?'lv':''}
+function run(){if(document.hidden)return;fetch('/matchs-du-jour.json?t='+(Date.now()/60000|0),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.matches)return;var by={};d.matches.forEach(function(m){by[m.id]=m});list.forEach(function(li){var m=by[li.dataset.id];if(m)paint(li,m)})}).catch(function(){})}
+setInterval(run,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)run()});run();
+})();
+</script>"""
+
+
+def hub_row(m, lang, today, t):
+    """Une carte de match du hub (mobile : heure/statut à gauche, une équipe par ligne, score à droite)."""
+    hh = hhmm(datetime.fromisoformat(m["start"].replace("Z", "+00:00")).astimezone(PARIS))
+    live, post = m["state"] == "in", m["state"] == "post"
+    show = (live or post) and m.get("h") is not None and m.get("a") is not None
+    if live:
+        left = (f'<span class="bd">{esc(t["s_in"]).upper()}</span><span class="mn">{esc(m.get("label") or "")}</span>')
+    else:
+        left = f'<time datetime="{esc(m["start"])}">{hh}</time><small>{status_label(m, t)}</small>'
+    if live:
+        left = f'<time datetime="{esc(m["start"])}">{hh}</time>' + left
+    sc_cls = "lv" if live else ("" if show else "pre")
+    sh, sa = (str(m["h"]), str(m["a"])) if show else ("–", "–")
+    ini = lambda n: esc((n or "?").strip()[:1].upper())
+    return (f'<li class="{"lv" if live else ""}" data-id="{esc(m["id"])}" data-hh="{hh}" data-iso="{esc(m["start"])}"><a class="mc" href="{match_href(m, lang, today)}">'
+            f'<div class="mt">{left}</div>'
+            f'<div class="tm"><span><i>{ini(m["home"])}</i><b>{esc(m["home"])}</b></span><span><i>{ini(m["away"])}</i><b>{esc(m["away"])}</b></span></div>'
+            f'<div class="sc {sc_cls}"><span>{sh}</span><span>{sa}</span></div></a></li>')
+
+
 def build_hub(items, today, upcoming, lang):
     t, pre = T[lang], prefix(lang)
     url = f"{SITE}{pre}/matchs-du-jour.html"
@@ -522,11 +567,8 @@ def build_hub(items, today, upcoming, lang):
         by.setdefault(m.get("lg") or "Football", []).append(m)
     secs = ""
     for lgfr, ms in by.items():
-        li = "".join(
-            f'<li><span><time datetime="{esc(m["start"])}">{hhmm(datetime.fromisoformat(m["start"].replace("Z", "+00:00")).astimezone(PARIS))}</time>'
-            f'<a href="{match_href(m, lang, today)}">{esc(m["home"])} {esc(score_txt(m)) if m["state"] in ("in", "post") else "–"} {esc(m["away"])}</a></span>'
-            f'<small>{status_label(m, t)}</small></li>' for m in sorted(ms, key=lambda x: x["start"]))
-        secs += f"<h2>{esc(lg_name(lgfr, t))}</h2><ul class=\"m\">{li}</ul>"
+        li = "".join(hub_row(m, lang, today, t) for m in sorted(ms, key=lambda x: x["start"]))
+        secs += f"<h2>{esc(lg_name(lgfr, t))}</h2><ul class=\"mm\">{li}</ul>"
     crumbs = {"@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": t["home"], "item": SITE + (pre or "") + "/"},
         {"@type": "ListItem", "position": 2, "name": t["mj"], "item": url}]}
@@ -542,7 +584,8 @@ def build_hub(items, today, upcoming, lang):
 {seo}
 </main>
 """
-    return head(lang, title, desc, url, ld_script([crumbs]), lang_urls, alt_urls) + body + footer_html(lang, alt_urls)
+    hub_js = HUB_JS.replace("__L__", json.dumps({k: t[k] for k in ("s_pre", "s_in", "s_post", "s_off")}, ensure_ascii=False))
+    return head(lang, title, desc, url, ld_script([crumbs]), lang_urls, alt_urls) + body + footer_html(lang, alt_urls) + hub_js
 
 
 def ping_indexnow(urls):
@@ -628,7 +671,7 @@ def main():
         f.write("</urlset>\n")
     n_pages = sum(len(v) for v in keep.values())
     print(f"{len(reg)} matchs, {n_pages} pages match (7 langues), {len(LANG_ORDER)} hubs + sitemap-matchs.xml ; {len(new_urls)} nouvelles URL.")
-    if ping:
+    if ping and new_urls:   # cron toutes les 10 min : on ne notifie IndexNow que s'il y a de nouvelles pages
         ping_indexnow(new_urls + [f"{SITE}{prefix(l)}/matchs-du-jour.html" for l in LANG_ORDER])
 
 
