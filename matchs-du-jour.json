@@ -1,6 +1,6 @@
 {
  "date": "2026-11-22",
- "generated": "2026-11-22T11:16:42.378Z",
+ "generated": "2026-11-22T11:59:52.568Z",
  "extra": 110,
  "matches": [
   {
@@ -85,8 +85,8 @@
    "id": "401875008",
    "lg": "Serie A",
    "start": "2026-11-22T11:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "28'",
    "home": "Juventus",
    "away": "Venezia",
    "h": 0,
@@ -215,8 +215,8 @@
    "id": "401875545",
    "lg": "Eredivisie",
    "start": "2026-11-22T11:15Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "42'",
    "home": "FC Twente",
    "away": "Willem II",
    "h": 0,
@@ -320,7 +320,7 @@
    "lg": "Süper Lig",
    "start": "2026-11-22T10:30Z",
    "state": "in",
-   "label": "45'+1'",
+   "label": "67'",
    "home": "Erzurum BB",
    "away": "Goztepe",
    "h": 0,
