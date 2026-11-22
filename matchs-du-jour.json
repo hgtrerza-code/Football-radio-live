@@ -1,7 +1,7 @@
 {
  "date": "2026-11-22",
- "generated": "2026-11-22T03:30:19.870Z",
- "extra": 109,
+ "generated": "2026-11-22T04:37:36.643Z",
+ "extra": 110,
  "matches": [
   {
    "id": "401879234",
@@ -502,10 +502,10 @@
    "lg": "Liga MX",
    "start": "2026-11-22T03:00Z",
    "state": "in",
-   "label": "17'",
+   "label": "66'",
    "home": "Tigres UANL",
    "away": "América",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Estadio Universitario",
    "place": "San Nicolás de los Garza, Mexico"
