@@ -1,6 +1,6 @@
 {
  "date": "2026-11-22",
- "generated": "2026-11-21T23:37:40.737Z",
+ "generated": "2026-11-22T00:17:10.116Z",
  "extra": 109,
  "matches": [
   {
@@ -372,7 +372,7 @@
    "lg": "MLS",
    "start": "2026-11-21T23:00Z",
    "state": "in",
-   "label": "27'",
+   "label": "45'+6'",
    "home": "Inter Miami CF",
    "away": "Columbus Crew",
    "h": 0,
@@ -397,8 +397,8 @@
    "id": "401841325",
    "lg": "Brasileirão",
    "start": "2026-11-22T00:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "16'",
    "home": "Chapecoense",
    "away": "Cruzeiro",
    "h": 0,
@@ -476,11 +476,11 @@
    "lg": "Liga MX",
    "start": "2026-11-21T23:00Z",
    "state": "in",
-   "label": "37'",
+   "label": "55'",
    "home": "Santos",
    "away": "León",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 1,
    "venue": "Estadio Corona",
    "place": "Torreón, Mexico"
   },
