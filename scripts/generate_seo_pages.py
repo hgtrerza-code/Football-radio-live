@@ -392,6 +392,7 @@ th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--bd)}th{colo
 .cta{display:inline-block;background:var(--ac);color:#04210f;font-weight:800;padding:10px 16px;border-radius:12px;margin:10px 0}.cta:hover{text-decoration:none;filter:brightness(1.1)}
 footer{border-top:1px solid var(--bd);margin-top:2.5rem;padding:1rem 0 2rem;color:var(--mu);font-size:.82rem}footer a{color:var(--mu);margin-right:14px}
 .grp{font-weight:800;margin:1.2rem 0 .3rem}
+.frm{margin:6px 0 10px}.fb{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;border-radius:8px;font-weight:800;margin-right:6px;color:#04210f}.fb.V{background:#22c55e}.fb.N{background:#eab308}.fb.D{background:#ef4444;color:#fff}
 .pl{display:flex;align-items:center;gap:10px}.av{position:relative;width:40px;height:40px;flex:0 0 auto;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#334155,#475569);color:#fff;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center}
 .av::before{content:attr(data-i)}.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#1e293b}
 @media(max-width:560px){.m li{grid-template-columns:1fr auto}.m .d{grid-column:1/-1}}
@@ -477,7 +478,100 @@ def match_text(m):
     return f"{m['home']} {sc} {m['away']}"
 
 
-def club_page(c, ms, scorers, league, same_league, stand=None):
+LEAGUE_PAGE = {"Premier League": "/premier-league.html", "Bundesliga": "/bundesliga.html", "Serie A": "/serie-a.html",
+               "LaLiga": "/laliga.html", "Ligue 1": "/ligue-1.html", "Liga Portugal": "/liga-portugal.html",
+               "Eredivisie": "/eredivisie.html", "Botola Pro": "/botola-pro.html"}
+
+
+def result_of(m):
+    hs, as_ = (m["hs"] or 0), (m["as_"] or 0)
+    mine, opp = (hs, as_) if m["is_h"] else (as_, hs)
+    return ("V" if mine > opp else "D" if mine < opp else "N"), mine, opp
+
+
+def form_block(name, past):
+    """Forme récente : pastilles V/N/D et résumé des 5 derniers matchs connus."""
+    last = past[:5]
+    if not last:
+        return "", None
+    res = [result_of(m) for m in last]
+    w = sum(1 for r in res if r[0] == "V")
+    d = sum(1 for r in res if r[0] == "N")
+    l = sum(1 for r in res if r[0] == "D")
+    gf = sum(r[1] for r in res)
+    ga = sum(r[2] for r in res)
+    badges = "".join(f'<span class="fb {r[0]}">{r[0]}</span>' for r in reversed(res))
+    deb = "Lors de son dernier match connu" if len(res) == 1 else f"Sur ses {len(res)} derniers matchs connus"
+    txt = (f"{deb}, {name} compte {plural(w, 'victoire', 'victoires')}, {plural(d, 'nul', 'nuls')} et "
+           f"{plural(l, 'défaite', 'défaites')}, avec {gf} {'but marqué' if gf <= 1 else 'buts marqués'} et "
+           f"{ga} {'but encaissé' if ga <= 1 else 'buts encaissés'}.")
+    html_ = (f"<h2>Forme récente de {e(name)}</h2><div class='frm'>{badges}</div><p>{e(txt)}</p>"
+             "<p><small>V = victoire, N = match nul, D = défaite. Du plus ancien au plus récent.</small></p>")
+    return html_, (f"{name} est-il en forme ?", txt)
+
+
+def season_block(c, st, rows, league, scorers):
+    """Bilan de la saison rédigé à partir du classement (aucun chiffre inventé)."""
+    if not st:
+        return "", []
+    gp, w, d, l = _n(st, "gamesPlayed"), _n(st, "wins"), _n(st, "ties"), _n(st, "losses")
+    gf, ga, pts, rk = _n(st, "pointsFor"), _n(st, "pointsAgainst"), _n(st, "points"), _n(st, "rank")
+    if not gp or pts is None:
+        return "", []
+    name = c["name"]
+    lgn = league["name"] if league else c["league"]
+    f1 = lambda v: f"{v:.2f}".replace(".", ",")
+    parts, faqs = [], []
+    n = len(rows or [])
+    lead = None
+    if rows:
+        allp = [_n(r["st"], "points") for r in rows]
+        allp = [x for x in allp if x is not None]
+        lead = max(allp) if allp else None
+    if rk:
+        rkt = "1er" if rk == 1 else f"{int(rk)}e"
+        band = ""
+        if n >= 6:
+            band = (" Le club occupe le haut du classement." if rk <= n / 3
+                    else " Le club se situe dans le bas du classement." if rk > 2 * n / 3
+                    else " Le club se situe dans le ventre mou du classement.")
+        parts.append(f"{name} est {rkt} de {lgn}{' sur ' + str(n) + ' équipes' if n else ''} avec {int(pts)} points en {int(gp)} matchs, "
+                     f"soit {f1(pts / gp)} points par match.{band}")
+    if lead is not None and rk and rk != 1:
+        gap = int(lead - pts)
+        t = f"{name} compte {plural(gap, 'point', 'points')} de retard sur le leader de {lgn}." if gap > 0 else f"{name} est à égalité de points avec le leader de {lgn}."
+        parts.append(t)
+        faqs.append((f"À combien de points {name} est-il du leader ?", t))
+    elif rk == 1 and rows and len(rows) > 1:
+        sec = sorted([x for x in (_n(r["st"], "points") for r in rows) if x is not None], reverse=True)
+        if len(sec) > 1:
+            t = f"{name} est leader de {lgn} avec {int(sec[0] - sec[1])} {'point' if int(sec[0] - sec[1]) <= 1 else 'points'} d’avance sur son premier poursuivant."
+            parts.append(t)
+    if gf is not None and ga is not None:
+        gfm, gam = gf / gp, ga / gp
+        att = ("une attaque très prolifique" if gfm >= 2.0 else "une attaque en difficulté" if gfm <= 1.0 else "une attaque dans la moyenne")
+        dfn = ("une défense solide" if gam <= 0.9 else "une défense friable" if gam >= 1.6 else "une défense dans la moyenne")
+        parts.append(f"Avec {f1(gfm)} buts marqués et {f1(gam)} encaissés par match, {name} présente {att} et {dfn}.")
+    if scorers and gf and scorers[0]["g"] <= gf and scorers[0]["g"] > 0:
+        t = scorers[0]
+        parts.append(f"{t['n']} a inscrit {plural(t['g'], 'but', 'buts')} sur les {int(gf)} du club, soit {round(t['g'] / gf * 100)} % de la production offensive.")
+    if not parts:
+        return "", faqs
+    return f"<h2>Bilan de la saison de {e(name)}</h2>" + "".join(f"<p>{e(x)}</p>" for x in parts), faqs
+
+
+def more_links(c, league):
+    items = []
+    lp = LEAGUE_PAGE.get(c["league"])
+    if lp:
+        items.append((lp, f"{c['league']} : scores et classement"))
+    items += [("/programme-tv.html", "Programme TV du foot"), ("/matchs-du-jour.html", "Matchs du jour"),
+              ("/classements.html", "Classements"), ("/radio.html", "Radios foot en direct")]
+    return ("<h2>Pour aller plus loin</h2><div class='chips'>"
+            + "".join(f'<a href="{u}">{e(t)}</a>' for u, t in items) + "</div>")
+
+
+def club_page(c, ms, scorers, league, same_league, stand=None, rows=None):
     now = datetime.now(PARIS)
     up = sorted([m for m in ms if m["state"] != "post" and not m["off"]], key=lambda m: m["start"])
     past = sorted([m for m in ms if m["state"] == "post"], key=lambda m: m["start"], reverse=True)
@@ -502,6 +596,13 @@ def club_page(c, ms, scorers, league, same_league, stand=None):
     st_html, st_faq = stats_html(c, stand, league)
     if st_faq:
         faqs.append(st_faq)
+    form_html, form_faq = form_block(name, past)
+    if form_faq:
+        faqs.append(form_faq)
+    season_html, season_faqs = season_block(c, stand, rows, league, scorers)
+    faqs.extend(season_faqs)
+    faqs.append((f"Où regarder {name} en direct ?",
+                 f"Suivez le score de {name} en direct sur FootLive Pro. Les chaînes qui diffusent les matchs du jour sont indiquées sur la page Programme TV."))
     sc_html = ""
     if scorers:
         t = scorers[0]
@@ -519,10 +620,10 @@ def club_page(c, ms, scorers, league, same_league, stand=None):
             f'<a class="cta" href="/#club-{c["slug"]}">▶ Suivre {e(name)} en direct</a>'
             + (f'<h2>Prochains matchs</h2><ul class="m">{"".join(match_li(m) for m in up[:5])}</ul>' if up else "")
             + (f'<h2>Derniers résultats</h2><ul class="m">{"".join(match_li(m) for m in past[:5])}</ul>' if past else "")
-            + st_html + sc_html
+            + form_html + st_html + season_html + sc_html
             + "<h2>Questions fréquentes</h2>" + "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in faqs)
             + (f"<h2>Autres clubs · {e(c['league'])}</h2><div class='chips'>{links}</div>" if links else "")
-            + bt)
+            + bt + more_links(c, league))
     desc = f"{name} : prochain match, derniers résultats, calendrier" + (" et meilleurs buteurs" if scorers else "") + ". Scores en direct sur FootLive Pro."
     path = f"/clubs/{c['slug']}.html"
     ld = [{"@context": "https://schema.org", "@type": "SportsTeam", "name": name, "sport": "Soccer",
@@ -629,8 +730,9 @@ def main():
                 pat = re.compile(c["pat"], re.I)
                 scorers = [r for r in league_scorers(lg, pages=2) if r["t"] and pat.search(norm(r["t"])) and not EXC.search(norm(r["t"]))]
             same = [x for x in clubs if x["league"] == c["league"] and x["slug"] != c["slug"]]
-            stand = club_standing(c, league_standings(lg)) if lg else None
-            changed += write_if_changed(f"clubs/{c['slug']}.html", club_page(c, ms, scorers, lg, same, stand), written)
+            rows = league_standings(lg) if lg else []
+            stand = club_standing(c, rows) if lg else None
+            changed += write_if_changed(f"clubs/{c['slug']}.html", club_page(c, ms, scorers, lg, same, stand, rows), written)
         except Exception as ex:  # noqa : une erreur sur un club ne doit pas bloquer les autres
             print("  ! club", c["slug"], ex, file=sys.stderr)
     changed += write_if_changed("clubs/index.html", clubs_index(clubs), written)
