@@ -1,6 +1,6 @@
 {
  "date": "2026-11-23",
- "generated": "2026-11-23T03:27:22.322Z",
+ "generated": "2026-11-23T04:43:21.824Z",
  "extra": 43,
  "matches": [
   {
@@ -72,8 +72,8 @@
    "id": "401933729",
    "lg": "MLS",
    "start": "2026-11-23T01:30Z",
-   "state": "in",
-   "label": "89'",
+   "state": "post",
+   "label": "90'+6'",
    "home": "Vancouver Whitecaps",
    "away": "Real Salt Lake",
    "h": 2,
