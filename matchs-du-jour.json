@@ -1,6 +1,6 @@
 {
  "date": "2026-11-23",
- "generated": "2026-11-22T23:17:49.254Z",
+ "generated": "2026-11-23T00:00:01.921Z",
  "extra": 43,
  "matches": [
   {
@@ -59,8 +59,8 @@
    "id": "401933730",
    "lg": "MLS",
    "start": "2026-11-22T23:30Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "19'",
    "home": "Chicago Fire FC",
    "away": "Charlotte FC",
    "h": 0,
@@ -125,10 +125,10 @@
    "lg": "Liga MX",
    "start": "2026-11-22T23:07Z",
    "state": "in",
-   "label": "9'",
+   "label": "45'+2'",
    "home": "Guadalajara",
    "away": "Cruz Azul",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Estadio Akron",
    "place": "Guadalajara, Mexico"
