@@ -1,6 +1,6 @@
 {
  "date": "2026-11-23",
- "generated": "2026-11-23T00:00:01.921Z",
+ "generated": "2026-11-23T01:07:26.897Z",
  "extra": 43,
  "matches": [
   {
@@ -60,11 +60,11 @@
    "lg": "MLS",
    "start": "2026-11-22T23:30Z",
    "state": "in",
-   "label": "19'",
+   "label": "70'",
    "home": "Chicago Fire FC",
    "away": "Charlotte FC",
-   "h": 0,
-   "a": 0,
+   "h": 1,
+   "a": 1,
    "venue": "SeatGeek Stadium",
    "place": "Bridgeview, Illinois, USA"
   },
@@ -98,11 +98,11 @@
    "id": "401933762",
    "lg": "Liga argentine",
    "start": "2026-11-23T01:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "6'",
    "home": "Instituto (Córdoba)",
    "away": "Huracán",
-   "h": 0,
+   "h": 1,
    "a": 0,
    "venue": "Mario Alberto Kempes",
    "place": "Córdoba, Argentina"
@@ -124,8 +124,8 @@
    "id": "401877047",
    "lg": "Liga MX",
    "start": "2026-11-22T23:07Z",
-   "state": "in",
-   "label": "45'+2'",
+   "state": "post",
+   "label": "90'+5'",
    "home": "Guadalajara",
    "away": "Cruz Azul",
    "h": 1,
