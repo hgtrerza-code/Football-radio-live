@@ -1,6 +1,6 @@
 {
  "date": "2026-11-23",
- "generated": "2026-11-23T02:21:24.811Z",
+ "generated": "2026-11-23T03:27:22.322Z",
  "extra": 43,
  "matches": [
   {
@@ -73,10 +73,10 @@
    "lg": "MLS",
    "start": "2026-11-23T01:30Z",
    "state": "in",
-   "label": "41'",
+   "label": "89'",
    "home": "Vancouver Whitecaps",
    "away": "Real Salt Lake",
-   "h": 0,
+   "h": 2,
    "a": 0,
    "venue": "BC Place",
    "place": "Vancouver, Canada"
@@ -98,12 +98,12 @@
    "id": "401933762",
    "lg": "Liga argentine",
    "start": "2026-11-23T01:00Z",
-   "state": "in",
-   "label": "61'",
+   "state": "post",
+   "label": "90'+6'",
    "home": "Instituto (Córdoba)",
    "away": "Huracán",
    "h": 2,
-   "a": 0,
+   "a": 1,
    "venue": "Mario Alberto Kempes",
    "place": "Córdoba, Argentina"
   },
@@ -137,12 +137,12 @@
    "id": "401877046",
    "lg": "Liga MX",
    "start": "2026-11-23T01:10Z",
-   "state": "in",
-   "label": "51'",
+   "state": "post",
+   "label": "90'+6'",
    "home": "Querétaro",
    "away": "Necaxa",
-   "h": 1,
-   "a": 1,
+   "h": 2,
+   "a": 2,
    "venue": "Estadio Corregidora",
    "place": "Santiago de Querétaro, Mexico"
   },
