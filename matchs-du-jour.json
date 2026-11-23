@@ -1,6 +1,6 @@
 {
  "date": "2026-11-23",
- "generated": "2026-11-23T17:43:30.174Z",
+ "generated": "2026-11-23T18:40:22.578Z",
  "extra": 43,
  "matches": [
   {
@@ -47,11 +47,11 @@
    "lg": "Süper Lig",
    "start": "2026-11-23T17:00Z",
    "state": "in",
-   "label": "44'",
+   "label": "80'",
    "home": "Istanbul Basaksehir",
    "away": "Çorum FK",
-   "h": 0,
-   "a": 1,
+   "h": 1,
+   "a": 2,
    "venue": "Basaksehir Fatih Terim Stadium",
    "place": "Istanbul, Türkiye"
   },
