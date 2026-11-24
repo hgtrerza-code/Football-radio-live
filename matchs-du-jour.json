@@ -1,6 +1,6 @@
 {
  "date": "2026-11-24",
- "generated": "2026-11-24T02:42:53.078Z",
+ "generated": "2026-11-24T03:43:11.872Z",
  "extra": 55,
  "matches": [
   {
@@ -124,12 +124,12 @@
    "id": "401933728",
    "lg": "MLS",
    "start": "2026-11-24T01:15Z",
-   "state": "in",
-   "label": "60'",
+   "state": "post",
+   "label": "90'+13'",
    "home": "St. Louis CITY SC",
    "away": "LAFC",
-   "h": 2,
-   "a": 0,
+   "h": 3,
+   "a": 2,
    "venue": "Energizer Park",
    "place": "St. Louis, Missouri, USA"
   },
