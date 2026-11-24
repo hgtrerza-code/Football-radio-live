@@ -1,7 +1,7 @@
 {
  "date": "2026-11-24",
- "generated": "2026-11-24T00:18:15.982Z",
- "extra": 2,
+ "generated": "2026-11-24T01:42:20.609Z",
+ "extra": 55,
  "matches": [
   {
    "id": "401915380",
@@ -123,9 +123,9 @@
   {
    "id": "401933728",
    "lg": "MLS",
-   "start": "2026-11-24T01:00Z",
-   "state": "pre",
-   "label": "0'",
+   "start": "2026-11-24T01:15Z",
+   "state": "in",
+   "label": "17'",
    "home": "St. Louis CITY SC",
    "away": "LAFC",
    "h": 0,
@@ -137,11 +137,11 @@
    "id": "401841326",
    "lg": "Brasileirão",
    "start": "2026-11-23T23:00Z",
-   "state": "in",
-   "label": "55'",
+   "state": "post",
+   "label": "90'+11'",
    "home": "Botafogo",
    "away": "São Paulo",
-   "h": 0,
+   "h": 1,
    "a": 1,
    "venue": "Joao Havelange Stadium",
    "place": "Rio de Janeiro, Brazil"
@@ -151,11 +151,11 @@
    "lg": "Brasileirão",
    "start": "2026-11-24T00:00Z",
    "state": "in",
-   "label": "14'",
+   "label": "74'",
    "home": "Santos",
    "away": "Grêmio",
    "h": 0,
-   "a": 0,
+   "a": 1,
    "venue": "Estádio Cícero Pompeu de Toledo",
    "place": "Sao Paulo, Brazil"
   },
