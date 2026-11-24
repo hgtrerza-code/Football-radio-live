@@ -1,7 +1,7 @@
 {
  "date": "2026-11-24",
- "generated": "2026-11-23T23:25:52.402Z",
- "extra": 55,
+ "generated": "2026-11-24T00:18:15.982Z",
+ "extra": 2,
  "matches": [
   {
    "id": "401915380",
@@ -138,11 +138,11 @@
    "lg": "Brasileirão",
    "start": "2026-11-23T23:00Z",
    "state": "in",
-   "label": "25'",
+   "label": "55'",
    "home": "Botafogo",
    "away": "São Paulo",
    "h": 0,
-   "a": 0,
+   "a": 1,
    "venue": "Joao Havelange Stadium",
    "place": "Rio de Janeiro, Brazil"
   },
@@ -150,8 +150,8 @@
    "id": "401841320",
    "lg": "Brasileirão",
    "start": "2026-11-24T00:00Z",
-   "state": "pre",
-   "label": "0'",
+   "state": "in",
+   "label": "14'",
    "home": "Santos",
    "away": "Grêmio",
    "h": 0,
